@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5312 Samels Rd — 3D site model</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#262a33;--text:#e8e6e1;--muted:#9a9fa9;--accent:#d19a5b;--accent2:#7fb4c9}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,"Segoe UI",Inter,Roboto,sans-serif}
+#app{display:grid;grid-template-columns:330px 1fr;height:100%}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:16px;overflow:auto}
+h1{font-size:18px;margin:0 0 2px}.sub{color:var(--muted);font-size:12px;margin-bottom:10px}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:16px 0 6px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+button{background:#1f232c;border:1px solid var(--line);color:var(--text);padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;text-align:left}
+button:hover{border-color:var(--accent)}button.on{border-color:var(--accent);background:#2a2418}
+.big{width:100%;text-align:center;font-weight:600;margin-bottom:5px}
+label.t{display:flex;align-items:center;gap:8px;padding:2px 0;font-size:13px;cursor:pointer}label.t input{accent-color:var(--accent)}
+.note{font-size:12px;color:var(--muted);margin-top:6px}a{color:var(--accent2)}
+kbd{background:#2a2e38;border:1px solid #3a3f4b;border-radius:4px;padding:0 5px;font-size:11px}
+main{position:relative;overflow:hidden}#c3d{position:absolute;inset:0}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-100%);background:rgba(15,17,21,.82);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px;white-space:nowrap;pointer-events:auto;cursor:pointer}
+.lbl.inf{border-style:dashed;color:#cfc6b8}.lbl.prop{border-color:#5fae6e;border-style:dashed}.lbl.own{border-color:#7fb4c9}.lbl.fut{border-color:#b06cff;border-style:dashed;color:#e3cfff}.t-fut{color:#d7a6ff;border-color:#d7a6ff}
+#hud{position:absolute;left:16px;bottom:14px;max-width:560px;background:rgba(15,17,21,.85);border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-size:13px;pointer-events:none}
+#hud b{color:var(--accent)}
+#minimap{position:absolute;right:14px;bottom:14px;width:260px;border:1px solid var(--line);border-radius:10px;background:#000}
+#north{position:absolute;right:20px;top:14px;width:54px;height:54px;background:rgba(15,17,21,.8);border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center}
+#help{position:absolute;inset:0;background:rgba(10,11,14,.88);display:none;align-items:center;justify-content:center;z-index:5}
+#help .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 26px;max-width:640px}
+#help table{border-collapse:collapse;font-size:13px}#help td{padding:4px 10px;border-bottom:1px solid var(--line)}
+#info{position:absolute;left:16px;top:14px;max-width:380px;background:rgba(15,17,21,.92);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13px;display:none}
+.tag{display:inline-block;font-size:10.5px;padding:0 6px;border-radius:9px;margin-left:4px;border:1px solid}
+.t-photo{color:#7fd18a;border-color:#7fd18a}.t-sat{color:#7fb4c9;border-color:#7fb4c9}.t-rec{color:#e0c36a;border-color:#e0c36a}.t-inf{color:#d88;border-color:#d88}.t-prop{color:#5fae6e;border-color:#5fae6e}.t-own{color:#b9a3e6;border-color:#b9a3e6}
+#legend{font-size:12px}#legend li{margin:1px 0}#legend ul{padding-left:16px;margin:4px 0}
+@media (max-width:900px){#app{grid-template-columns:1fr}aside{max-height:40vh}}
+#tb{position:absolute;left:50%;top:12px;transform:translateX(-50%);display:flex;gap:4px;flex-wrap:wrap;justify-content:center;background:rgba(15,17,21,.86);border:1px solid var(--line);border-radius:12px;padding:5px;z-index:3;max-width:calc(100% - 120px)}
+#tb button{padding:5px 9px;font-size:12.5px;text-align:center}#tb .sep{width:1px;background:var(--line);margin:2px 3px}
+#pad{position:absolute;left:16px;bottom:70px;display:none;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:5px;z-index:3;user-select:none;-webkit-user-select:none}
+#pad button{font-size:18px;text-align:center;padding:0;background:rgba(31,35,44,.85);touch-action:none}#pad button.on{background:#3a3020;border-color:var(--accent)}
+#caption{position:absolute;left:50%;top:64px;transform:translateX(-50%);background:rgba(15,17,21,.88);border:1px solid var(--line);border-radius:10px;padding:8px 14px;max-width:560px;text-align:center;opacity:0;transition:opacity .6s;pointer-events:none;z-index:2}
+#caption b{display:block;color:var(--accent);font-size:15px}#caption span{font-size:12.5px;color:#d6d2ca}
+#tourBar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:none;gap:6px;align-items:center;background:rgba(15,17,21,.9);border:1px solid var(--accent);border-radius:10px;padding:6px 10px;z-index:4}
+#minimapWrap{position:absolute;right:14px;bottom:14px;width:260px}#minimap{position:static;display:block;width:260px;cursor:crosshair}
+#mmMode{position:absolute;left:6px;top:-26px;font-size:11px;padding:2px 8px}
+.lbl{transition:opacity .25s}
+@media (max-width:900px){aside{max-height:24vh}#minimapWrap{width:140px}#minimap{width:140px}#mmMode{display:none}#hud{display:none}#tb{top:4px;max-width:100%;padding:3px;gap:2px}#tb button{padding:3px 6px;font-size:11px}#tb .sep{display:none}#pad{grid-template-columns:repeat(3,40px);grid-template-rows:repeat(3,40px);bottom:12px;left:10px}#caption{top:72px;max-width:92%}}
+</style></head><body>
+<div id="app"><aside>
+<h1>5312 Samels Rd <span style="color:var(--accent)">3D</span></h1>
+<div class="sub">Parcel 13-002-015-25 · 6.00 ac · Whitewater Twp · A-1 · Esri imagery ground · real USGS 3DEP elevations (9×6 samples) · <a href="index.html">← summary</a></div>
+<h2>Mode</h2>
+<button class="big on" id="bOrbit" onclick="setMode('orbit')">🛰 Orbit / aerial <kbd>O</kbd></button>
+<button class="big" id="bWalk" onclick="setMode('walk')">🚶 Walk — first person, 5.5 ft eye <kbd>F</kbd></button>
+<button class="big" onclick="toggleHelp(true)">? Controls &amp; gestures <kbd>H</kbd></button>
+<h2>Viewpoints (smooth fly-to)</h2>
+<div class="btns" id="views"></div>
+<h2>Levels / cutaway</h2>
+<label class="t"><input type="checkbox" id="lv_loft" checked onchange="refresh()"> Loft</label>
+<label class="t"><input type="checkbox" id="lv_main" checked onchange="refresh()"> Main level</label>
+<label class="t"><input type="checkbox" id="lv_lower" checked onchange="refresh()"> Lower (walk-out) level</label>
+<div class="btns" style="margin-top:4px"><button onclick="cutaway('lower')">Dollhouse: lower</button><button onclick="cutaway('main')">Dollhouse: main</button><button onclick="cutaway('loft')">Dollhouse: loft</button><button onclick="cutaway('all')">Whole house</button></div>
+<h2>More jumps</h2>
+<div class="btns" id="jumps"></div>
+<h2>Layers</h2><div id="layers"></div>
+<label class="t"><input type="checkbox" id="roofT" checked onchange="refresh()"> Roofs</label>
+<label class="t"><input type="checkbox" id="xrayT" onchange="refresh()"> X-ray walls</label>
+<label class="t"><input type="checkbox" id="satT" checked onchange="refresh()"> Satellite ground</label>
+<label class="t"><input type="checkbox" id="lblT" checked onchange="refresh()"> Labels (hidden behind walls, fade with distance)</label>
+<label class="t"><input type="checkbox" id="presT" checked onchange="refresh()"> Presentation look (proposed items solid, no dashed outlines)</label>
+<label class="t"><input type="checkbox" id="shT" checked onchange="refresh()"> Sun shadows</label>
+<label class="t"><input type="checkbox" id="ilT" checked onchange="refresh()"> Interior lights</label>
+<h2>Confidence tags</h2>
+<div><span class="tag t-photo">photo</span><span class="tag t-sat">satellite</span><span class="tag t-rec">public record</span><span class="tag t-inf">inferred</span><span class="tag t-prop">proposed</span><span class="tag t-own">owned (Seabreeze inventory)</span><span class="tag t-fut">future (2+ yrs)</span></div>
+<div class="note">Inferred and proposed objects are translucent with dashed outlines. Click any label or object for details.</div>
+<h2>Legend</h2><div id="legend"></div>
+<div class="note">Parcel outline from Grand Traverse County GIS (TaxParcel layer). Building positions read from Esri World Imagery (z19) and listing aerials p09/p60; dimensions other than the 32×38 pole barn and 24×24 attached garage are estimated. County GIS shows no FEMA flood zone, mapped waterbody, or mapped wetland on the parcel. Built Oct 26, 2026; v2 navigation + detail pass Oct 26 night. Window positions, interior fixtures, furniture, the van and pontoon are approximate concepts.</div>
+</aside>
+<main><canvas id="c3d"></canvas><div id="labels"></div>
+<div id="north"><svg width="40" height="40" viewBox="-20 -20 40 40"><g id="narrow"><polygon points="0,-16 6,4 0,0 -6,4" fill="#d19a5b"/><text x="0" y="16" fill="#e8e6e1" font-size="10" text-anchor="middle">N</text></g></svg></div>
+<div id="info"></div>
+<div id="tb"><button data-mode="orbit" onclick="setMode('orbit')">🛰 Orbit</button><button data-mode="walk" onclick="setMode('walk')">🚶 Walk</button><button id="bLock" onclick="lockMouse()" title="Pointer lock: look with the mouse, Esc to release">🖱 Mouse-look</button><span class="sep"></span><button id="bTour" onclick="toggleTour()">▶ Tour</button><span class="sep"></span><button onclick="levelStep(1)" title="Up a level (] / PageUp)">⤒ Up</button><button onclick="levelStep(-1)" title="Down a level ([ / PageDown)">⤓ Down</button><button onclick="cutaway('lower')" title="Remove roof + upper floors">🏠 Cutaway</button><button onclick="document.getElementById('xrayT').click()">X-ray</button><button onclick="document.getElementById('lblT').click()">Labels</button><span class="sep"></span><button onclick="resetView()">⟲ Reset</button><button onclick="toggleHelp(true)">?</button></div>
+<div id="caption"></div>
+<div id="tourBar"><button onclick="tourNav(-1)">◀</button><span id="tourTxt" style="font-size:12.5px"></span><button onclick="tourNav(1)">▶</button><button onclick="toggleTour()">■ Stop</button></div>
+<div id="pad"><button data-k="KeyQ" title="turn left">⟲</button><button data-k="KeyW">▲</button><button data-k="KeyE" title="turn right">⟳</button><button data-k="KeyA">◀</button><button data-k="ShiftLeft" title="hold to run" style="font-size:12px">RUN</button><button data-k="KeyD">▶</button><button onclick="levelStep(1)" style="font-size:13px">⤒ lvl</button><button data-k="KeyS">▼</button><button onclick="levelStep(-1)" style="font-size:13px">⤓ lvl</button></div>
+<div id="hud"></div><div id="minimapWrap"><button id="mmMode" onclick="cycleMini()" title="M: auto / site / house plan">Map: auto</button><canvas id="minimap" width="260" height="177"></canvas></div>
+<div id="help"><div class="card"><h3 style="margin-top:0">Controls (Mac trackpad, mouse, keyboard, touch)</h3>
+<table>
+<tr><td colspan=2><b>Anywhere</b></td></tr>
+<tr><td><kbd>O</kbd> / <kbd>F</kbd></td><td>Orbit (aerial) / Walk (first person)</td></tr>
+<tr><td><kbd>T</kbd></td><td>Guided tour (◀ ▶ to skip, Esc to stop)</td></tr>
+<tr><td>Viewpoint buttons</td><td>Smooth fly-to; interior views drop you into Walk</td></tr>
+<tr><td>Mini-map click</td><td>Teleport there (in Walk it switches to a house plan when you're inside; <kbd>M</kbd> cycles)</td></tr>
+<tr><td><kbd>R</kbd></td><td>Reset view &nbsp; · &nbsp; <kbd>H</kbd> this help</td></tr>
+<tr><td colspan=2><b>Orbit / aerial</b></td></tr>
+<tr><td>Two-finger swipe</td><td>Pan across the site</td></tr>
+<tr><td>Pinch (or ⌘/Ctrl + scroll)</td><td>Zoom in / out</td></tr>
+<tr><td><kbd>⇧</kbd> + two-finger swipe, or click-drag</td><td>Rotate &amp; tilt</td></tr>
+<tr><td><kbd>W A S D</kbd> / arrows, <kbd>Q</kbd> <kbd>E</kbd></td><td>Pan / rotate (<kbd>⇧</kbd> faster)</td></tr>
+<tr><td colspan=2><b>Walk</b> (eye height 5.5 ft, walls and furniture block you, gravity on)</td></tr>
+<tr><td><kbd>W A S D</kbd> / arrows</td><td>Walk / strafe; <kbd>⇧ Shift</kbd> = run; <kbd>Q</kbd>/<kbd>E</kbd> or ←/→ turn</td></tr>
+<tr><td>Click-drag (or <kbd>P</kbd> for mouse-look lock)</td><td>Look around (Esc releases the lock)</td></tr>
+<tr><td>Two-finger swipe</td><td>Up/down = forward/back, left/right = strafe; <kbd>⇧</kbd>+swipe = turn</td></tr>
+<tr><td>Pinch</td><td>Zoom the lens (field of view)</td></tr>
+<tr><td>Stairs, <kbd>[</kbd> <kbd>]</kbd> / PageUp-Down, <kbd>L</kbd></td><td>Walk up/down the stairs, or jump lower ↔ main ↔ loft</td></tr>
+<tr><td>iPhone / iPad</td><td>On-screen pad (▲▼◀▶, turn, run, level); one-finger drag looks; two fingers pinch/pan in Orbit</td></tr></table>
+<p class="note">Model note: building footprints come from satellite + county records; interiors, fixtures, furniture placement, window positions and the van/pontoon sizes are approximate concepts — measure at the visit.</p>
+<p style="text-align:right"><button onclick="toggleHelp(false)">Close</button></p></div></div>
+</main></div>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="data/site_data.js"></script>
+<script src="data/sat_data.js"></script>
+<script src="model.js"></script>
+</body></html>
