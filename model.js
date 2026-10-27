@@ -29,7 +29,7 @@ const camera=new THREE.PerspectiveCamera(55,1,0.8,6000);
 scene.add(new THREE.HemisphereLight(0xf4f7ff,0x6a6650,0.78));scene.add(new THREE.AmbientLight(0xffffff,0.2));
 const sun=new THREE.DirectionalLight(0xfff4e2,0.85); sun.position.set(-300,500,400); scene.add(sun);
 
-const LAYERS={site:'Site features (pond, well, septic, propane, firepit)',bldg:'Buildings (exteriors)',house:'House interior (inferred plan)',barn:'Pole barn: Airstream Interstate 24X van, pontoon, bench',gym:'Gym barn: owned + proposed gear',elec:'Electrical callouts',solar:'Solar candidates',plan:'Setbacks + ADU spot',trees:'Trees (illustrative)',future:'Future (2+ yrs): guest suite',cars:'Vehicles: garage cars + barn fit',net:'Network: UniFi APs + bridges',netcov:'Network coverage (approx. circles)',cams:'Ring cameras + doorbell',camcov:'Camera view cones',smart:'Smart locks, thermostats, myQ'};
+const LAYERS={site:'Site features (pond, well, septic, propane, firepit)',bldg:'Buildings (exteriors)',house:'House interior (inferred plan)',barn:'Pole barn: Airstream Interstate 24X van, pontoon, bench',gym:'Gym barn: owned + proposed gear',elec:'Electrical callouts',solar:'Solar candidates',plan:'Setbacks + ADU spot',trees:'Trees (illustrative)',future:'Future (2+ yrs): guest suite',cars:'Vehicles: garage cars + barn fit',tandem:'Barn fit variant: tandem 911 + Model Y (smaller section)',nowall:'Barn fit variant: divider removed (only if non-structural; no structural work)',net:'Network: UniFi APs + bridges',netcov:'Network coverage (approx. circles)',cams:'Ring cameras + doorbell',camcov:'Camera view cones',smart:'Smart locks, thermostats, myQ'};
 const groups={}; for(const k in LAYERS){groups[k]=new THREE.Group();scene.add(groups[k]);}
 const TAGS={photo:['seen in photo','t-photo'],sat:['satellite','t-sat'],rec:['public record','t-rec'],inf:['inferred','t-inf'],prop:['proposed','t-prop'],own:['owned – Seabreeze inventory','t-own'],pnew:['proposed new','t-prop'],future:['future (2+ yrs)','t-fut']};
 const items=[], colliders=[], surfaces=[], pickables=[], extWalls=[], roofs=[], occl=[], panes=[], softMats=[], softLines=[];
@@ -751,7 +751,7 @@ for(const [F,y,w,d,n] of [[PB,PBy+11.6,32,38,4],[GY,GYy+9.6,28,30,3]]){for(let i
 // ---- landscaping: shrubs + boulders around the house (illustrative)
 {let s=11;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};const sg=new THREE.SphereGeometry(1,10,8),sm=new THREE.MeshLambertMaterial({color:0x3f6e35}),bm=new THREE.MeshLambertMaterial({color:0x9a958c});
  const n=46,im=new THREE.InstancedMesh(sg,sm,n),bi=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1),bm,30),o=new THREE.Object3D();
- for(let i=0;i<n;i++){const side=i%3;let u,v;if(side===0){u=-2-rnd()*2;v=rnd()*20;}else if(side===1){u=rnd()*33;v=-2-rnd()*2.5;}else{u=46+rnd()*4;v=rnd()*32;}
+ for(let i=0;i<n;i++){const side=i%3;let u,v;if(side===0){u=-2-rnd()*2;v=rnd()*20;}else if(side===1){u=rnd()*33;v=-2-rnd()*2.5;}else{u=46+rnd()*4;v=17+rnd()*15;}
    const [x,z]=P(u,v);const sc=1+rnd()*1.4;o.position.set(x,elev(x,z)+sc*0.7,z);o.scale.set(sc,sc*0.8,sc);o.updateMatrix();im.setMatrixAt(i,o.matrix);}
  for(let i=0;i<30;i++){const a=i/30*Math.PI*2;const x=W(345)+Math.cos(a)*(26+rnd()*4),z=Zs(296)+Math.sin(a)*(17+rnd()*3);const sc=0.8+rnd()*1.3;o.position.set(x,rawElev(x,z)+sc*0.4,z);o.scale.set(sc,sc*0.7,sc);o.rotation.set(rnd(),rnd(),0);o.updateMatrix();bi.setMatrixAt(i,o.matrix);}
  groups.site.add(im);groups.site.add(bi);}
@@ -894,24 +894,35 @@ const IN=v=>v/12;
  MY.pos=[a[0],y+8,a[1]];XT.pos=[b[0],y+8,b[1]];}
 // --- pole barn small section: future sports car test-fit (Porsche 911 992)
 {const y=PBy;const it=NI('Future sports car test-fit: Porsche 911 (992) in the smaller section','prop','Porsche spec (992.2 Carrera): 178.8 in L × 72.9 in W (80.0 in with mirrors) × 51.1 in H (newsroom.porsche.com tech specs). Alternative Shelby GT350: 188.9 × 75.9 in (caranddriver.com). Fits the ~11.5 ft-wide smaller section with a 3+ ft walkway, but NOT through the old ~7 ft wooden double door: replace it with a 9 × 7 ft modern overhead door (proposed). It does not fit in the large section with the van + pontoon.',null,'cars',{short:'Porsche 911 (future) test-fit',pri:8});
- const p=PB.P(5.4,12);car('cars',p[0],p[1],y,IN(178.8),IN(72.9),IN(51.1),0xb3121a,'sport',it,Math.PI);it.pos=[p[0],y+7,p[1]];}
+ const p=PB.P(5.4,10.5);car('cars',p[0],p[1],y,IN(178.8),IN(72.9),IN(51.1),0xb3121a,'sport',it,Math.PI);it.pos=[p[0],y+7,p[1]];}
+// --- barn-fit variants
+{const it=NI('Tandem variant: Model Y behind the 911 (smaller section)','prop','Smaller section ~11.5 ft wide (divider position estimated) × ~37.3 ft deep. 911 (14.9 ft) + Model Y (15.7 ft) = 30.6 ft, leaving ~6.7 ft for the door end, the gap and the back wall (e.g. 3 + 2 + 1.7 ft). The existing workbench along the back wall (~2.5 ft deep) must move, or end clearance drops to ~1.4 ft. Width: Model Y 7.0 ft with mirrors → ~4.5 ft side walkway. Door: 9×7 or 9×8 is fine (Model Y 5.3 ft tall).',null,'tandem',{short:'Tandem: 911 + Model Y',pri:8});
+ const p=PB.P(5.4,27.7);car('tandem',p[0],p[1],PBy,IN(188.7),IN(75.6),IN(63.8),0xe8e8ea,'suv',it,Math.PI);it.pos=[p[0],PBy+7,p[1]];colliders.pop();
+ const it2=NI('Divider removed: van + pontoon + sports car (only if non-structural; no structural work)','prop','Only if the wall is non-structural; no structural work. Full ~31.3 ft width: van 7.7 ft with mirrors + pontoon 8.5 ft + 911 6.7 ft with mirrors = 22.9 ft, leaving ~8.4 ft for walkways (about 3 ft between each). Lengths all fit in 37.3 ft. The 911 still enters through the new 9×7 door.',[PB.P(12,19)[0],PBy+14,PB.P(12,19)[1]],'nowall',{short:'Divider removed (if non-structural)',pri:8});
+ const Qv=new URLSearchParams(location.search);setTimeout(()=>{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c)c.checked=on;};set('tandem',Qv.get('tandem')==='1');set('nowall',Qv.get('nowall')==='1');if(Qv.get('nowall')==='1'&&window.toggleDivider)toggleDivider();refresh();},0);
+ document.addEventListener('change',e=>{if(e.target&&e.target.dataset&&e.target.dataset.l==='nowall'&&window.toggleDivider)toggleDivider();});}
 // --- modern barn doors (Hanna look: black flush insulated steel + cedar accent above + black up/down sconces)
-{const it=NI('Proposed modern doors (concept): black flush steel, Hanna-style','prop','Matches the Hanna garage look (listing photo 09): black/charcoal insulated flush steel sectional doors with fine horizontal texture, no glass, set in black siding with a cedar tongue-and-groove band above and black up/down sconces. E.g. Clopay Modern Steel (flush panel, R-18.4, black). Pole barn: keep the tall ~10 × 11.5 ft opening for the van (custom size); replace the old wooden double door with a 9 × 7 ft door; gym barn: 8 ft-wide door. Published: Clopay Modern Steel 16×7 black, no windows, $2,347 door-only (Home Depot); installed 9×7/10×7 $3,300-5,800 and 16×7 $4,100-6,600 (Reynolds Door, Clopay dealer). Custom tall door priced by quote. myQ-ready openers.',null,'barn',{short:'Proposed modern doors (concept)',pri:7});
+{const it=NI('Proposed modern doors (concept): full-view glass, brown frame','prop','Full-view aluminum sectional doors with frosted glass lites (clear optional), frame in brown to match the trim (toggle black/brown/cream), set in the existing cream steel siding with a brown trim border. Pole barn: keep the tall ~10 × 11.5 ft van opening; replace the old wooden double door with a 9 × 7; gym barn: 8 ft-wide door. E.g. Clopay Avante or Amarr Vista. myQ-ready openers.',null,'barn',{short:'Proposed modern doors (concept)',pri:7});
+ const DGLASS=new THREE.MeshPhongMaterial({color:0xc9d6dc,shininess:90,specular:0x888888,transparent:true,opacity:0.82}),DFRAME=new THREE.MeshPhongMaterial({color:0x5a3e2a,shininess:40}),DTRIM=new THREE.MeshLambertMaterial({color:0x6b4a2e});
+ window.setDoorFrame=k=>{const C={black:[0x1a1a1a,0x2a2a2a],brown:[0x5a3e2a,0x6b4a2e],cream:[0xe9dfc8,0xdccfb0]}[k]||[0x5a3e2a,0x6b4a2e];DFRAME.color.setHex(C[0]);DTRIM.color.setHex(C[1]);};
+ {const lay=document.getElementById('layers');if(lay){const w=document.createElement('label');w.innerHTML='Door frame: <select id="dfSel"><option value="brown">brown</option><option value="black">black</option><option value="cream">cream</option></select>';lay.appendChild(w);w.querySelector('select').onchange=e=>setDoorFrame(e.target.value);}const qf=new URLSearchParams(location.search).get('frame');if(qf){setDoorFrame(qf);const e=document.getElementById('dfSel');if(e)e.value=qf;}}
  const doorTex=ctex(256,(c,n)=>{c.fillStyle='#262729';c.fillRect(0,0,n,n);for(let i=0;i<32;i++){c.fillStyle=i%8===7?'#121314':'#1e1f21';c.fillRect(0,i*n/32,n,1.5);}});
  const cedar=new THREE.MeshLambertMaterial({color:0xc99a62});texMat(cedar,'plank',1,1);
- const mk=(F,y0,uA,uB,v,h,side,acc)=>{const L=uB-uA;const mat=new THREE.MeshLambertMaterial({color:0xffffff});const t=doorTex.clone();t.needsUpdate=true;t.repeat.set(1,h/3.2);mat.map=t;
+ const mk=(F,y0,uA,uB,v,h,side,acc)=>{const L=uB-uA;const mat=DGLASS;
    let a,b;if(side==='S'){a=F.P(uA,v);b=F.P(uB,v);}else{a=F.P(v,uA);b=F.P(v,uB);}
    const horiz=side==='S';const d=new THREE.Mesh(new THREE.BoxGeometry(horiz?L:0.2,h,horiz?0.2:L),mat);d.position.set((a[0]+b[0])/2,y0+h/2,(a[1]+b[1])/2+(horiz?0.42:0));if(!horiz)d.position.x+=0.42;groups.barn.add(d);d.userData.item=it;pickables.push(d);
+   {const nc=Math.max(3,Math.round(L/2.6)),nr=Math.max(4,Math.round(h/1.8));const bar=(w,hh,x,y)=>{const m=new THREE.Mesh(horiz?new THREE.BoxGeometry(w,hh,0.26):new THREE.BoxGeometry(0.26,hh,w),DFRAME);m.position.set(d.position.x+(horiz?x:0.04),y,d.position.z+(horiz?0.04:x));groups.barn.add(m);};
+    for(let i=0;i<=nc;i++)bar(0.28,h,-L/2+i*L/nc,y0+h/2);for(let j=0;j<=nr;j++)bar(L,j===0?0.6:0.3,0,y0+(j===0?0.3:j*h/nr));}
    // frame
-   const fr=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+0.8:0.3,h+0.4,horiz?0.3:L+0.8),LMv(0x111111));fr.position.copy(d.position);fr.position.y=y0+(h+0.4)/2;if(horiz)fr.position.z-=0.06;else fr.position.x-=0.06;groups.barn.add(fr);
+   const fr=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+1.2:0.3,h+0.6,horiz?0.3:L+1.2),DTRIM);fr.position.copy(d.position);fr.position.y=y0+(h+0.4)/2;if(horiz)fr.position.z-=0.06;else fr.position.x-=0.06;groups.barn.add(fr);
    if(acc){const ah=acc;const cb=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+0.8:0.1,ah,horiz?0.1:L+0.8),cedar);cb.position.set(d.position.x+(horiz?0:0.05),y0+h+0.5+ah/2,d.position.z+(horiz?0.05:0));groups.barn.add(cb);
      const sc=new THREE.Mesh(new THREE.BoxGeometry(horiz?0.35:0.5,0.9,horiz?0.5:0.35),LMv(0x111111));sc.position.set(d.position.x+(horiz?0:0.3),y0+h+0.5+ah*0.45,d.position.z+(horiz?0.3:0));groups.barn.add(sc);}
    // hide/disable the old white door slab at the same place if any
    };
  // pole barn south face (v=0): tall van door u14-24 h11.5 with cedar band to eave; small-section door u2-8 h7 (proposed 9 x 7 when widened)
- mk(PB,PBy,14,24,-0.3,11.5,'S',0);mk(PB,PBy,2,8,-0.3,7,'S',3.6);
+ mk(PB,PBy,14,24,-0.3,11.5,'S',0);mk(PB,PBy,2,8,-0.3,7,'S',0);
  // gym barn east face (u=28): v11-19 h8
- mk(GY,GYy,11,19,28.0,8,'E',1.6);
+ mk(GY,GYy,11,19,28.0,8,'E',0);
  it.pos=[PB.P(19,0)[0],PBy+14.5,PB.P(19,0)[1]+4];
  // remove the old white overhead/door slabs from view
  groups.barn.children.forEach(o=>{const n=o.userData&&o.userData.item&&o.userData.item.name;if(n&&/^Overhead door \(with opener\)|^Old wooden double door/.test(n))o.visible=false;});}
@@ -962,9 +973,9 @@ const NET=[];
  // Office (bedroom 1): existing Seabreeze desk + Aeron; add shelving on the west wall
  Bx(0.3,5.2,0.45,11.2,7,0xe8e2d6,0);for(const v of [5.2,11.05])Bx(0.3,v,1.5,v+0.15,7,0xd9d4c8,0);for(let i=1;i<6;i++)Bx(0.35,5.3,1.45,11.1,0.08,0xd9d4c8,i*1.3);
  for(let i=0;i<14;i++){const v=5.6+i*0.4;Bx(0.5,v,1.3,v+0.25,0.9+(i%3)*0.15,[0x7a3b22,0x2f4d6a,0xc9b27a,0x444444][i%4],1.3*(1+(i%4)));}
- info('Office','prop','Smaller main-floor bedroom = pure office: Seabreeze #6 glass-top desk + #20 Aeron chair, wall shelving. Room ~12 × 12 ft in the model (inferred; the listing gives no room dimensions).',[H.P(6,6)[0],HM+7,H.P(6,6)[1]],{near:true,layer:'house'});
+ info('Office','prop','Smaller main-floor bedroom = pure office: Seabreeze #6 glass-top desk + #20 Aeron chair, wall shelving. Listing: 11 × 9 ft. Model room is ~12 × 12 (kept so the main bath and closets line up).',[H.P(6,6)[0],HM+7,H.P(6,6)[1]],{near:true,layer:'house'});
  // Office / guest (bedroom 2, larger, direct door to the main bath)
- const futonIt=info('Office / guest (futon)','prop','Larger main-floor bedroom (sellers\' master, direct door to the main bath kept): second desk (Jenny/guest), queen sleeper sofa/futon (~7 ft × 3 ft closed, ~7 × 6.5 ft open) with ≥3 ft clearance when open, small side table. Room ~12 × 12 ft in the model (inferred).',[H.P(5,26)[0],HM+7,H.P(5,26)[1]],{near:true,layer:'house'});
+ const futonIt=info('Office / guest (futon)','prop','Larger main-floor bedroom (sellers\' master, direct door to the main bath kept): second desk (Jenny/guest), queen sleeper sofa/futon (~7 ft × 3 ft closed, ~7 × 6.5 ft open) with ≥3 ft clearance when open, small side table. Listing: 13 × 13 ft. Model room is ~12 × 12 (the house footprint and bath wall fix it).',[H.P(5,26)[0],HM+7,H.P(5,26)[1]],{near:true,layer:'house'});
  Bx(0.6,28.6,7.6,31.6,1.4,0x3c4a5a,0,true);Bx(0.6,31.0,7.6,31.6,3,0x3c4a5a,0);for(const u of [0.6,7.1])Bx(u,28.6,u+0.5,31.6,2.1,0x3c4a5a,0); // sleeper sofa
  Bx(0.6,25.1,7.6,28.6,0.04,0x8a96a6,0.02); // ghost of the opened bed footprint (rug-like marker)
  Bx(7.9,30.0,9.3,31.5,1.9,0x6b4f3a,0,true); // side table
@@ -973,11 +984,12 @@ const NET=[];
  const it2=NI('Office / guest — open futon needs ~3 ft clearance','prop','Opened queen footprint shown as the pale marker; ~3.5 ft remains between it and the desk/door.',null,'house');it2.pos=null;
  // direct door bedroom 2 -> main bath is the opening at v=20, u4.5-7 (see wall)
 }
+
 // --- new layers' default state + labels for items created after the label pass
 {const lay=document.getElementById('layers');
  NEWITEMS.concat(items.filter(i=>!i.el&&i.pos)).forEach(it=>{if(it.el||!it.pos)return;const d=document.createElement('div');d.className='lbl'+(it.tag==='own'?' own':soft(it.tag)?' prop':'');it.layer=it.layer||guessLayer(it);
    d.textContent=it.short||it.name.split(/\s+\(|\s+—\s+|:\s+/)[0].slice(0,30);it.pri=it.pri!==undefined?it.pri:4;d.title=it.name;d.onclick=()=>showInfo(it);lblDiv.appendChild(d);it.el=d;});
- lay.querySelectorAll('input').forEach(c=>{if(c.dataset.l==='netcov'||c.dataset.l==='camcov')c.checked=false;});}
+ lay.querySelectorAll('input').forEach(c=>{if(['netcov','camcov','tandem','nowall'].includes(c.dataset.l))c.checked=false;});}
 
 // jump-to
 const J=[['🏡 Whole site',()=>{flyTo(home.tgt,560,[-0.3,0.65,0.8]);}],
@@ -1013,7 +1025,7 @@ vo('🛰 Aerial overview','Whole 6-acre parcel: house, pole barn, gym barn, pond
 {const t=[H.x0+20,HM+6,H.z0-26];vo('🏠 Front exterior (garage side)','Chalet with attached 24×24 garage; steep gray metal roof, light lap siding, black-frame windows.',t,[t[0]-70,t[1]+30,t[2]-75]);}
 {const t=[H.x0+22,HM+4,H.z0-14];vo('🌊 Pond-side elevation','East glass gable, wraparound deck above the walk-out, pond in front.',t,[t[0]+95,t[1]+22,t[2]+30]);}
 vw('🪵 Deck — teak dining table','8-ft teak table on the ~10 ft deck; cocktails and dinners outside.',39,26.5,HM,38.5,14,-0.18);VP[VP.length-1].walk.fov=68;
-{const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0],HL+2.5,t[1]],[c[0],HL+7.2,c[1]]);VP[VP.length-1].orbit.fov=72;}
+{const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0]+6,HL+3,t[1]+1],[c[0]+0.9,HL+4.4,c[1]-0.4]);VP[VP.length-1].orbit.fov=72;}
 vw('🍸 Great room — lounge/club','Steinway B, cigar chairs, art panel #2 on the inner west wall, back bar; existing warm wood vaulted ceiling kept.',33,15.5,HM,13,4,-0.07);VP[VP.length-1].walk.fov=68;
 vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',25.5,15.8,HM,25.5,31,-0.2);VP[VP.length-1].walk.fov=68;
 vw('💻 Office (main floor)','Smaller main-floor bedroom: Seabreeze glass desk + Aeron, wall shelving.',10.2,10.6,HM,2,3,-0.12);VP[VP.length-1].walk.fov=72;
@@ -1030,7 +1042,7 @@ vo('🟪 Guest suite site (future, ~2 yrs)','Future guest suite footprint beside
 {const t=PB.P(16,19),c=PB.P(16,19);VP.push({id:'barn_fit',n:'📐 Barn fit test (plan view)',cap:'Van + pontoon in the large section with a ~3 ft walkway; Porsche 911 test-fit in the smaller section.',orbit:{t:[t[0],PBy,t[1]-0.01],pos:[c[0],PBy+60,c[1]+0.01],fov:50},noRoof:true});}
 {const t=G.P(12,11),c=G.P(12,40);VP.push({id:'garage_cars',n:'🚗 Garage: Model Y + XT5',cap:'Tesla Model Y (west bay, by the Wall Connector) and Cadillac XT5 in the 24×24 garage.',orbit:{t:[t[0],HM+2,t[1]],pos:[c[0]+10,HM+30,c[1]],fov:55},noRoof:true});}
 {VP.push({id:'network',n:'📶 Network + cameras',cap:'UniFi gateway + 3 indoor APs, 2 outdoor APs, bridges to both barns; Ring cameras.',orbit:{t:[-110,10,-10],pos:[-60,330,160],fov:55},showNet:true});}
-{const t=PB.P(18,0),c=PB.P(20,-40);VP.push({id:'barn_doors',n:'🚪 Modern barn doors (Hanna look)',cap:'Black flush steel doors with a cedar band and black sconces (concept).',orbit:{t:[t[0],PBy+7,t[1]],pos:[c[0],PBy+8,c[1]],fov:50}});}
+{const t=PB.P(18,0),c=PB.P(20,-40);VP.push({id:'barn_doors',n:'🚪 Modern glass barn doors',cap:'Full-view glass doors, brown frames, cream siding kept (concept).',orbit:{t:[t[0],PBy+7,t[1]],pos:[c[0],PBy+8,c[1]],fov:50}});}
 function goVP(v,instant){{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c&&c.checked!==on){c.checked=on;}};if(v.showNet){set('netcov',true);set('camcov',true);set('net',true);set('cams',true);}else{set('netcov',false);set('camcov',false);}refresh();}const rt=document.getElementById('roofT');if(v.noRoof&&rt.checked){rt.checked=false;refresh();}else if(!v.noRoof&&!rt.checked&&v.orbit){rt.checked=true;refresh();}if(instant){anim=null;if(v.walk){const w=walkPose(v.walk);enterWalk(Object.assign({},v.walk,{feet:w.feet}));}else{camera.position.set(...v.orbit.pos);enterOrbit(new THREE.Vector3(...v.orbit.t),v.orbit.fov);camera.lookAt(...v.orbit.t);}return;}
   if(v.walk)goWalk(v.walk,true);else{const T=new THREE.Vector3(...v.orbit.t);flyCam(new THREE.Vector3(...v.orbit.pos),T,null,()=>enterOrbit(T,v.orbit.fov));}caption(v);}
 function caption(v){const c=document.getElementById('caption');if(!c)return;c.innerHTML=`<b>${v.n}</b><span>${v.cap||''}</span>`;c.style.opacity=1;clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,tour?5200:4200);}
