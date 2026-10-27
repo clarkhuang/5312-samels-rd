@@ -895,30 +895,49 @@ function fxRugTex(base,border,pattern){return FX.tex(256,256,(g,w,h)=>{g.fillSty
  for(const f of byName(/#3 Seabreeze gray sectional/)){hideBox(f);fxSofa(f.c,'w',0x8f959c,{arms:[1],pillows:[0xe9e4da,0x3f4d5c,0xb88a5a,0xe9e4da],throwC:0xd8d0c2});}
  for(const f of byName(/#3 Sectional chaise \(left/)){hideBox(f);fxSofa(f.c,'n',0x8f959c,{arms:[-1],noBack:false,pillows:[0x3f4d5c,0xe9e4da]});}
  for(const f of byName(/#3 Sectional chaise \(right/)){hideBox(f);}
+ {const sec=byName(/#3 Seabreeze gray sectional/)[0],tvf=byName(/75″ TV/)[0];if(sec&&tvf){const y=sec.c.y0,cx=(sec.c.x1+tvf.c.x0)/2-0.6,cz=(tvf.c.z0+tvf.c.z1)/2+0.4;const k={x0:cx-1.3,x1:cx+1.3,z0:cz-2.2,z1:cz+2.2,y0:y};
+  const ot=fxTuftBench(k,0x3a2a20);SW(ot,'modern_coffee_table_01',{ry:Math.PI/2,fit:'xz'});colliders.push({x0:k.x0,x1:k.x1,z0:k.z0,z1:k.z1,y0:y,y1:y+1.4});
+  info('Tufted ottoman / coffee table — TV room (proposed new)','pnew','2.6 × 4.4 ft tufted leather ottoman in front of the sectional, facing the 75 in TV on the white media console. High quality shows a CC0 modern coffee table model in the same footprint.',[cx,y+1.6,cz],{near:true,layer:'house'});}}
  // tufted bench
  for(const f of byName(/#4 Tufted/)){hideBox(f);fxTuftBench(f.c,0x2a1c14);}
  // Steinway: curved case approximation (body + tail taper), lid, legs, keyboard, music desk
- for(const f of byName(/Steinway Model B/)){hideBox(f);const k=f.c,y=k.y0;const blk=new THREE.MeshPhongMaterial({color:0x0b0b0b,shininess:120,specular:0x555555,side:THREE.DoubleSide});
-   const L=k.x1-k.x0,Wd=k.z1-k.z0;const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Wd,0);sh.lineTo(Wd,0.27*L);sh.bezierCurveTo(Wd,0.52*L,0.58*Wd,0.5*L,0.5*Wd,0.78*L);sh.quadraticCurveTo(0.44*Wd,L,0.2*Wd,L);sh.quadraticCurveTo(0,L,0,0.86*L);sh.lineTo(0,0);
-   const G=new THREE.Group();const g=new THREE.ExtrudeGeometry(sh,{depth:1.0,bevelEnabled:true,bevelThickness:0.04,bevelSize:0.04,bevelSegments:2,curveSegments:28});g.rotateX(Math.PI/2);const cs=new THREE.Mesh(g,blk);cs.position.y=3.3;cs.castShadow=true;G.add(cs);
-   const inner=new THREE.Mesh(new THREE.ShapeGeometry(sh,28),new THREE.MeshPhongMaterial({color:0xb8913f,shininess:60,specular:0x664422,side:THREE.DoubleSide}));inner.rotation.x=Math.PI/2;inner.position.y=3.05;inner.scale.set(0.96,0.96,1);inner.position.x=Wd*0.02;G.add(inner); // gold plate visible under the lid
-   const str=new THREE.Mesh(new THREE.PlaneGeometry(Wd*0.7,L*0.75),new THREE.MeshPhongMaterial({color:0x9a9a96,shininess:100,transparent:true,opacity:0.5}));str.rotation.x=-Math.PI/2;str.position.set(Wd*0.42,3.12,L*0.42);G.add(str);
-   const lp=new THREE.Group();lp.position.set(0,3.32,0);lp.rotation.z=0.72;const lid=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:false,curveSegments:28}),blk);lid.rotation.x=Math.PI/2;lp.add(lid);G.add(lp);
-   {const px=Wd*0.86,pz=L*0.42,top=Math.sin(0.72)*px;const stick=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,top+0.05,8),blk);stick.position.set(px*Math.cos(0.72)*0.98,3.32+top/2,pz);stick.rotation.z=0.18;G.add(stick);}
-   const bx=(x0,x1,z0,z1,y0,h,c,mm)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,h,z1-z0),mm||(c?new THREE.MeshLambertMaterial({color:c}):blk));o.position.set((x0+x1)/2,y0+h/2,(z0+z1)/2);o.castShadow=true;G.add(o);return o;};
-   // legs: tapered with brass casters
-   for(const [x,z] of [[0.45,0.35],[Wd-0.45,0.35],[Wd*0.42,L*0.82]]){const lg=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.13,2.2,12),blk);lg.position.set(x,1.25,z);G.add(lg);bx(x-0.24,x+0.24,z-0.24,z+0.24,2.25,0.12);const cst=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,6),new THREE.MeshPhongMaterial({color:0xb08d57,shininess:90}));cst.position.set(x,0.1,z);G.add(cst);}
-   // keyboard: key bed with key texture, cheek blocks, fallboard, key slip
+ for(const f of byName(/Steinway Model B/)){hideBox(f);const k=f.c,y=k.y0;const HI=window.__V8HI;
+   const blk=HI?new THREE.MeshPhysicalMaterial({color:0x060606,roughness:0.14,metalness:0,clearcoat:1,clearcoatRoughness:0.04,side:THREE.DoubleSide}):new THREE.MeshPhongMaterial({color:0x0b0b0b,shininess:120,specular:0x555555,side:THREE.DoubleSide});
+   const brass=new THREE.MeshPhongMaterial({color:0xc9a35a,shininess:110,specular:0x886633});
+   const L=k.x1-k.x0,Wd=k.z1-k.z0;
+   // Model B outline: straight spine (x=0), short treble cheek, S-curved bentside to a rounded tail
+   const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Wd,0);sh.lineTo(Wd,0.29*L);
+   sh.splineThru([[0.985,0.4],[0.93,0.5],[0.82,0.585],[0.69,0.66],[0.6,0.75],[0.55,0.85],[0.47,0.94],[0.33,0.995],[0.17,1.0],[0.05,0.975],[0,0.92]].map(([a,b])=>new THREE.Vector2(a*Wd,b*L)));sh.lineTo(0,0);
+   const G=new THREE.Group();const mk=(g,m)=>{const o=new THREE.Mesh(g,m);o.castShadow=o.receiveShadow=true;G.add(o);return o;};
+   const rim=new THREE.ExtrudeGeometry(sh,{depth:1.05,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.05,bevelSegments:4,curveSegments:64});rim.rotateX(Math.PI/2);mk(rim,blk).position.y=3.3;
+   const inner=new THREE.Mesh(new THREE.ShapeGeometry(sh,64),new THREE.MeshPhongMaterial({color:0xb8913f,shininess:70,specular:0x664422,side:THREE.DoubleSide}));inner.rotation.x=Math.PI/2;inner.position.set(Wd*0.025,3.1,L*0.02);inner.scale.set(0.95,0.95,1);G.add(inner);
+   const str=new THREE.Mesh(new THREE.PlaneGeometry(Wd*0.62,L*0.7),new THREE.MeshPhongMaterial({color:0xa9a9a4,shininess:120,transparent:true,opacity:0.55}));str.rotation.x=-Math.PI/2;str.position.set(Wd*0.4,3.13,L*0.43);G.add(str);
+   // lid raised on the long prop, hinged along the spine
+   const LA=0.68,lp=new THREE.Group();lp.position.set(0,3.36,0);lp.rotation.z=LA;const lg=new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:true,bevelThickness:0.015,bevelSize:0.015,bevelSegments:2,curveSegments:64});lg.rotateX(Math.PI/2);const lid=new THREE.Mesh(lg,blk);lid.castShadow=true;lp.add(lid);G.add(lp);
+   {const px=Wd*0.9,pz=L*0.45,hx=px*Math.cos(LA),top=px*Math.sin(LA);const s=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.035,Math.hypot(top,px-hx)+0.05,10),blk);s.position.set((px+hx)/2,3.36+top/2,pz);s.rotation.z=Math.atan2(px-hx,top);G.add(s);}
+   // turned legs (lathe) with brass casters
+   const prof=[[0,0],[0.16,0],[0.16,0.12],[0.11,0.25],[0.13,0.9],[0.1,1.4],[0.15,1.75],[0.22,1.95],[0.24,2.15],[0,2.15]].map(([r,h])=>new THREE.Vector2(r,h));const legG=new THREE.LatheGeometry(prof,24);
+   for(const [x,z] of [[0.5,0.45],[Wd-0.5,0.45],[Wd*0.36,L*0.86]]){const l=mk(legG,blk);l.position.set(x,0.12,z);const c=new THREE.Mesh(new THREE.SphereGeometry(0.11,12,8),brass);c.position.set(x,0.11,z);G.add(c);}
+   // keyboard, cheek blocks, fallboard, key slip
    const kt=(()=>{const c=document.createElement('canvas');c.width=1024;c.height=64;const q=c.getContext('2d');q.fillStyle='#f6f4ec';q.fillRect(0,0,1024,64);const ww=1024/52;q.fillStyle='#222';for(let i=0;i<52;i++)q.fillRect(i*ww,0,1,64);for(let i=0;i<52;i++){const n=(i+5)%7;if(n===2||n===6)continue;q.fillRect(i*ww+ww*0.65,0,ww*0.7,38);}const t=new THREE.CanvasTexture(c);t.anisotropy=8;return t;})();
    const kb=new THREE.Mesh(new THREE.BoxGeometry(Wd-0.7,0.08,0.55),[blk,blk,new THREE.MeshPhongMaterial({map:kt,shininess:80}),blk,blk,blk]);kb.geometry.rotateY(Math.PI/2);kb.rotation.y=-Math.PI/2;kb.position.set(Wd/2,2.48,-0.3);G.add(kb);
+   const bx=(x0,x1,z0,z1,y0,h,mm)=>{const g=new THREE.BoxGeometry(x1-x0,h,z1-z0);const o=mk(g,mm||blk);o.position.set((x0+x1)/2,y0+h/2,(z0+z1)/2);return o;};
    bx(0.05,0.35,-0.65,0.05,2.3,0.5);bx(Wd-0.35,Wd-0.05,-0.65,0.05,2.3,0.5);bx(0.2,Wd-0.2,-0.7,-0.58,2.3,0.18);bx(0.2,Wd-0.2,0,0.25,2.3,1.0);
-   // music desk (angled) + lyre with 3 brass pedals
-   const md=new THREE.Mesh(new THREE.BoxGeometry(Wd*0.62,0.95,0.06),blk);md.position.set(Wd/2,3.85,0.35);md.rotation.x=-0.25;G.add(md);
-   const lyre=new THREE.Group();lyre.position.set(Wd*0.5,0,0.15);G.add(lyre);for(const sx of [-0.28,0.28]){const r=new THREE.Mesh(new THREE.BoxGeometry(0.08,2.1,0.1),blk);r.position.set(sx,1.25,0);lyre.add(r);}const lb=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.22,0.35),blk);lb.position.set(0,0.2,0);lyre.add(lb);
-   for(const sx of [-0.22,0,0.22]){const pd=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.04,0.42),new THREE.MeshPhongMaterial({color:0xc9a35a,shininess:120,specular:0x886633}));pd.position.set(sx,0.32,-0.3);lyre.add(pd);}
-   // STEINWAY & SONS fallboard decal
+   {const fb=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,Wd-0.7,24,1,false,0,Math.PI/2),blk);fb.rotation.z=Math.PI/2;fb.position.set(Wd/2,2.56,0.12);G.add(fb);}
+   // music desk with fretwork rail, lyre with 3 brass pedals
+   const md=mk(new THREE.BoxGeometry(Wd*0.6,1.0,0.05),blk);md.position.set(Wd/2,3.9,0.38);md.rotation.x=-0.22;bx(Wd*0.2,Wd*0.8,0.05,0.5,3.36,0.06);
+   const ly=new THREE.Group();ly.position.set(Wd*0.5,0,0.2);G.add(ly);for(const sx of [-0.26,0.26]){const r=new THREE.Mesh(new THREE.LatheGeometry([[0,0],[0.06,0],[0.04,0.6],[0.07,1.3],[0.04,2.05],[0,2.05]].map(([a,b])=>new THREE.Vector2(a,b)),12),blk);r.position.set(sx,0.25,0);ly.add(r);}
+   {const lb=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.2,0.32),blk);lb.position.y=0.2;ly.add(lb);for(const sx of [-0.22,0,0.22]){const pd=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.035,0.4),brass);pd.position.set(sx,0.3,-0.28);pd.rotation.x=0.12;ly.add(pd);}}
    {const c=document.createElement('canvas');c.width=256;c.height=32;const q=c.getContext('2d');q.fillStyle='#0b0b0b';q.fillRect(0,0,256,32);q.fillStyle='#c9a35a';q.font='bold 18px serif';q.textAlign='center';q.fillText('STEINWAY & SONS',128,22);const dm=new THREE.Mesh(new THREE.PlaneGeometry(1.4,0.18),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}));dm.position.set(Wd/2,2.95,-0.005);dm.rotation.y=Math.PI;dm.scale.x=-1;G.add(dm);}
-   G.scale.x=-1;G.rotation.y=-Math.PI/2;G.position.set(k.x1,y,k.z1);groups.house.add(G);}
+   G.traverse(o=>{o.userData.noMerge=true;});G.scale.x=-1;G.rotation.y=-Math.PI/2;G.position.set(k.x1,y,k.z1);groups.house.add(G);}
+ // Steinway artist bench: tufted black leather top, glossy frame, turned legs
+ for(const f of byName(/Steinway artist bench/)){hideBox(f);const k=f.c,y=k.y0,W=k.x1-k.x0,D=k.z1-k.z0,cx=(k.x0+k.x1)/2,cz=(k.z0+k.z1)/2;const BG=new THREE.Group();BG.position.set(cx,y,cz);
+   const gl=new THREE.MeshPhongMaterial({color:0x0b0b0b,shininess:110,specular:0x555555}),le=new THREE.MeshPhongMaterial({color:0x141414,shininess:30,specular:0x2a2a2a});
+   const m=(g,M,x,yy,z)=>{const o=new THREE.Mesh(g,M);o.position.set(x,yy,z);o.castShadow=o.receiveShadow=true;BG.add(o);return o;};
+   m(new THREE.BoxGeometry(W,0.22,D),gl,0,1.38,0);const cu=m(new THREE.SphereGeometry(1,24,12),le,0,1.52,0);cu.scale.set(W/2-0.02,0.12,D/2-0.02);
+   for(let i=0;i<4;i++)for(let j=0;j<2;j++){m(new THREE.SphereGeometry(0.025,6,4),gl,-W/2+(i+0.5)*W/4,1.63,-D/2+(j+0.5)*D/2);}
+   const lp=new THREE.LatheGeometry([[0,0],[0.07,0],[0.05,0.4],[0.08,0.8],[0.06,1.27],[0,1.27]].map(([a,b])=>new THREE.Vector2(a,b)),14);for(const sx of [-1,1])for(const sz of [-1,1])m(lp,gl,sx*(W/2-0.15),0,sz*(D/2-0.12));
+   BG.traverse(o=>{o.userData.noMerge=true;});groups.house.add(BG);}
  for(const f of byName(/Steinway lid/)){hideBox(f);}
  // stools
  for(const f of byName(/Counter stool/)){hideBox(f);const k=f.c,x=(k.x0+k.x1)/2,z=(k.z0+k.z1)/2;const SG=new THREE.Group();SG.position.set(x,k.y0,z);groups.house.add(SG);const s=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,0.25,18),new THREE.MeshLambertMaterial({color:0x6b4f3a}));s.position.set(0,2.4,0);SG.add(s);
@@ -1811,6 +1830,8 @@ if(window.__V8HI&&window.__matTier==='standard'){try{
  const keyOf=m=>{const t=m.map;if(!t)return null;if(t.__pbr)return t.__pbr;for(const k of ['plank','siding','rib','seam','deck'])if(TEXr[k]&&t.image===TEXr[k].image)return k;return null;};
  const todo=[];const seen=new Set();scene.traverse(o=>{if(!o.isMesh)return;for(const m of (Array.isArray(o.material)?o.material:[o.material])){if(!m||seen.has(m)||!m.isMeshStandardMaterial)continue;seen.add(m);const k=keyOf(m);if(k)todo.push([m,k]);}});
  const cl=(t,ref)=>{if(!t)return null;const c=t.clone();c.repeat.copy(ref.repeat);c.offset.copy(ref.offset);c.rotation=ref.rotation;c.center.copy(ref.center);c.needsUpdate=true;return c;};
+ {const wm=[];const sn=new Set();for(const gk of ['house','bldg'])groups[gk]&&groups[gk].traverse(o=>{if(!o.isMesh)return;for(const m of (Array.isArray(o.material)?o.material:[o.material])){if(!m||sn.has(m)||!m.isMeshStandardMaterial||m.map||m.transparent||!m.color)continue;sn.add(m);const h=m.color.getHex();if(h===0xefebe4||h===0xe9e6df)wm.push(m);}});
+  Promise.all([T('plastered_wall_nor'),T('plastered_wall_rough')]).then(([n,r])=>{for(const m of wm){if(n){m.normalMap=n.clone();m.normalMap.repeat.set(5,2.5);m.normalMap.needsUpdate=true;m.normalScale=new THREE.Vector2(0.35,0.35);}if(r){m.roughnessMap=r.clone();m.roughnessMap.repeat.set(5,2.5);m.roughnessMap.needsUpdate=true;}m.roughness=0.92;m.needsUpdate=true;}window.__v8walls=wm.length;});}
  Promise.all(todo.map(async([m,k])=>{const ref=m.map;const [d,n,r]=await Promise.all([sets[k]?T(sets[k]):null,T(nr[k]+'_nor'),T(nr[k]+'_rough')]);if(d)m.map=cl(d,ref);if(n){m.normalMap=cl(n,ref);m.normalScale=new THREE.Vector2(k==='plank'?0.5:0.8,k==='plank'?0.5:0.8);}if(r)m.roughnessMap=cl(r,ref);m.roughness=k==='plank'?0.55:k==='leather'?0.7:1;if(k==='leather'||k==='fabric')m.normalMap&&m.normalMap.repeat.set(3,3),m.roughnessMap&&m.roughnessMap.repeat.set(3,3);m.needsUpdate=true;})).then(()=>{window.__v8tex=todo.length;});
  // HDRI environment (Poly Haven kloofendal_48d_partly_cloudy_puresky, 1k) with a black-PMREM guard (some software GL stacks return black)
  if(THREE.RGBELoader&&!/[?&]hdri=0/.test(location.search))new THREE.RGBELoader().setDataType(THREE.UnsignedByteType).load('assets/hdri/sky_1k.hdr',t=>{try{const pm=new THREE.PMREMGenerator(renderer);const rt=pm.fromEquirectangular(t);t.dispose();pm.dispose();
@@ -1822,7 +1843,7 @@ if(window.__V8HI&&window.__matTier==='standard'){try{
   const doSwap=s=>{if(s.st)return;s.st=1;get(s.m).then(src=>{const G=s.G;const p0=G.position.clone(),r0=G.rotation.clone(),s0=G.scale.clone(),par=G.parent;if(!par)return;
     par.remove(G);G.position.set(0,0,0);G.rotation.set(0,0,0);G.scale.set(1,1,1);G.updateMatrixWorld(true);const gb=new THREE.Box3().setFromObject(G);G.position.copy(p0);G.rotation.copy(r0);G.scale.copy(s0);par.add(G);
     const o=src.clone(true);o.rotation.y=s.ry||0;o.updateMatrixWorld(true);let mb=new THREE.Box3().setFromObject(o);const gs=gb.getSize(new THREE.Vector3()),ms=mb.getSize(new THREE.Vector3());
-    const sc=(s.fit==='h'?gs.y/ms.y:Math.min(gs.x/ms.x,gs.z/ms.z))*(s.k||1);o.scale.setScalar(sc);o.updateMatrixWorld(true);mb=new THREE.Box3().setFromObject(o);const gc=gb.getCenter(new THREE.Vector3()),mcn=mb.getCenter(new THREE.Vector3());
+    const sc=(s.fit==='h'?gs.y/ms.y:Math.min(gs.x/ms.x,gs.z/ms.z))*(s.k||1);if(s.fit==='xz'){const q=Math.abs(Math.sin(s.ry||0))>0.7,sx=q?gs.z/ms.z:gs.x/ms.x,sz=q?gs.x/ms.x:gs.z/ms.z;o.scale.set(sx,Math.min(sx,sz)*(s.k||1),sz);}else o.scale.setScalar(sc);o.updateMatrixWorld(true);mb=new THREE.Box3().setFromObject(o);const gc=gb.getCenter(new THREE.Vector3()),mcn=mb.getCenter(new THREE.Vector3());
     o.position.set(gc.x-mcn.x,gb.min.y-mb.min.y,gc.z-mcn.z);const Hd=new THREE.Group();Hd.position.copy(p0);Hd.rotation.copy(r0);Hd.scale.copy(s0);Hd.add(o);Hd.userData.noMerge=true;
     o.traverse(c=>{c.userData.noMerge=true;if(c.isMesh){c.castShadow=c.receiveShadow=true;const ms2=Array.isArray(c.material)?c.material:[c.material];ms2.forEach(m=>{m.userData.glb=true;if(m.isMeshStandardMaterial)m.envMapIntensity=scene.environment?0.9:1;});}});
     par.add(Hd);G.visible=false;s.H=Hd;s.st=2;window.__swapDone=(window.__swapDone||0)+1;}).catch(e=>{s.st=3;console.warn('glb',s.m,e&&e.message);});};
