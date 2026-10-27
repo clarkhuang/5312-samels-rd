@@ -373,12 +373,12 @@ G1('Cold plunge tub (owned #36 — "take to Michigan")','own','Model/size to con
 lbox('elec',GY,22.7,0,23.3,0.3,0.8,0xff5040,'prop',info('eBike charging spot (proposed)','prop','Dedicated 20 A GFCI outlet on a timer, away from the sauna; lithium charging on a non-combustible shelf.',null,{gym:true,near:true}),3.5);
 // proposed new gear
 G1('Assault / Echo air bike (proposed new)','pnew','Not in the Seabreeze inventory.',25,25.5,27.5,29.5,4.2,0x5f7f68);
-G1('GHD (proposed new)','pnew','~6 × 2.5 ft.',20,20.5,26,23,3.6,0x5f7f68);
-G1('Plyo box set (proposed new)','pnew','Soft/stackable 20/24/30 in set.',15.5,4.5,19.5,6.5,2.5,0x5f7f68);
+G1('GHD (proposed new)','pnew','~6 × 2.5 ft.',20,20.5,26,23,3.6,0x23262a);
+G1('Plyo box set (proposed new)','pnew','Soft/stackable 20/24/30 in set.',15.5,4.5,19.5,6.5,2.5,0x2f3338);
 G1('Wall balls (proposed new)','pnew','14/20 lb.',1,21,3,23,1,0x5f7f68,0,{nocol:true});
 lbox('gym',GY,0,21.5,0.3,22.5,1,0x5f7f68,'pnew',info('Wall-ball target at 9-10 ft (proposed new)','pnew','On the west wall.',null,{gym:true,near:true}),9);
 G1('Kettlebell set (proposed new, additional)','pnew','Adds to the ~6 owned (one 35 lb). Weights TBD.',4.5,16,7,17.5,1.2,0x5f7f68,0,{nocol:true});
-G1('Sled (proposed new)','pnew','Push out the overhead door onto the drive/grass.',8,20.5,11,23,1.3,0x5f7f68);
+G1('Sled (proposed new)','pnew','Push out the overhead door onto the drive/grass.',8,20.5,11,23,1.3,0x3a3d42);
 // recovery corner
 G1('#1 Seabreeze massage chair — recovery room (size to verify)','own','Clark\'s choice: small-barn recovery room with the gym and cold plunge. Size not logged: modeled ~32 in W × 60 in D upright, up to ~75 in reclined, ~300 lb (VERIFY). Clear zone ≥3 ft beside and behind for recline; dedicated 15/20 A GFCI outlet. Requires the barn to be climate-controlled (mini-split + dehumidifier, insulation): cold/humid air is bad for its electronics and upholstery.',13.6,23.5,16.3,29.75,3.8,0x2b2b2b);
 lbox('gym',GY,13.1,22.6,19.6,30,0.03,0x9fc5a8,'prop',info('Massage chair clearance zone (≥3 ft, recline)','prop','Kept free of gym gear.'),0.02,{edges:false});
@@ -408,7 +408,12 @@ info('Shed (~10 × 12)','inf','Listing lists a shed; only glimpsed at the edge o
 // ================= SITE FEATURES =================
 {const px=W(345),pz=Zs(296),py=rawElev(px,pz);
  const pond=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshPhongMaterial({color:0x22343a,shininess:80})); pond.scale.set(14,9,1); pond.rotation.x=-Math.PI/2; pond.position.set(px,py+0.5,pz); groups.site.add(pond);
- const rim=new THREE.Mesh(new THREE.RingGeometry(1,1.35,40),new THREE.MeshLambertMaterial({color:0xbdb5a8})); rim.scale.set(14,9,1);rim.rotation.x=-Math.PI/2;rim.position.set(px,py+0.45,pz);groups.site.add(rim);
+ const rim=new THREE.Mesh(new THREE.RingGeometry(1,1.35,40),new THREE.MeshLambertMaterial({color:0xbdb5a8})); rim.scale.set(14,9,1);rim.rotation.x=-Math.PI/2;rim.position.set(px,py+0.45,pz);groups.site.add(rim);rim.material.color.set(0x8c8a7e);
+ {const n=window.innerWidth<900?110:220,rg=new THREE.DodecahedronGeometry(1,0),rm=new THREE.MeshLambertMaterial({color:0xffffff}),ri=new THREE.InstancedMesh(rg,rm,n),o=new THREE.Object3D(),cc=new THREE.Color();
+  for(let i=0;i<n;i++){const row=i%3,a=i/n*Math.PI*2*3+row*0.4,rr=1.02+row*0.11+((i*37)%7)/70;o.position.set(px+Math.cos(a)*14*rr,py+0.35+row*0.25,pz+Math.sin(a)*9*rr);const s=0.55+((i*53)%10)/14;o.scale.set(s*1.2,s*0.7,s);o.rotation.set(i,i*1.7,i*0.3);o.updateMatrix();ri.setMatrixAt(i,o.matrix);
+   ri.setColorAt(i,cc.set([0xb9b2a3,0x9c968a,0xcfc7b6,0x8a8478,0xa89a84][i%5]));}ri.castShadow=ri.receiveShadow=true;groups.site.add(ri);
+  const sg=new THREE.IcosahedronGeometry(1,1),si=new THREE.InstancedMesh(sg,new THREE.MeshLambertMaterial({color:0xffffff}),18);for(let i=0;i<18;i++){const a=i/18*Math.PI*2+0.2,rr=1.55+(i%3)*0.12;o.position.set(px+Math.cos(a)*14*rr,py+1.2,pz+Math.sin(a)*9*rr);const s=1.3+(i%4)*0.35;o.scale.set(s,s*0.85,s);o.rotation.set(0,i,0);o.updateMatrix();si.setMatrixAt(i,o.matrix);si.setColorAt(i,cc.set([0x3f6a2c,0x4d7a34,0x5a3a52,0x6b8a3a][i%4]));}si.castShadow=true;groups.site.add(si);
+  const lp=new THREE.InstancedMesh(new THREE.CircleGeometry(0.9,10),new THREE.MeshLambertMaterial({color:0x4f7a35}),14);for(let i=0;i<14;i++){o.position.set(px+Math.cos(i*2.3)*8*((i%5)/6+0.3),py+0.53,pz+Math.sin(i*2.3)*5*((i%5)/6+0.3));o.rotation.set(-Math.PI/2,0,0);o.scale.set(1,1,1);o.updateMatrix();lp.setMatrixAt(i,o.matrix);}groups.site.add(lp);}
  pond.userData.item=info('Landscaped garden pond','photo','Seen p01, p07, p09, p37: rock-lined lily pond in the front lawn east of the deck. Not a mapped waterbody (county GIS). Position from p09/p60 aerials (≈ 60 ft east of house).',[px,py+6,pz]); pickables.push(pond);}
 {const [x,z]=[W(247),Zs(286)],y=rawElev(x,z);const it=info('Propane tank (~500 gal, location inferred) — conflicts with future suite','inf','Listing: forced-air propane heat, so there is a tank (owned or leased — ask). Not visible in photos/satellite; placed on the west (uphill) side near the drive. Could also feed a standby generator. Sits inside the future guest-suite footprint, so it would have to move (see relocated tank).',[x,y+7,z]);
  cyl('site',x-5,y+0.5,z,1.9,10,0xf2f2f2,'inf',it,true);}
@@ -427,7 +432,7 @@ info('Shed (~10 × 12)','inf','Listing lists a shed; only glimpsed at the edge o
  const o=new THREE.Object3D();
  pts.forEach((p,i)=>{const y=rawElev(p[0],p[1]);o.position.set(p[0],y+5*p[2],p[1]);o.scale.set(p[2],10*p[2],p[2]);o.rotation.set(0,0,0);o.updateMatrix();trunk.setMatrixAt(i,o.matrix);});
  con.forEach((p,i)=>{const y=rawElev(p[0],p[1]);o.scale.set(p[2],p[2],p[2]);o.position.set(p[0],y+(8+10)*p[2],p[1]);o.updateMatrix();t1.setMatrixAt(i,o.matrix);o.position.set(p[0],y+(20+8)*p[2],p[1]);o.updateMatrix();t2.setMatrixAt(i,o.matrix);});
- cr.material.color.set(0xffffff);const FALL=[0x4c7a3a,0x5b8a3c,0xc9772e,0xd9a43a,0xa8452a,0x6f8f3a,0xe0b04a,0x8a3a22];const tc=new THREE.Color();
+ cr.material.color.set(0xffffff);const SEASON=new URLSearchParams(location.search).get('season')||(()=>{try{return localStorage.getItem('samelsSeason')}catch(e){return null}})()||'summer';const FALL=SEASON==='fall'?[0x4c7a3a,0x5b8a3c,0xc9772e,0xd9a43a,0xa8452a,0x6f8f3a,0xe0b04a,0x8a3a22]:[0x3f6e2c,0x4a7a32,0x557f36,0x3a6428,0x5e8a3a,0x46732e,0x67913f,0x355f26];window.__season=SEASON;const tc=new THREE.Color();
  window.__trees=[trunk,t1,t2,cr];
  dec.forEach((p,i)=>{cr.setColorAt(i,tc.set(FALL[Math.floor((Math.sin(i*12.9898)*43758.5453%1+1)%1*FALL.length)]));const y=rawElev(p[0],p[1]);o.scale.set(p[2]*1.1,p[2]*0.9,p[2]*1.1);o.position.set(p[0],y+17*p[2],p[1]);o.updateMatrix();cr.setMatrixAt(i,o.matrix);});}
 
@@ -767,6 +772,7 @@ sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.4;sun.target.position.set(W(240)
 for(const k of ['bldg','house','barn','gym','trees','site'])groups[k].traverse(o=>{if(o.isMesh||o.isInstancedMesh){if(o.material===GLASS||(o.material&&o.material.isMeshBasicMaterial))return;o.castShadow=k!=='site';o.receiveShadow=true;}});
 terrain.receiveShadow=true;
 // ---- GYM polish: full rubber floor, loaded barbell, plates, recovery zone, wall-ball zone
+window.__gymLeg0=groups.gym.children.length;
 {const g=groups.gym,F=GY,add=(geo,c,u,v,yy,m)=>{const p=F.P(u,v);const o=new THREE.Mesh(geo,m||new THREE.MeshLambertMaterial({color:c}));o.position.set(p[0],GYy+yy,p[1]);g.add(o);return o;};
  const fl=lbox('gym',GY,0.25,0.25,27.75,29.75,0.04,0x262626,'photo',null,0.02,{edges:false});texMat(fl.material,'tile',7,7.5);
  const bar=new THREE.CylinderGeometry(0.08,0.08,7.2,10);bar.rotateZ(Math.PI/2);const plate=new THREE.CylinderGeometry(1.48,1.48,0.25,24);plate.rotateZ(Math.PI/2);
@@ -878,6 +884,7 @@ const EXTRAS=[];
  for(let i=0;i<5;i++){const [x,z]=F.P(0.7,3+i*5.8);const l=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.8),new THREE.MeshBasicMaterial({color:0xfff0d0}));l.position.set(x,yb+9.6,z);g.add(l);}
  for(const [u,v] of [[7,8],[20,22]]){const [x,z]=F.P(u,v);const pl=new THREE.PointLight(0xfff1dc,0.45,26,1.3);pl.position.set(x,yb+9,z);scene.add(pl);ilights.push(pl);}}
 
+window.__gymLeg1=groups.gym.children.length;
 // ================= v4: vehicles, barn fit, modern doors, network, cameras, smart home, offices =================
 const NEWITEMS=[];const NI=(name,tag,text,pos,layer,extra)=>{const it=info(name,tag,text,pos,Object.assign({layer,near:false},extra||{}));NEWITEMS.push(it);return it;};
 const LMv=c=>new THREE.MeshLambertMaterial({color:c});
@@ -1075,20 +1082,64 @@ vw('🛌 Guest loft','Guest loft for guests or the kids; shower-only ¾ bath.',1
 {const t=[SOLAR.x,rawElev(SOLAR.x,SOLAR.z)+4,SOLAR.z];vo('☀ Ground-mount solar (concept)','~20 kW in two racked rows at ~40°, facing south; trench to the house.',t,[t[0]+75,t[1]+48,t[2]+62]);}
 vo('🟪 Guest suite site (future, ~2 yrs)','Future guest suite footprint beside the chalet (purple layer).',[SU.x0+10,HM,SU.z0-14],[SU.x0-55,HM+48,SU.z0+45]);
 ['aerial','arrival','front','pond','deck','coffee','great_room','kitchen','office','office_guest','lower_master','lower_bath','tv_room','loft','big_barn','gym','solar','guest_suite'].forEach((id,i)=>{if(VP[i])VP[i].id=id;});
+{const t=GY.P(9,15.5),c=GY.P(25.6,4.2);VP.push({id:'gym_beauty',n:'🏋 Gym — rig + platform',cap:'Rubber floor, oak lifting platform, 10 × 6 ft rig with loaded bar, mirror wall, bumper and dumbbell racks, rower/SkiErg, LED high-bays.',orbit:{t:[t[0],GYy+3.2,t[1]],pos:[c[0],GYy+7.2,c[1]],fov:68}});}
+{const t=GY.P(6.5,27.8),c=GY.P(9.2,20.6);VP.push({id:'recovery',n:'🧊 Recovery — Plunge + Sauna',cap:'The Plunge tub (66⅝ × 31½ × 26 in) at 39°F, Plunge The Sauna Standard (cedar, glass front, HUUM heater), massage chair, cedar slat wall.',orbit:{t:[t[0],GYy+3.4,t[1]],pos:[c[0],GYy+6.2,c[1]],fov:72}});}
+{const PD=[W(345),rawElev(W(345),Zs(296)),Zs(296)],HC=H.P(17,16),d=new THREE.Vector2(PD[0]-HC[0],PD[2]-HC[1]).normalize(),pb=PB.P(16,19),gy=GY.P(14,15);
+ const ctr=[(HC[0]+pb[0]+gy[0])/3,HM-6,(HC[1]+pb[1]+gy[1])/3];
+ VP.push({id:'drone',n:'🛸 Drone: whole parcel',cap:'High drone view over the 6 acres: house and pond, both barns, the drive, the south field and the treeline.',orbit:{t:ctr,pos:[ctr[0]+d.x*260+120,ctr[1]+330,ctr[2]+d.y*260+60],fov:55}});
+ VP.push({id:'aerial_p09',n:'🛸 Aerial like listing p09',cap:'Drone view from beyond the pond toward the chalet, with the barns behind (matches listing photo p09).',orbit:{t:[(HC[0]*2+pb[0])/3,HM,(HC[1]*2+pb[1])/3],pos:[PD[0]+d.x*120+d.y*30,PD[1]+105,PD[2]+d.y*120-d.x*30],fov:52}});
+ const gp=G.P(12,12);VP.push({id:'aerial_p07',n:'🛸 Aerial like listing p07',cap:'Low drone over the garage roof looking down at the pond and gardens (matches listing photo p07).',orbit:{t:[PD[0],PD[1],PD[2]],pos:[gp[0]-d.x*18,HM+42,gp[1]-d.y*18],fov:60}});
+ VP.push({id:'front_p01',n:'📷 Front like listing p01',cap:'From the lawn beyond the pond: east glass gable, covered deck and the stone-edged pond (matches listing photo p01).',orbit:{t:[HC[0],HM+10,HC[1]],pos:[PD[0]+d.x*55,PD[1]+9,PD[2]+d.y*55],fov:55}});
+ VP.push({id:'pond_p08',n:'📷 Pond like listing p08',cap:'Ground-level view across the stacked-stone pond with the evergreen treeline behind (matches listing photo p08).',orbit:{t:[PD[0]-d.y*10,PD[1]+4,PD[2]+d.x*10],pos:[PD[0]+d.y*40,PD[1]+5.5,PD[2]-d.x*40],fov:58}});
+ const sm=[(pb[0]+gy[0]+SOLAR.x)/3,(PBy+GYy)/2,(pb[1]+gy[1]+SOLAR.z)/3];{const st=[(sm[0]+SOLAR.x)/2,sm[1],(sm[2]+SOLAR.z)/2],dx=SOLAR.x-sm[0],dz=SOLAR.z-sm[2],dl=Math.hypot(dx,dz)||1;VP.push({id:'barns_solar',n:'🛸 Aerial: barns + solar',cap:'Drone over the pole barn, the gym barn and the south-field solar array.',orbit:{t:st,pos:[st[0]-dz/dl*150+dx/dl*40,st[1]+140,st[2]+dx/dl*150+dz/dl*40],fov:58}});}
+ window.__flyCtr=ctr;}
 {const t=PB.P(16,19),c=PB.P(16,19);VP.push({id:'barn_fit',n:'📐 Barn fit test (plan view)',cap:'Van + pontoon in the large section with a ~3 ft walkway; Porsche 911 test-fit in the smaller section.',orbit:{t:[t[0],PBy,t[1]-0.01],pos:[c[0],PBy+60,c[1]+0.01],fov:50},noRoof:true});}
 {const t=G.P(12,11),c=G.P(12,40);VP.push({id:'garage_cars',n:'🚗 Garage: Model Y + XT5',cap:'Tesla Model Y (west bay, by the Wall Connector) and Cadillac XT5 in the 24×24 garage.',orbit:{t:[t[0],HM+2,t[1]],pos:[c[0]+10,HM+30,c[1]],fov:55},noRoof:true});}
 {VP.push({id:'network',n:'📶 Network + cameras',cap:'UniFi gateway + 3 indoor APs, 2 outdoor APs, bridges to both barns; Ring cameras.',orbit:{t:[-110,10,-10],pos:[-60,330,160],fov:55},showNet:true});}
 {const t=PB.P(18,0),c=PB.P(20,-40);VP.push({id:'barn_doors',n:'🚪 Modern glass barn doors',cap:'Full-view glass doors, brown frames, cream siding kept (concept).',orbit:{t:[t[0],PBy+7,t[1]],pos:[c[0],PBy+8,c[1]],fov:50}});}
 {const t=PB.P(6,38),c=PB.P(10,72);VP.push({id:'barn_rear',n:'🚪 Option B: new rear door (pole barn)',cap:'New 9×8 glass overhead door on the rear gable of the smaller section; gravel apron around the barn.',orbit:{t:[t[0],PBy+5,t[1]],pos:[c[0],PBy+12,c[1]],fov:50}});}
+{const c=H.P(52,6);VP.push({id:'firepit',n:'🔥 Fire pit',cap:'Stone fire pit on a paver circle near the walk-out (proposed).',orbit:{t:[c[0],HL,c[1]],pos:[c[0]-26,HL+16,c[1]+30],fov:55}});}
 function goVP(v,instant){{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c&&c.checked!==on){c.checked=on;}};if(v.showNet){set('netcov',true);set('camcov',true);set('net',true);set('cams',true);}else{set('netcov',false);set('camcov',false);}refresh();}const rt=document.getElementById('roofT');if(v.noRoof&&rt.checked){rt.checked=false;refresh();}else if(!v.noRoof&&!rt.checked&&v.orbit){rt.checked=true;refresh();}if(instant){anim=null;if(v.walk){const w=walkPose(v.walk);enterWalk(Object.assign({},v.walk,{feet:w.feet}));}else{camera.position.set(...v.orbit.pos);enterOrbit(new THREE.Vector3(...v.orbit.t),v.orbit.fov);camera.lookAt(...v.orbit.t);}return;}
   if(v.walk)goWalk(v.walk,true);else{const T=new THREE.Vector3(...v.orbit.t);flyCam(new THREE.Vector3(...v.orbit.pos),T,null,()=>enterOrbit(T,v.orbit.fov));}caption(v);}
 function caption(v){const c=document.getElementById('caption');if(!c)return;c.innerHTML=`<b>${v.n}</b><span>${v.cap||''}</span>`;c.style.opacity=1;clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,tour?5200:4200);}
 let tour=null;
-function stopTour(){if(!tour)return;clearTimeout(tour.t);document.getElementById('lblT').checked=tour.lbl;tour=null;const b=document.getElementById('bTour');if(b){b.classList.remove('on');b.textContent='▶ Tour';}const tb=document.getElementById('tourBar');if(tb)tb.style.display='none';}
-function tourStep(){if(!tour)return;const v=VP[tour.i];goVP(v);const tb=document.getElementById('tourBar');tb.style.display='flex';document.getElementById('tourTxt').textContent=`Tour ${tour.i+1}/${VP.length} · ${v.n}`;
-  tour.t=setTimeout(()=>{if(!tour)return;tour.i=(tour.i+1)%VP.length;if(tour.i===0){stopTour();return;}tourStep();},6500);}
-window.toggleTour=function(){if(tour){stopTour();return;}const lt=document.getElementById('lblT');tour={i:0,lbl:lt.checked};lt.checked=false;const b=document.getElementById('bTour');b.classList.add('on');b.textContent='■ Stop tour';tourStep();};
-window.tourNav=function(d){if(!tour)return;clearTimeout(tour.t);tour.i=(tour.i+d+VP.length)%VP.length;tourStep();};
+const TOUR=[
+ ['drone','From above','Six quiet wooded acres in Whitewater Township: the chalet and pond, two barns, the south field and a wall of pines.'],
+['arrival','Welcome to 5312 Samels Road','Six quiet wooded acres in Whitewater Township. The drive winds up past the barns to the house on the rise.'],
+ ['front','The house','A sage-gray chalet with a standing-seam metal roof, brown trim and a covered wraparound deck. Big gable windows face the trees.'],
+ ['great_room','The great room','The warm knotty-pine vaulted ceiling stays. The Steinway B sits at the center of the lounge as the focal piece, with a quiet conversation corner by the glass.'],
+ ['kitchen','Kitchen island','A long quartz island seats four, with storage on both sides and an easy aisle to the counters and range.'],
+ ['office','Main-floor offices','A focused office with the glass desk and Aeron chair, and across the hall a second office that doubles as a guest room with a fold-out futon.'],
+ ['tv_room','Lower level: lounge and movies','The big L sectional settles into the corner facing the TV, steps from the walk-out patio and the morning-coffee spot.'],
+ ['lower_master','Lower-level master retreat','A calm primary bedroom with a finished closet and a new full bath, its own floor away from the main living space.'],
+ ['loft','The loft','A bright guest and kids space under the roof, with Milan\'s bed, a desk under the skylight and room for a daybed.'],
+ ['deck','The deck','The covered wraparound deck, stained to match the barn trim, with a teak table for long summer dinners.'],
+ ['aerial_p09','The chalet from the air','Like the listing drone shot: the chalet on its rise, the stone-edged pond in front and the barns tucked behind.'],
+['pond','The pond','A landscaped lily pond ringed with stacked stone and plantings, just below the deck.'],
+ ['big_barn','The big pole barn','Room for the Airstream Interstate and the pontoon, with a proposed glass overhead door and a tandem bay for a future sports car.'],
+ ['gym_beauty','The small barn: CrossFit gym','Rubber floor and an oak lifting platform in front of the pull-up rig, with the mirror wall, bumper plates, dumbbells, rower and SkiErg.'],
+ ['recovery','Recovery corner','The Plunge cold tub at thirty-nine degrees beside a cedar Plunge sauna, with the massage chair and a warm cedar slat wall.'],
+ ['barns_solar','Barns and solar from above','The pole barn, the gym barn and the south-field array, all linked by the gravel drive.'],
+['solar','The solar field','A ground-mount array in the south field, angled for winter sun and clear of snow sliding off the roofs.'],
+ ['firepit','The fire pit','A stone fire pit on a paver circle near the walk-out, made for evenings under the pines.'],
+ ['guest_suite','Phase 2: the guest suite','A future guest suite with its own entry, planned for a couple of years out.']];
+const NARR={on:false,voice:null};
+function pickVoice(){try{const vs=speechSynthesis.getVoices()||[];const pref=[/Samantha/,/Google US English/,/Microsoft (Aria|Jenny|Guy).*Online/,/Daniel/,/Karen/,/en-US/];for(const re of pref){const v=vs.find(v=>re.test(v.name)||re.test(v.lang));if(v)return v;}return vs.find(v=>/^en/.test(v.lang))||null;}catch(e){return null;}}
+if(window.speechSynthesis){speechSynthesis.onvoiceschanged=()=>{NARR.voice=pickVoice();};}
+function speak(t,done){if(!NARR.on||!window.speechSynthesis){done&&done();return;}try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=0.98;u.pitch=1;if(!NARR.voice)NARR.voice=pickVoice();if(NARR.voice)u.voice=NARR.voice;u.onend=()=>done&&done();u.onerror=()=>done&&done();speechSynthesis.speak(u);}catch(e){done&&done();}}
+function tcap(title,txt){const c=document.getElementById('caption');if(!c)return;c.classList.add('tourcap');c.innerHTML=`<b>${title}</b><span>${txt}</span>`;c.style.opacity=0;requestAnimationFrame(()=>{c.style.opacity=1;});clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,Math.max(5200,txt.length*60));}
+function stopTour(){if(!tour)return;clearTimeout(tour.t);tour.gen++;try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}document.getElementById('lblT').checked=tour.lbl;tour=null;const b=document.getElementById('bTour');if(b){b.classList.remove('on');b.textContent='▶ Tour';}const tb=document.getElementById('tourBar');if(tb)tb.style.display='none';const c=document.getElementById('caption');if(c)c.classList.remove('tourcap');}
+function stops(){return TOUR.map(([id,t,x])=>({v:VP.find(v=>v.id===id),t,x})).filter(s=>s.v);}
+function tourStep(){if(!tour)return;const S=stops(),s=S[tour.i];const gen=++tour.gen;goVP(s.v);const tb=document.getElementById('tourBar');tb.style.display='flex';document.getElementById('tourTxt').textContent=`Tour ${tour.i+1}/${S.length} · ${s.t}`;
+  setTimeout(()=>{if(!tour||tour.gen!==gen)return;tcap(s.t,s.x);let spoke=!NARR.on,dwell=false;const next=()=>{if(!tour||tour.gen!==gen||tour.paused)return;if(spoke&&dwell){tour.i++;if(tour.i>=S.length){stopTour();return;}tourStep();}};tour.next=next;
+   speak(s.t+'. '+s.x,()=>{spoke=true;setTimeout(next,700);});tour.t=setTimeout(()=>{dwell=true;next();},Math.max(5500,s.x.length*55));},1600);}
+window.toggleTour=function(){if(tour){stopTour();return;}const lt=document.getElementById('lblT');tour={i:0,lbl:lt.checked,gen:0,paused:false};lt.checked=false;const b=document.getElementById('bTour');b.classList.add('on');b.textContent='■ Stop tour';
+  if(NARR.on&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}} // unlock audio on the tap (iOS)
+  tourStep();};
+window.tourNav=function(d){if(!tour)return;clearTimeout(tour.t);try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}const n=stops().length;tour.i=(tour.i+d+n)%n;tour.paused=false;tourStep();};
+window.tourPause=function(){if(!tour)return;tour.paused=!tour.paused;const b=document.getElementById('bPause');if(b)b.textContent=tour.paused?'▶ Resume':'⏸ Pause';try{if(window.speechSynthesis){tour.paused?speechSynthesis.pause():speechSynthesis.resume();}}catch(e){}if(!tour.paused&&tour.next){setTimeout(()=>{tour&&tour.next&&tour.next();},300);}};
+window.setNarrate=function(on){NARR.on=!!on;const b=document.getElementById('bNarr');if(b){b.classList.toggle('on',NARR.on);b.textContent=NARR.on?'🔊 Narrate: on':'🔈 Narrate: off';}const b2=document.getElementById('bNarr2');if(b2){b2.classList.toggle('on',NARR.on);b2.textContent=NARR.on?'🔊 Narrate':'🔈 Narrate';}if(!NARR.on){try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}}};
+window.__tour={TOUR,NARR,stops};
 {const vd=document.getElementById('views');VP.forEach(v=>{const b=document.createElement('button');b.textContent=v.n;b.title=v.cap;b.onclick=()=>{stopTour();goVP(v);document.body.classList.remove('menu');};vd.appendChild(b);});}
 const jd=document.getElementById('jumps');J.forEach(([n,f])=>{const b=document.createElement('button');b.textContent=n;if(n.includes('Future'))b.title=FUTNAME;b.onclick=()=>{stopTour();f();};jd.appendChild(b);});
 
@@ -1174,11 +1225,181 @@ function updateLabels(){const show=document.getElementById('lblT').checked,r=can
   for(const it of items){if(!it.el)continue;const v=it._vis&&!it._occ;it.el.style.display=v?'block':'none';if(v)it.el.style.opacity=Math.max(0.25,it._op).toFixed(2);}}
 
 pickables.forEach(o=>{const it=o.userData.item;if(it&&/^Sauna 6|Bathroom \/ shower spot/.test(it.name)&&o.material){o.material.userData.keepSoft=true;o.material.transparent=true;o.material.opacity=0.28;o.material.depthWrite=false;}});
+// ================= GYM + RECOVERY DETAIL (v6) =================
+{const F=GY,Y=GYy,g=groups.gym;const QUALITY_HINT=()=>{try{return new URLSearchParams(location.search).get('clean')==='1'||(localStorage.getItem('samelsQ')||((matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high'))!=='low';}catch(e){return true;}};const hideRe=/Free-standing pull-up rig|Barbell tree|Bumper plates|DB\/KB 3-tier|Xebex curved|Peloton bike|EnergyFit rower|Assault \/ Echo|Wall balls \(|Kettlebell set|#1 Seabreeze massage|Cold plunge tub|Sauna 6|Rubber gym flooring/;
+ const hidden=[];g.traverse(o=>{const it=o.userData&&o.userData.item;if(o.isMesh&&it&&hideRe.test(it.name)){hidden.push([o,it]);}});
+ hidden.forEach(([o])=>{o.material=Array.isArray(o.material)?o.material.map(m=>{m=m.clone();m.visible=false;return m;}):(()=>{const m=o.material.clone();m.visible=false;return m;})();o.children.forEach(c=>c.visible=false);});
+ {const B=F.P(13,27.6),B2=F.P(16.6,29);const inR=(o)=>{const x=o.position.x,z=o.position.z;return x>Math.min(B[0],B2[0])-0.6&&x<Math.max(B[0],B2[0])+0.6&&z>Math.min(B[1],B2[1])-0.8&&z<Math.max(B[1],B2[1])+0.8;};
+  g.children.slice(window.__gymLeg0||0,window.__gymLeg1||0).forEach(o=>{if(!o.isMesh||(o.userData&&o.userData.item))return;const gp=o.geometry.parameters||{};const t=o.geometry.type;
+   if(t!=='BoxGeometry'||gp.height<0.3||(o.material&&o.material.transparent)||inR(o)||(gp.height>=5.5&&gp.height<6.5&&gp.depth>4))o.visible=false;});
+  for(let i=colliders.length-1;i>=0;i--){const c=colliders[i];if(Math.abs(c.x0-Math.min(B[0],B2[0]))<0.05&&Math.abs(c.z0-Math.min(B[1],B2[1]))<0.05)colliders.splice(i,1);}}
+ const itOf=re=>{const h=hidden.find(([o,it])=>re.test(it.name));return h?h[1]:null;};
+ const cv=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;};
+ const L=c=>new THREE.MeshLambertMaterial({color:c}),Ph=(c,s,sp)=>new THREE.MeshPhongMaterial({color:c,shininess:s||60,specular:sp||0x444444});
+ const STEEL=Ph(0x1d1f22,40,0x333333),CHR=Ph(0xd8dde2,140,0xffffff),RED=Ph(0xb3261e,30),RUB=L(0x151515);
+ const add=(m,it,pick)=>{m.castShadow=m.receiveShadow=true;g.add(m);if(it){m.userData.item=it;if(pick)pickables.push(m);}return m;};
+ const Bx=(u0,v0,u1,v1,y0,h,M,it)=>{const [x,z]=F.P((u0+u1)/2,(v0+v1)/2);const m=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.02,Math.abs(u1-u0)),h,Math.max(.02,Math.abs(v1-v0))),M);m.position.set(x,Y+y0+h/2,z);return add(m,it,true);};
+ // axis: 'y' vertical, 'u' east-west, 'v' north-south. (u,v,y)=center
+ const Cy=(u,v,y,r,h,M,ax,r2,seg,it)=>{const [x,z]=F.P(u,v);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r2===undefined?r:r2,h,seg||20),M);m.position.set(x,Y+y,z);if(ax==='u')m.rotation.z=Math.PI/2;if(ax==='v')m.rotation.x=Math.PI/2;return add(m,it,true);};
+ // ---- rubber floor (whole room) with speckle, + 8x4 lifting platform
+ const rubT=cv(256,256,(c,w,h)=>{c.fillStyle='#1a1a1b';c.fillRect(0,0,w,h);for(let i=0;i<5000;i++){c.fillStyle=['#2a2a2c','#3a3a3d','#101010','#4a4a4a'][i%4];c.fillRect(Math.random()*w,Math.random()*h,1.4,1.4);}c.strokeStyle='#0a0a0a';c.lineWidth=2;c.strokeRect(0,0,w,h);});rubT.repeat.set(7,7.5);
+ const fl=Bx(0.05,0.05,27.95,29.95,0.02,0.06,new THREE.MeshLambertMaterial({map:rubT}),itOf(/Rubber gym flooring/));fl.castShadow=false;
+ const oakT=cv(256,64,(c,w,h)=>{c.fillStyle='#b98a55';c.fillRect(0,0,w,h);for(let i=0;i<60;i++){c.strokeStyle='rgba(90,55,25,'+(0.15+Math.random()*0.25)+')';c.beginPath();const y=Math.random()*h;c.moveTo(0,y);c.bezierCurveTo(w/3,y+Math.random()*6-3,2*w/3,y+Math.random()*6-3,w,y);c.stroke();}for(let x=0;x<w;x+=64){c.fillStyle='#7a5a35';c.fillRect(x,0,1,h);} });
+ const pit=info('Lifting platform 8 × 4 ft (proposed new)','pnew','3/4 in rubber drop zones each side, oak center strip; in front of the rig so the barbell can be dropped. ~$400–900 DIY.',null,{gym:true,near:true});
+ Bx(12,7.4,20,11.6,0.08,0.12,RUB,pit);Bx(14.2,7.45,17.8,11.55,0.08,0.13,new THREE.MeshLambertMaterial({map:oakT}),pit);
+ // ---- rig 10 x 6, 9 ft, pull-up bars both sides, J-cups, spotter arms
+ const rig=itOf(/Free-standing pull-up rig/);
+ for(const [u,v] of [[11,12],[21,12],[11,18],[21,18]]){Bx(u-0.125,v-0.125,u+0.125,v+0.125,0,9,STEEL,rig);Bx(u-0.6,v-0.15,u+0.6,v+0.15,0,0.12,STEEL,rig);}
+ for(const v of [12,18])Bx(11,v-0.12,21,v+0.12,8.75,0.25,STEEL,rig);for(const u of [11,16,21])Bx(u-0.12,12,u+0.12,18,8.75,0.25,STEEL,rig);
+ for(const v of [11.55,18.45])Cy(16,v,8.4,0.05,10.2,CHR,'u',undefined,12,rig);
+ for(const v of [11.6,17.6]){Cy(16,v+0.4,8.45,0.06,1,STEEL,'v',undefined,8,rig);}
+ for(const u of [11,21]){Bx(u-0.1,11.65,u+0.1,11.88,4.4,0.35,RED,rig);Bx(u-0.07,10.2,u+0.07,11.88,2.6,0.18,STEEL,rig);}
+ Bx(15.2,11.86,16.8,11.9,7.6,0.7,RED,rig);
+ // loaded barbell on the J-cups (2×45 lb bumpers)
+ const bb=info('Olympic barbell + bumper plates on the J-cups','own','Owned bars (#27) and colored bumpers (#28); 45 lb blue plates shown. 7.2 ft bar.',null,{gym:true,near:true});
+ Cy(16,11.75,4.85,0.05,7.2,CHR,'u',undefined,12,bb);for(const s of [-1,1]){for(const [d,c] of [[2.75,0x1f4fa8],[2.95,0x1f4fa8]])Cy(16+s*d,11.75,4.85,0.74,0.22,Ph(c,20),'u',undefined,28,bb);Cy(16+s*3.15,11.75,4.85,0.1,0.15,CHR,'u',undefined,12,bb);}
+ // ---- barbell tree (3 bars vertical) and bumper toast rack
+ const bt=itOf(/Barbell tree/);Bx(0.6,15.8,2,17.2,0,0.15,STEEL,bt);Bx(1.2,16.4,1.4,16.6,0,1.2,STEEL,bt);
+ [[0.9,16.1,CHR],[1.7,16.1,Ph(0x111111,40)],[1.3,16.9,CHR]].forEach(([u,v,M])=>{Cy(u,v,3.75,0.05,7.2,M,'y',undefined,10,bt);Cy(u,v,0.9,0.1,1.6,M,'y',undefined,10,bt);});
+ const pr=itOf(/Bumper plates/);Bx(0.4,18.6,3.2,20.4,0,0.2,STEEL,pr);for(const v of [18.7,20.3])Bx(0.5,v-0.05,3.1,v+0.05,0,1.2,STEEL,pr);
+ [[0.75,0xb3261e,0.74],[0.95,0xb3261e,0.74],[1.3,0x1f4fa8,0.74],[1.5,0x1f4fa8,0.74],[1.85,0xd9b21c,0.74],[2.05,0xd9b21c,0.74],[2.4,0x2e7d32,0.74],[2.6,0x2e7d32,0.74],[2.9,0x111111,0.74]].forEach(([u,c,r])=>Cy(u,19.5,r+0.2,r,0.22,Ph(c,15),'u',undefined,28,pr));
+ // ---- DB / KB 3-tier rack against the south wall
+ const db=itOf(/DB\/KB 3-tier/);for(const u of [23.6,27.4])Bx(u-0.1,0.3,u+0.1,1.6,0,3.4,STEEL,db);
+ for(const [y,dv] of [[1.0,1.3],[2.0,0.95],[3.0,0.6]])Bx(23.5,0.3,27.5,0.3+dv+0.2,y,0.08,STEEL,db);
+ {const hx=new THREE.CylinderGeometry(0.22,0.22,0.22,6);hx.rotateZ(Math.PI/2);const hm=new THREE.InstancedMesh(hx,L(0x161616),20),hd=new THREE.Object3D();let k=0;
+  for(let i=0;i<5;i++)for(const s of [-1,1]){const u=24+i*0.75,v=0.9;const [x,z]=F.P(u+s*0.25,v);hd.position.set(x,Y+1.33,z);hd.updateMatrix();hm.setMatrixAt(k++,hd.matrix);const [x2,z2]=F.P(u+s*0.25,0.65);hd.position.set(x2,Y+2.3,z2);hd.updateMatrix();hm.setMatrixAt(k++,hd.matrix);}
+  hm.castShadow=true;g.add(hm);for(let i=0;i<5;i++)for(const vv of [0.9,0.65])Cy(24+i*0.75,vv,vv>0.8?1.33:2.3,0.06,0.3,CHR,'u',undefined,8,db);}
+ // kettlebells on the top shelf + floor
+ const kb=(u,v,y,r,c,it)=>{const [x,z]=F.P(u,v);const b=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),Ph(c,25));b.position.set(x,Y+y+r*0.9,z);b.scale.y=0.92;add(b,it,true);const h=new THREE.Mesh(new THREE.TorusGeometry(r*0.6,r*0.13,8,16,Math.PI),Ph(c,25));h.position.set(x,Y+y+r*1.7,z);add(h,it);};
+ [[23.9,0.55,0.32],[24.6,0.55,0.34],[25.3,0.55,0.36],[26,0.55,0.38],[26.7,0.55,0.4],[27.2,0.55,0.3]].forEach(([u,v,r])=>kb(u,v,3.08,r*0.7,0x1b1b1b,db));
+ const kit=itOf(/Kettlebell set/);[[4.8,16.7,0.42,0x8a1c1c],[5.5,16.7,0.46,0x1f4fa8],[6.3,16.7,0.5,0xd9b21c],[5.1,17.3,0.38,0x2e7d32],[6,17.3,0.42,0x5b2a86]].forEach(([u,v,r,c])=>kb(u,v,0.06,r*0.75,c,kit));
+ // wall balls
+ const wb=itOf(/Wall balls \(/);[[1.5,21.6],[2.5,21.6],[1.5,22.6],[2.5,22.6]].forEach(([u,v],i)=>{const [x,z]=F.P(u,v);const s=new THREE.Mesh(new THREE.SphereGeometry(0.58,18,14),Ph(i%2?0x2a2a2a:0x3a3f46,10));s.position.set(x,Y+0.62,z);add(s,wb,true);});
+ {const [x,z]=F.P(2,22.1);const s=new THREE.Mesh(new THREE.SphereGeometry(0.58,18,14),Ph(0x8a1c1c,10));s.position.set(x,Y+1.75,z);add(s,wb);}
+ // ---- Concept2-style rower + SkiErg (owned combo) along the east wall
+ const rw=itOf(/EnergyFit rower/),BLK=Ph(0x141414,50);Bx(26.7,2.6,27.1,9.2,0.35,0.18,Ph(0x9aa3ab,90),rw);Bx(26.6,2.6,27.2,3,0,0.5,BLK,rw);Bx(26.55,6.6,27.25,7.2,0,0.4,BLK,rw);
+ Cy(26.9,8.6,1.15,0.85,0.55,BLK,'u',undefined,28,rw);Bx(26.4,8.5,27.4,9.2,0,1,BLK,rw);Bx(26.55,4.6,27.25,5.6,0.55,0.25,Ph(0x222222,10),rw);Bx(26.8,7.8,27,8,1.2,1.6,BLK,rw);Bx(26.6,7.7,27.2,7.9,2.7,0.5,Ph(0x333a40,80),rw);
+ for(const u of [26.5,27.3])Bx(u-0.1,7.4,u+0.1,7.7,0.3,0.12,BLK,rw);
+ Bx(26.6,9.5,27.6,10.4,0,0.15,BLK,rw);Bx(27.0,9.8,27.4,10.2,0.15,6.9,BLK,rw);Cy(27.2,9.6,5.6,0.7,0.3,BLK,'u',undefined,24,rw);Bx(26.9,9.5,27.5,9.7,4.2,0.6,Ph(0x333a40,80),rw);
+ for(const du of [-0.25,0.25])Bx(26.95+du,9.4,27.05+du,9.5,5.2,1.1,Ph(0x111111,10),rw);
+ // ---- Assault / Echo air bike
+ const ab=itOf(/Assault \/ Echo/);{Cy(26.2,28.6,1.75,1.35,0.9,Ph(0x1a1a1a,30),'u',undefined,32,ab);Cy(26.2,28.6,1.75,1.2,0.95,Ph(0xb3261e,20),'u',undefined,32,ab);
+  Bx(25.9,25.9,26.5,28.6,0.1,0.25,BLK,ab);Bx(26.05,26.3,26.35,26.6,0.3,2.9,BLK,ab);Bx(25.7,26.1,26.7,26.8,3.1,0.25,Ph(0x111111,10),ab);
+  for(const s of [-1,1]){Bx(26.2+s*0.5-0.05,27.4,26.2+s*0.5+0.05,27.6,1.2,3.6,BLK,ab);}Bx(25.95,27.3,26.45,27.6,4.1,0.4,Ph(0x333a40,80),ab);}
+ // ---- Peloton
+ const pe=itOf(/Peloton bike/);{Bx(22.6,25.6,24.4,29.4,0.06,0.06,RUB,pe);Bx(23.3,25.9,23.7,29.1,0.12,0.18,BLK,pe);
+  const [x,z]=F.P(23.5,27.3);const f=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.4,0.22),BLK);f.position.set(x,Y+1.9,z);f.rotation.x=0.35;add(f,pe,true);
+  Cy(23.5,28.6,1.25,0.9,0.28,Ph(0x2a2a2a,90),'u',undefined,32,pe);Bx(23.25,26.2,23.75,27.1,3.3,0.25,Ph(0x111111,10),pe);Bx(23.45,28.6,23.55,29.1,1.6,2.8,BLK,pe);Bx(23,28.9,24,29.2,4.2,0.12,BLK,pe);Bx(23.05,29.15,23.95,29.25,4.3,1.3,new THREE.MeshBasicMaterial({color:0x1d2a3a}),pe);Bx(23.2,26.1,23.8,26.3,0.3,0.25,Ph(0xb3261e,30),pe);}
+ // ---- Xebex curved manual treadmill
+ const tm=itOf(/Xebex curved/);{for(const v of [26.6,29.4])Bx(16.2,v-0.12,21.8,v+0.12,0.1,1.3,BLK,tm);
+  const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(0.16,0.08,2.5),Ph(0x111111,15),34),d=new THREE.Object3D();for(let i=0;i<34;i++){const t=i/33,u=16.5+t*5,yy=0.55+0.55*Math.pow((t-0.5)*2,2);const [x,z]=F.P(u,28);d.position.set(x,Y+yy,z);d.rotation.set(0,0,Math.atan(2.2*(t-0.5)*2/5));d.updateMatrix();sl.setMatrixAt(i,d.matrix);}sl.castShadow=true;g.add(sl);
+  for(const v of [26.65,29.35]){Bx(21.4,v-0.06,21.55,v+0.06,1.3,2.8,BLK,tm);Bx(18.5,v-0.06,21.55,v+0.06,3.9,0.12,BLK,tm);}Bx(21.3,26.7,21.6,29.3,3.9,0.12,BLK,tm);Bx(21.3,27.4,21.6,28.6,4.0,0.7,Ph(0x333a40,80),tm);}
+ // ---- massage chair (Seabreeze #1): reclined-ready, black leather, faces south
+ const mc=itOf(/#1 Seabreeze massage/),LEA=Ph(0x262220,35,0x2a2a2a);{const u0=13.6,u1=16.3;Bx(u0+0.2,24,u1-0.2,28.8,0,0.5,Ph(0x1a1a1a,40),mc);Bx(u0+0.3,25.2,u1-0.3,27.9,0.5,1.3,LEA,mc);
+  const [x,z]=F.P((u0+u1)/2,28.4);const bk=new THREE.Mesh(new THREE.BoxGeometry(u1-u0-0.6,3.4,0.9),LEA);bk.position.set(x,Y+3.1,z);bk.rotation.x=-0.3;add(bk,mc,true);
+  const hd2=new THREE.Mesh(new THREE.BoxGeometry(u1-u0-0.9,0.9,0.6),Ph(0x3a3532,30));hd2.position.set(x,Y+4.7,F.P(0,28.85)[1]);add(hd2,mc);
+  for(const u of [u0,u1-0.55])Bx(u,25.4,u+0.55,28.6,0.5,2.2,Ph(0x1e1b19,40),mc);for(const u of [u0+0.12,u1-0.2])Bx(u,25.6,u+0.08,27.6,2.7,0.04,Ph(0x55595e,120),mc);
+  const [x3,z3]=F.P((u0+u1)/2,24.5);const lg=new THREE.Mesh(new THREE.BoxGeometry(u1-u0-0.9,0.6,1.9),LEA);lg.position.set(x3,Y+1.2,z3);lg.rotation.x=-0.9;add(lg,mc,true);}
+ // ---- The Plunge (owned, #36): 66-5/8 × 31-1/2 × 26 in white acrylic tub + chiller
+ const pl=itOf(/Cold plunge tub/);if(pl){pl.name='The Plunge cold plunge (owned #36) — 66⅝ × 31½ × 26 in';pl.text='Plunge brand "The Plunge": white acrylic/fiberglass lay-down tub, 66⅝ in L × 31½ in W × 26 in H (plunge.com specs), 105 gal, ~1,020 lb filled; chiller to 37–39°F (Clark plunges at 39°F). Chiller unit size estimated (~20 × 14 × 18 in). Dedicated 120 V/15 A GFCI circuit. Sits on the rubber floor beside the sauna in the recovery corner.';}
+ {const u0=7,u1=12.55,v0=27.3,v1=29.92,H2=26/12,WH=Ph(0xf4f5f3,90,0x888888);Bx(u0,v0,u1,v0+0.12,0,H2,WH,pl);Bx(u0,v1-0.12,u1,v1,0,H2,WH,pl);Bx(u0,v0,u0+0.12,v1,0,H2,WH,pl);Bx(u1-0.12,v0,u1,v1,0,H2,WH,pl);
+  Bx(u0+0.12,v0+0.12,u1-0.12,v1-0.12,0,0.35,WH,pl);Bx(u0-0.04,v0-0.04,u1+0.04,v0+0.06,H2,0.05,WH,pl);Bx(u0-0.04,v1-0.06,u1+0.04,v1+0.04,H2,0.05,WH,pl);
+  const wt=new THREE.MeshPhongMaterial({color:0x6fb7c9,shininess:160,specular:0xffffff,transparent:true,opacity:0.82});Bx(u0+0.12,v0+0.12,u1-0.12,v1-0.12,0.35,H2-0.6,wt,pl);
+  const ch=info('Plunge chiller unit (estimated size)','own','Chiller/filtration box beside the tub (size estimated ~20 × 14 × 18 in; check the actual unit). App display set to 39°F.',null,{gym:true,near:true});
+  Bx(7.05,25.9,8.75,27.1,0,1.5,WH,ch);for(let i=0;i<6;i++)Bx(7.15+i*0.26,25.88,7.3+i*0.26,25.9,0.4,0.8,Ph(0x999999,20),ch);Bx(7.6,25.86,8.2,25.88,1.15,0.2,new THREE.MeshBasicMaterial({color:0x40c8ff}),ch);
+  Bx(9.5,26.4,11.5,27.1,0,0.08,Ph(0xdddddd,10),null);} // step mat
+ const cedT=cv(128,256,(c,w,h)=>{for(let x=0;x<w;x+=16){const t=Math.random()*25;c.fillStyle=`rgb(${176+t},${118+t*0.6},${72+t*0.3})`;c.fillRect(x,0,16,h);c.fillStyle='rgba(80,45,20,.5)';c.fillRect(x,0,1.5,h);for(let k=0;k<6;k++){c.strokeStyle='rgba(120,70,35,.25)';c.beginPath();const xx=x+Math.random()*16;c.moveTo(xx,0);c.lineTo(xx+Math.random()*3,h);c.stroke();}}});
+ const cedT_=()=>cedT;
+ // ---- Plunge "The Sauna" Standard: H 7'11" × W 5'8" × D 5'11", cedar, glass front (east), HUUM heater
+ const si=itOf(/Sauna 6/);if(si){si.name='Plunge "The Sauna" — Standard (optional, proposed)';si.tag='pnew';si.text='Plunge The Sauna, Standard: H 7 ft 11 in × W 5 ft 8 in × D 5 ft 11 in, cedar, full-glass front, HUUM electric heater, flip-up benches. $12,990 list ($11,040 fall sale) per plunge.com/products/the-sauna. Needs a dedicated 240 V 30 A circuit (NEMA L14-30). Foundation rated for ~1,400 lb (4 in concrete slab is fine). Gym eave ~10 ft (estimated) clears the 7 ft 11 in height. XL (W 7 ft 8 in, 240 V 50 A, NEMA 14-50) also fits if the plunge shifts east. Option B: outdoors on a pad beside the north wall.';}
+ {const u0=0.12,u1=0.12+5.92,v0=29.9-5.67,v1=29.9,SH2=95/12;
+  const CED=new THREE.MeshLambertMaterial({map:cedT}),CD2=L(0x8a5a35);Bx(u0,v1-0.3,u1,v1,0,SH2,CED,si);Bx(u0,v0,u0+0.3,v1,0,SH2,CED,si);Bx(u0,v0,u1,v0+0.3,0,SH2,CED,si);Bx(u0-0.1,v0-0.1,u1+0.1,v1+0.05,SH2-0.35,0.35,CD2,si);
+  const gl=new THREE.MeshPhongMaterial({color:0x2a3438,transparent:true,opacity:0.32,shininess:200,specular:0xffffff,depthWrite:false});Bx(u1-0.12,v0+0.3,u1,v1-0.3,0.2,SH2-0.6,gl,si);
+  for(const v of [v0+0.3,v1-0.3])Bx(u1-0.2,v-0.12,u1,v+0.12,0,SH2-0.35,CD2,si);Bx(u1-0.2,v0+0.3,u1,v1-0.3,0,0.2,CD2,si);Bx(u1-0.04,v0+1.5,u1+0.08,v0+1.6,3,1.6,L(0x2a1a10),si);
+  Bx(u0+0.3,v1-2.0,u1-1.0,v1-0.3,1.6,0.15,CED,si);Bx(u0+0.3,v0+0.3,u0+2.0,v1-2.0,3.0,0.15,CED,si);Bx(u0+0.3,v1-1.9,u1-1.0,v1-0.3,3.0,0.15,CED,si);
+  Cy(u1-0.9,v0+0.9,1.3,0.55,2.4,Ph(0x1a1a1a,60),'y',0.6,24,si);for(let i=0;i<14;i++){const a=i*2.4,r=0.12+(i%4)*0.1;const [x,z]=F.P(u1-0.9+Math.cos(a)*r,v0+0.9+Math.sin(a)*r);const s=new THREE.Mesh(new THREE.DodecahedronGeometry(0.13),L(0x6b6b68));s.position.set(x,Y+2.5+(i%3)*0.08,z);add(s);}
+  const lw=new THREE.MeshBasicMaterial({color:0xffb36b});Bx(u0+0.35,v1-0.34,u1-0.4,v1-0.31,1.45,0.05,lw);Bx(u0+0.35,v1-0.34,u1-0.4,v1-0.31,2.85,0.05,lw);
+  if(QUALITY_HINT()){const pl2=new THREE.PointLight(0xffa860,0.6,10,2);const [x,z]=F.P(2.5,27.5);pl2.position.set(x,Y+5,z);g.add(pl2);}}
+ // ---- cedar slat accent wall (north wall, recovery side) + LED cove
+ const sw=info('Cedar slat accent wall + LED cove (proposed)','prop','Vertical 1×2 cedar slats on black felt behind the plunge and massage chair, warm 2700 K LED strip at the top. ~$1.2–2K DIY.',null,{gym:true,near:true});
+ {Bx(6.2,29.88,20.4,29.92,0,9.2,L(0x151515),sw);const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(0.11,9.1,0.09),new THREE.MeshLambertMaterial({map:cedT_()}),56),d=new THREE.Object3D();for(let i=0;i<56;i++){const [x,z]=F.P(6.3+i*0.255,29.82);d.position.set(x,Y+4.6,z);d.updateMatrix();sl.setMatrixAt(i,d.matrix);}g.add(sl);Bx(6.2,29.6,20.4,29.9,9.25,0.08,new THREE.MeshBasicMaterial({color:0xffc27a}),sw);}
+ // ---- mirror wall (west wall, behind the bar/plate area) 9 ft wide × 6.5 ft
+ const mi=info('Gym mirror wall (proposed new)','pnew','Three 36 × 78 in shatter-resistant gym mirrors on the west wall (form checks for the barbell and wall-ball area). ~$600–900.',null,{gym:true,near:true});
+ {const mm=new THREE.MeshPhongMaterial({color:0xb9c6cc,shininess:250,specular:0xffffff,envMap:null});Bx(0.05,14.6,0.12,23.6,1,6.5,mm,mi);for(const v of [14.6,17.6,20.6,23.6])Bx(0.05,v-0.04,0.16,v+0.04,1,6.5,STEEL,mi);}
+ // ---- workout TV (65 in) on the south wall above the eBike
+ const tv=info('65 in workout TV (proposed new)','pnew','Wall-mounted over the eBike, visible from the rig, Peloton and rower. Streams WODs / timers. ~$600–900.',null,{gym:true,near:true});
+ Bx(16.8,0.05,22.2,0.2,5.2,3.1,Ph(0x050505,120,0x666666),tv);Bx(17.0,0.2,22.0,0.21,5.35,2.8,new THREE.MeshBasicMaterial({color:0x22324a}),tv);
+ Bx(14.6,0.05,16.4,0.12,6.0,1.4,new THREE.MeshBasicMaterial({color:0x111111}),tv);Bx(14.75,0.12,16.25,0.13,6.15,1.1,new THREE.MeshBasicMaterial({color:0xd02020}),tv); // timer
+ // ---- towel + water station by the east wall
+ const tw=info('Towel + water station (proposed new)','pnew','Open shelf with rolled towels, a bottle-filler water dispenser and a hamper next to the small fridge.',null,{gym:true,near:true});
+ {Bx(26.4,23.5,27.9,25.3,0,3.2,L(0x8a6a48),tw);for(let i=0;i<3;i++)for(let j=0;j<2;j++)Cy(26.8+i*0.4,24.0+j*0.8,2.7,0.17,0.7,L([0xf2f2f2,0x9aa8b5][j]),'v',undefined,10,tw);
+  Cy(27.1,24.4,3.2+0.9,0.35,1.8,Ph(0xe9ecef,80),'y',undefined,16,tw);Cy(27.1,24.4,5.5,0.3,0.9,new THREE.MeshPhongMaterial({color:0x8fc7e8,transparent:true,opacity:0.6,shininess:120}),'y',undefined,16,tw);Cy(26.9,25.8,0.9,0.4,1.8,L(0x555555),'y',0.35,14,tw);}
+ // ---- LED lighting: 6 linear high-bay fixtures under the trusses
+ const led=info('LED linear high-bays (proposed)','prop','Six 4 ft 5000 K LED linear fixtures (~4,000 lm each, ~$60–120 each) on two switched rows; dimmable 2700 K cove at the recovery wall.',null,{gym:true,near:true});
+ const LM=new THREE.MeshBasicMaterial({color:0xfafcff});for(const u of [7,14,21])for(const v of [8,20]){Bx(u-2,v-0.3,u+2,v+0.3,9.6,0.1,L(0x333333),led);Bx(u-1.9,v-0.22,u+1.9,v+0.22,9.55,0.05,LM,led);}
+ if(QUALITY_HINT()){for(const [u,v] of [[9,10],[19,10],[14,22]]){const p=new THREE.PointLight(0xf2f6ff,0.35,34,2);const [x,z]=F.P(u,v);p.position.set(x,Y+9,z);g.add(p);}}
+}
+
+// ================= v6 EXTERIOR REALISM: ground detail shader, tone mapping, flyover =================
+{const HC=H.P(17,16),pb=PB.P(16,19),gy=GY.P(14,15);const circ=[[HC[0],HC[1],120],[W(345),Zs(296),75],[pb[0],pb[1],55],[gy[0],gy[1],50],[G.P(12,12)[0],G.P(12,12)[1],45]];
+ const U={uLawn:{value:circ.map(c=>new THREE.Vector3(c[0],c[1],c[2]))},uSummer:{value:window.__season==='fall'?0.35:1.0}};
+ satMat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWp;').replace('#include <begin_vertex>','#include <begin_vertex>\nvWp=(modelMatrix*vec4(transformed,1.0)).xyz;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
+varying vec3 vWp;uniform vec3 uLawn[5];uniform float uSummer;
+float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),f.x),f.y);}`).replace('#include <map_fragment>',`#include <map_fragment>
+{vec2 q=vWp.xz;float lawn=0.0;for(int i=0;i<5;i++){float d=length(q-uLawn[i].xy);lawn=max(lawn,1.0-smoothstep(uLawn[i].z*0.7,uLawn[i].z,d));}
+ float n1=vn(q*0.9),n2=vn(q*3.7),n3=vn(q*0.08);vec3 sat=diffuseColor.rgb;float lum=dot(sat,vec3(0.3,0.59,0.11));
+ float tree=smoothstep(0.32,0.18,lum);
+ float stripe=0.5+0.5*sin((q.x*0.6+q.y*0.8)/5.0*3.14159);
+ vec3 lawnC=mix(vec3(0.29,0.49,0.16),vec3(0.35,0.56,0.2),stripe*0.3+n1*0.7)*(0.9+0.2*n2);
+ vec3 fieldC=mix(vec3(0.46,0.5,0.24),vec3(0.36,0.45,0.2),n3)*(0.85+0.3*n2);
+ vec3 summer=mix(mix(fieldC,sat*1.05,0.45),lawnC,lawn*(1.0-tree*0.6));
+ summer=mix(summer,sat*vec3(0.9,1.02,0.85),tree*(1.0-lawn)*0.8);
+ diffuseColor.rgb=mix(sat*(0.92+0.16*n2),summer,uSummer);}`);};
+ satMat.needsUpdate=true;
+ outer.material.color.set(window.__season==='fall'?0x56703c:0x4d6b30);
+ // warm hazy sky
+ if(window.__sky){const u=window.__sky.material.uniforms;u.top.value.set(0x3b7ac4);u.mid.value.set(0xa9cbe6);u.bot.value.set(0xe8eef0);}
+ scene.fog.color.set(0xd6e2ea);
+}
+// tone mapping (High/Medium)
+window.__applyTone=q=>{if(q==='low'){renderer.toneMapping=THREE.NoToneMapping;}else{renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;}scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(mm=>mm.needsUpdate=true);}});};
+// cinematic flyover
+let FLY=null;window.flyover=function(){if(FLY){FLY=null;const b=document.getElementById('bFly');if(b)b.textContent='🛸 Aerial flyover';return;}if(typeof stopTour==='function')stopTour();
+ const c=new THREE.Vector3(...window.__flyCtr);enterOrbit(c,52);const t0=performance.now();const a0=Math.atan2(camera.position.z-c.z,camera.position.x-c.x);
+ FLY={c,t0,a0};const b=document.getElementById('bFly');if(b)b.textContent='■ Stop flyover';
+ const step=()=>{if(!FLY)return;const t=(performance.now()-FLY.t0)/1000,a=FLY.a0+t*0.11,R=300+70*Math.sin(t*0.23),hgt=170+60*Math.sin(t*0.17+1);
+  camera.position.set(c.x+Math.cos(a)*R,c.y+hgt,c.z+Math.sin(a)*R);controls.target.copy(c);camera.lookAt(c);if(t>57){window.flyover();return;}requestAnimationFrame(step);};step();
+ const stop=()=>{if(FLY)window.flyover();canvas.removeEventListener('pointerdown',stop);};setTimeout(()=>canvas.addEventListener('pointerdown',stop),300);};
+
+// ---- v6: dense pine/hardwood treeline from the satellite (dark canopy pixels), instanced, quality-scaled
+{const img=new Image();img.onload=()=>{const c=document.createElement('canvas'),Wd=200,Ht=Math.round(200*img.height/img.width);c.width=Wd;c.height=Ht;const g=c.getContext('2d');g.drawImage(img,0,0,Wd,Ht);const d=g.getImageData(0,0,Wd,Ht).data;
+ const HC=H.P(17,16),pb=PB.P(16,19),gy=GY.P(14,15),keep=[[HC[0],HC[1],115],[W(345),Zs(296),80],[pb[0],pb[1],50],[gy[0],gy[1],45],[SOLAR.x,SOLAR.z,70]];
+ const pts=[];let s=7;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};
+ for(let k=0;k<60000&&pts.length<1700;k++){const fx=rnd(),fy=rnd(),px=Math.floor(fx*Wd),py=Math.floor(fy*Ht),i=(py*Wd+px)*4,l=(d[i]*0.3+d[i+1]*0.59+d[i+2]*0.11)/255;if(l>0.3||d[i+1]<d[i]*0.95)continue;
+  const x=fx*S.bboxW-CX,z=fy*S.bboxH-CY;if(keep.some(([a,b,r])=>Math.hypot(x-a,z-b)<r))continue;pts.push([x,z,0.5+rnd()*0.45,rnd()]);}
+ const pine=pts.filter(p=>p[3]<0.68),hard=pts.filter(p=>p[3]>=0.68);const o=new THREE.Object3D(),cc=new THREE.Color();
+ const T=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.5,0.8,1,6),new THREE.MeshLambertMaterial({color:0x5a4330}),pts.length);
+ const c1=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,7),new THREE.MeshLambertMaterial({color:0xffffff}),pine.length),c2=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,7),new THREE.MeshLambertMaterial({color:0xffffff}),pine.length);
+ const hc=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshLambertMaterial({color:0xffffff}),hard.length);
+ const PG=window.__season==='fall'?[0x2f4f2a,0x3a5a2e,0x2a4626]:[0x1f3a1c,0x284620,0x1b331a,0x2e4d24],HG=window.__season==='fall'?[0xc9772e,0xd9a43a,0xa8452a,0x6f8f3a]:[0x46732e,0x557f36,0x3f6a2c,0x5e8a3a];
+ pts.forEach((p,i)=>{const y=rawElev(p[0],p[1]),sc=p[2],isP=p[3]<0.68,ht=isP?(48+20*p[3])*sc:22*sc;o.rotation.set(0,i,0);o.scale.set(1.3*sc,isP?ht*0.55:ht*0.5,1.3*sc);o.position.set(p[0],y+o.scale.y/2,p[1]);o.updateMatrix();T.setMatrixAt(i,o.matrix);});
+ pine.forEach((p,i)=>{const y=rawElev(p[0],p[1]),sc=p[2],ht=(48+20*p[3])*sc;cc.set(PG[i%PG.length]);o.rotation.set(0,i*0.7,0);
+  o.scale.set(7*sc,ht*0.5,7*sc);o.position.set(p[0],y+ht*0.45,p[1]);o.updateMatrix();c1.setMatrixAt(i,o.matrix);c1.setColorAt(i,cc);
+  o.scale.set(5*sc,ht*0.38,5*sc);o.position.set(p[0],y+ht*0.78,p[1]);o.updateMatrix();c2.setMatrixAt(i,o.matrix);c2.setColorAt(i,cc.multiplyScalar(1.1));});
+ hard.forEach((p,i)=>{const y=rawElev(p[0],p[1]),sc=p[2];o.rotation.set(0,i,0);o.scale.set(13*sc,11*sc,13*sc);o.position.set(p[0],y+20*sc,p[1]);o.updateMatrix();hc.setMatrixAt(i,o.matrix);hc.setColorAt(i,cc.set(HG[i%HG.length]));});
+ for(const mm of [T,c1,c2,hc]){mm.castShadow=true;mm.receiveShadow=false;mm.userData.full=mm.count;groups.trees.add(mm);(window.__trees=window.__trees||[]).push(mm);}
+ const q=typeof QUALITY==='string'?QUALITY:'high';for(const mm of [T,c1,c2,hc])mm.count=q==='high'?mm.userData.full:q==='medium'?Math.ceil(mm.userData.full*0.6):Math.ceil(mm.userData.full/4);
+ window.__forest=pts.length;refresh&&refresh();};img.src=window.SAT_IMG;}
 // ================= QUALITY =================
 let QUALITY='high';
-window.setQuality=function(q){QUALITY=q;const hi=q==='high';renderer.setPixelRatio(hi?Math.min(2,devicePixelRatio):1);
+window.setQuality=function(q){if(q!=='high'&&q!=='medium')q='low';QUALITY=q;const hi=q!=='low',full=q==='high';renderer.setPixelRatio(full?Math.min(2,devicePixelRatio):q==='medium'?Math.min(1.25,devicePixelRatio):1);
   const sh=document.getElementById('shT');if(sh)sh.checked=hi;const il=document.getElementById('ilT');if(il)il.checked=hi;
-  (window.__trees||[]).forEach(m=>{if(m.userData.full===undefined)m.userData.full=m.count;m.count=hi?m.userData.full:Math.ceil(m.userData.full/3);});
+  if(sun.shadow.map&&sun.shadow.mapSize.x!==(full?4096:2048)){sun.shadow.map.dispose();sun.shadow.map=null;}sun.shadow.mapSize.set(full?4096:2048,full?4096:2048);sun.shadow.radius=full?3:2;
+  (window.__trees||[]).forEach(m=>{if(m.userData.full===undefined)m.userData.full=m.count;m.count=full?m.userData.full:q==='medium'?Math.ceil(m.userData.full*0.6):Math.ceil(m.userData.full/3);});
+  if(window.__applyTone)window.__applyTone(q);
   const sel=document.getElementById('qSel');if(sel)sel.value=q;try{localStorage.setItem('samelsQ',q);}catch(e){}resize();refresh();};
 // ================= RESIZE + LOOP =================
 function resize(){const r=canvas.parentElement.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();}
