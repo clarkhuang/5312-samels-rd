@@ -1231,13 +1231,84 @@ function speak(t,done){if(!NARR.on||!SS){done&&done();return;}const gen=++ssGen;
 function tcap(title,txt){const c=document.getElementById('caption');if(!c)return;c.classList.add('tourcap');c.innerHTML=`<b>${title}</b><span>${txt}</span>`;c.style.opacity=0;requestAnimationFrame(()=>{c.style.opacity=1;});clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,Math.max(5200,txt.length*60));}
 function stopTour(){if(!tour)return;clearTimeout(tour.t);tour.gen++;try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}document.getElementById('lblT').checked=tour.lbl;tour=null;const b=document.getElementById('bTour');if(b){b.classList.remove('on');b.textContent='▶ Tour';}const tb=document.getElementById('tourBar');if(tb)tb.style.display='none';const c=document.getElementById('caption');if(c)c.classList.remove('tourcap');}
 function stops(){return TOUR.map(([id,t,x])=>({v:VP.find(v=>v.id===id),t,x})).filter(s=>s.v);}
-function tourStep(){if(!tour)return;const S=stops(),s=S[tour.i];const gen=++tour.gen;goVP(s.v);const tb=document.getElementById('tourBar');tb.style.display='flex';document.getElementById('tourTxt').textContent=`Tour ${tour.i+1}/${S.length} · ${s.t}`;
+function tourStep(){if(!tour)return;const S=stops(),s=S[tour.i];const gen=++tour.gen;tourGo(s.v);const tb=document.getElementById('tourBar');tb.style.display='flex';document.getElementById('tourTxt').textContent=`Tour ${tour.i+1}/${S.length} · ${s.t}`;
   setTimeout(()=>{if(!tour||tour.gen!==gen)return;tcap(s.t,s.x);let spoke=!NARR.on,dwell=false;const next=()=>{if(!tour||tour.gen!==gen||tour.paused)return;if(spoke&&dwell){tour.i++;if(tour.i>=S.length){stopTour();return;}tourStep();}};tour.next=next;
    speak(s.t+'. '+s.x,()=>{spoke=true;setTimeout(next,700);});tour.t=setTimeout(()=>{dwell=true;next();},Math.max(5500,s.x.length*55));},1600);}
 window.toggleTour=function(){if(tour){stopTour();return;}const lt=document.getElementById('lblT');tour={i:0,lbl:lt.checked,gen:0,paused:false};lt.checked=false;const b=document.getElementById('bTour');b.classList.add('on');b.textContent='■ Stop tour';
   if(NARR.on){ssGen++;try{SS&&SS.cancel();}catch(e){}sayNow('Starting the tour.');} // synchronous speak inside the tap unlocks iOS audio
   tourStep();};
 window.tourNav=function(d){if(!tour)return;clearTimeout(tour.t);try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}const n=stops().length;tour.i=(tour.i+d+n)%n;tour.paused=false;tourStep();};
+// ===== tourfix: fit-to-viewport framing, Enter/Go-outside transitions, places bar =====
+const TF=(()=>{const V3=THREE.Vector3,B3=THREE.Box3;
+ const fB=(re,pad,hgt)=>{const b=new B3();let y0=null;for(const f of window.__furn||[]){if(!re.test(f.name))continue;const c=f.c;b.expandByPoint(new V3(c.x0,c.y0,c.z0));b.expandByPoint(new V3(c.x1,c.y0+1,c.z1));y0=y0===null?c.y0:Math.min(y0,c.y0);}if(b.isEmpty())return null;for(const k of ['x','z']){const w=b.max[k]-b.min[k];if(w<12){b.min[k]-=(12-w)/2;b.max[k]+=(12-w)/2;}}b.min.x-=pad;b.min.z-=pad;b.max.x+=pad;b.max.z+=pad;b.min.y=y0;b.max.y=y0+(hgt||8);return b;};
+ const fr=(F,u0,v0,u1,v1,y0,y1)=>{const a=F.P(u0,v0),c=F.P(u1,v1);return new B3(new V3(Math.min(a[0],c[0]),y0,Math.min(a[1],c[1])),new V3(Math.max(a[0],c[0]),y1,Math.max(a[1],c[1])));};
+ const pt=(x,y,z,r,h)=>new B3(new V3(x-r,y,z-r),new V3(x+r,y+(h||8),z+r));
+ const house=()=>fr(H,0,0,34,32,HL,HM+21).union(fr(G,0,0,24,24,HM,HM+16));
+ const lvl={main:()=>fr(H,0,0,34,32,HM,HM+9),lower:()=>fr(H,0,0,34,32,HL,HL+9),loft:()=>fr(H,0,0,34,32,HM+9,HM+17)};
+ const gym=()=>fr(GY,0,0,28,30,GYy,GYy+10),barn=()=>fr(PB,0,0,32,38,PBy,PBy+15);
+ // camera pose that fits box b (all 8 corners) inside the viewport with ~20% margin, from azimuth az / elevation el
+ function fit(b,az,el,fov){fov=fov||50;const c=b.getCenter(new V3()),dir=new V3(Math.cos(el)*Math.sin(az),Math.sin(el),Math.cos(el)*Math.cos(az));
+  const cam=new THREE.PerspectiveCamera(fov,camera.aspect||1,0.5,8000);let d=b.getSize(new V3()).length();const P=[];for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])P.push(new V3(x,y,z));
+  for(let i=0;i<12;i++){cam.position.copy(c).addScaledVector(dir,d);cam.lookAt(c);cam.updateMatrixWorld();let m=0;for(const p of P){const q=p.clone().applyMatrix4(cam.matrixWorldInverse);if(-q.z<0.5){m=9;break;}const n=q.applyMatrix4(cam.projectionMatrix);m=Math.max(m,Math.abs(n.x),Math.abs(n.y));}d*=Math.max(0.6,Math.min(2.5,1+(m/0.8-1)*0.9));}
+  return {pos:cam.position.clone(),t:c,fov};}
+ const setL=(lv,roof)=>{const s=(l,v)=>{const e=document.getElementById('lv_'+l);if(e)e.checked=v;};const rt=document.getElementById('roofT');
+  if(!lv||lv==='all'){s('lower',true);s('main',true);s('loft',true);}else{s('lower',true);s('main',lv!=='lower');s('loft',lv==='loft');}if(rt)rt.checked=roof!==false;refresh();};
+ const azOf=v=>{if(v.orbit){return Math.atan2(v.orbit.pos[0]-v.orbit.t[0],v.orbit.pos[2]-v.orbit.t[2]);}return v.walk.yaw||0;};
+ const elOf=v=>{if(!v.orbit)return 0.35;const p=v.orbit.pos,t=v.orbit.t;return Math.atan2(p[1]-t[1],Math.hypot(p[0]-t[0],p[2]-t[2]));};
+ const vpT=v=>v.orbit?v.orbit.t:[v.walk.x,(v.walk.feet!==undefined?v.walk.feet:HM)+2,v.walk.z];
+ // per-stop subject boxes + view (interiors: high corner cutaway, roof/upper floors hidden)
+ const S={
+  arrival:{box:()=>house().union(barn()),el:0.42},
+  front:{box:house,el:0.38},
+  great_room:{box:()=>fB(/Steinway|cigar chair|#4 Tufted|Back bar|Carved dark/,3),lv:'main',el:1.12},
+  kitchen:{box:()=>fB(/Kitchen island|Counter stool/,5),lv:'main',el:1.12},
+  office:{box:()=>fB(/Glass-top desk|Aeron|futon|Futon/,5),lv:'main',el:1.12},
+  tv_room:{box:()=>fB(/sectional|chaise|media console|75″ TV/,2.5),lv:'lower',el:1.12},
+  lower_master:{box:v=>{const t=vpT(v);return pt(t[0],HL,t[2],10,8);},lv:'lower',el:1.12},
+  loft:{box:()=>fB(/Milan's|Kids desk|Daybed/,2.5),lv:'loft',el:1.12},
+  deck:{box:()=>fB(/Teak dining/,7,5),el:0.6},
+  pond:{box:v=>{const t=vpT(v);return pt(t[0],t[1]-3,t[2],20,6);},el:0.6},
+  big_barn:{box:barn,roof:false,el:0.95},
+  gym_beauty:{box:gym,roof:false,el:1.0},
+  recovery:{box:()=>fr(GY,0,22,21,30,GYy,GYy+8.5),roof:false,el:0.95},
+  firepit:{box:v=>{const t=vpT(v);return pt(t[0],t[1],t[2],10,4);},el:0.6},
+  guest_suite:{box:v=>{const t=vpT(v);return pt(t[0],t[1]-4,t[2],16,12);}},
+  aerial_p09:{box:()=>house().union(barn()).union(gym()),keepAz:true},
+  barns_solar:{keep:true},solar:{keep:true},drone:{keep:true}};
+ let cur=null;
+ function go(pose,lv,roof,done,dur){setL(lv,roof);flyCam(pose.pos,pose.t,dur||1500,()=>{enterOrbit(pose.t,pose.fov);done&&done();});}
+ function stopPose(v){const s=S[v.id];if(!s||s.keep||!v)return null;const b=s.box(v);if(!b)return null;const el=s.el!==undefined?s.el:Math.max(0.3,elOf(v));return {pose:fit(b,azOf(v),el),lv:s.lv||'all',roof:s.roof===undefined?!s.lv:s.roof};}
+ function tourGo(v){cur=null;ui();const p=stopPose(v);if(!p){goVP(v);return;}caption(v);go(p.pose,p.lv,p.roof,null,1700);}
+ // buildings: door point (just outside), outward azimuth, interior and exterior views
+ const BLD={
+  house:{door:()=>{const p=H.P(21,32);return new V3(p[0],HM+3.5,p[1]);},az:Math.PI,inside:()=>({pose:fit(lvl.main(),Math.PI*0.8,0.95),lv:'main',roof:false}),outside:()=>({pose:fit(house(),Math.PI*0.85,0.38),lv:'all',roof:true})},
+  gym:{door:()=>{const p=GY.P(28,15);return new V3(p[0],GYy+4,p[1]);},az:Math.PI/2,inside:()=>({pose:fit(gym(),Math.PI*0.6,1.0),lv:'all',roof:false}),outside:()=>({pose:fit(gym(),Math.PI*0.62,0.35),lv:'all',roof:true})},
+  barn:{door:()=>{const p=PB.P(16,0);return new V3(p[0],PBy+5,p[1]);},az:0,inside:()=>({pose:fit(barn(),0.35,1.0),lv:'all',roof:false}),outside:()=>({pose:fit(barn(),0.3,0.33),lv:'all',roof:true})}};
+ function busy(){if(tour)stopTour();}
+ function enter(k){busy();const B=BLD[k],d=B.door(),o=new V3(Math.sin(B.az),0,Math.cos(B.az)),I=B.inside();
+  const p1=d.clone().addScaledVector(o,9);p1.y+=1;flyCam(p1,d.clone().addScaledVector(o,-6),800,()=>{setL(I.lv,I.roof);flyCam(I.pose.pos,I.pose.t,900,()=>{enterOrbit(I.pose.t,I.pose.fov);cur=k;ui();});});}
+ function exit(){const k=cur;if(!k)return;busy();const B=BLD[k],d=B.door(),o=new V3(Math.sin(B.az),0,Math.cos(B.az)),O=B.outside();cur=null;ui();
+  const p1=d.clone().addScaledVector(o,-4);flyCam(p1,d.clone().addScaledVector(o,8),700,()=>{setL('all',true);flyCam(O.pose.pos,O.pose.t,900,()=>enterOrbit(O.pose.t,O.pose.fov));});}
+ const PL=[['aerial','🛸 Aerial'],['outside','🏡 Outside'],['main','Main floor'],['lower','Lower level'],['loft','Loft'],['gym','🏋 Gym barn'],['barn','🚐 Big barn']];
+ function place(k){busy();if(k==='aerial'){cur=null;ui();const v=VP.find(x=>x.id==='drone');setL('all',true);if(v){const T=new V3(...v.orbit.t);flyCam(new V3(...v.orbit.pos),T,1600,()=>enterOrbit(T,v.orbit.fov));}return;}
+  if(k==='outside'){cur=null;ui();const O=BLD.house.outside();go(O.pose,'all',true);return;}
+  if(k==='gym'||k==='barn'){const I=BLD[k].inside();go(I.pose,I.lv,I.roof,()=>{cur=k;ui();});return;}
+  go(fit(lvl[k](),Math.PI*0.8,k==='loft'?1.05:0.95),k,false,()=>{cur='house';ui();});}
+ // UI: places bar (collapses to a menu on phones), Enter hotspots, Go-outside button
+ const css=document.createElement('style');css.textContent=`#tfBar{position:absolute;bottom:66px;left:50%;transform:translateX(-50%);z-index:40;display:flex;gap:4px;background:rgba(20,24,28,.82);padding:4px;border-radius:10px;font:13px system-ui,sans-serif}
+#tfBar button{background:#2b3138;color:#fff;border:0;border-radius:7px;padding:7px 10px;cursor:pointer;white-space:nowrap;touch-action:manipulation}#tfBar button:hover{background:#3d4752}#tfBar #tfTog{display:none}
+@media (max-width:700px){#tfBar{flex-direction:column;left:auto;right:8px;transform:none;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 128px)}#tfBar #tfTog{display:block}#tfBar:not(.open) .tfp{display:none}#tfBar button{padding:10px 12px;font-size:14px}}
+.tfHot{position:absolute;z-index:35;transform:translate(-50%,-100%);background:#ffcc33;color:#111;border:2px solid #fff;border-radius:16px;padding:6px 11px;font:bold 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.45);touch-action:manipulation;white-space:nowrap}
+.tfHot:after{content:'';position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+#tfOut{position:absolute;z-index:41;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 112px);background:#ffcc33;color:#111;border:2px solid #fff;border-radius:20px;padding:9px 16px;font:bold 14px system-ui,sans-serif;display:none;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.5);touch-action:manipulation}`;document.head.appendChild(css);
+ const bar=document.createElement('div');bar.id='tfBar';bar.innerHTML='<button id="tfTog">📍 Places</button>'+PL.map(([k,n])=>`<button class="tfp" data-k="${k}">${n}</button>`).join('');const host=document.getElementById('c3d').parentElement;if(getComputedStyle(host).position==='static')host.style.position='relative';host.appendChild(bar);
+ bar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='tfTog'){bar.classList.toggle('open');return;}bar.classList.remove('open');place(b.dataset.k);});
+ const hot={};for(const [k,n] of [['house','🚪 Enter house'],['gym','🚪 Enter gym'],['barn','🚪 Enter big barn']]){const b=document.createElement('button');b.className='tfHot';b.textContent=n;b.style.display='none';b.onclick=e=>{e.stopPropagation();enter(k);};host.appendChild(b);hot[k]=b;}
+ const out=document.createElement('button');out.id='tfOut';out.textContent='⬅ Go outside';out.onclick=e=>{e.stopPropagation();exit();};host.appendChild(out);
+ function ui(){out.style.display=cur&&!tour?'block':'none';}
+ const v=new V3();(function hl(){requestAnimationFrame(hl);const cv=document.getElementById('c3d'),W=cv.clientWidth,Hh=cv.clientHeight,ox=cv.offsetLeft,oy=cv.offsetTop;for(const k in hot){const b=hot[k];if(tour||cur===k||mode==='walk'){b.style.display='none';continue;}const d=BLD[k].door();d.y+=1.5;if(camera.position.distanceTo(d)>420){b.style.display='none';continue;}v.copy(d).project(camera);if(v.z>1||v.z<-1||Math.abs(v.x)>0.95||Math.abs(v.y)>0.95){b.style.display='none';continue;}b.style.display='block';b.style.left=(ox+(v.x+1)/2*W)+'px';b.style.top=(oy+(1-v.y)/2*Hh)+'px';}if(tour&&out.style.display!=='none')ui();})();
+ window.__tf={fit,enter,exit,place,tourGo,S,BLD};return {tourGo};})();
+function tourGo(v){TF.tourGo(v);}
 window.tourPause=function(){if(!tour)return;tour.paused=!tour.paused;const b=document.getElementById('bPause');if(b)b.textContent=tour.paused?'▶ Resume':'⏸ Pause';try{if(window.speechSynthesis){tour.paused?speechSynthesis.pause():speechSynthesis.resume();}}catch(e){}if(!tour.paused&&tour.next){setTimeout(()=>{tour&&tour.next&&tour.next();},300);}};
 window.setNarrate=function(on){NARR.on=!!on;const b=document.getElementById('bNarr');if(b){b.classList.toggle('on',NARR.on);b.textContent=NARR.on?'🔊 Narrate: on':'🔈 Narrate: off';}const b2=document.getElementById('bNarr2');if(b2){b2.classList.toggle('on',NARR.on);b2.textContent=NARR.on?'🔊 Narrate':'🔈 Narrate';}if(NARR.on){ssGen++;try{SS&&SS.cancel();}catch(e){}sayNow('Narration on.');}else{ssGen++;clearInterval(ssKA);try{SS&&SS.cancel();}catch(e){}}};
 window.__tour={TOUR,NARR,stops};
