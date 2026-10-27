@@ -615,14 +615,13 @@ window.__furn=[];
 function FP(name,tag,text,u0,v0,u1,v1,h,color,y0){const t=tag||'prop';const m=lbox('house',H,Math.min(u0,u1),Math.min(v0,v1),Math.max(u0,u1),Math.max(v0,v1),h,color,t,info(name,t,text,null,{near:true}),y0,{collide:true});window.__furn.push({name,c:colliders[colliders.length-1],mesh:m});return m;}
 // MAIN LEVEL — entertaining
 FP('Great room lounge — MAIN level = entertaining (zone label)','prop','Lounge/club look: piano, cigar chairs, low sofa, back bar, art wall. Existing vaulted wood tongue-and-groove ceiling and wood character are KEPT (Clark, Oct 26); modern furnishings around it.',22,10.5,22.2,10.7,0.1,0xd19a5b,0);
-FP('#5 Steinway Model B grand (6′11″ × 4′10″, ~760 lb)','own','Interior zone beside the stair, ~12 ft from the east glass and out of direct sun; keep off any heat register. Lid shown raised. Add a Dampp-Chaser humidity system (vaulted wood room). Keyboard faces the lounge.',12.8,1.0,19.72,5.83,3.3,0x111111,0);
+FP('#5 Steinway Model B grand (6′11″ × 4′10″, ~760 lb)','own','Interior zone beside the stair, ~12 ft from the east glass and out of direct sun; keep off any heat register. Lid shown raised. Add a Dampp-Chaser humidity system (vaulted wood room). Keyboard faces the lounge.',15.0,3.0,21.92,7.83,3.3,0x111111,0);
 FP('#5 Steinway lid (raised)','own','Lid prop ~45°.',13,1.2,13.01,1.21,0.01,0x222222,3.3);
-FP('#5 Steinway artist bench','own','Placeholder 3 × 1.2 ft.',20.6,1.9,21.8,4.9,1.6,0x222222,0);
+FP('#5 Steinway artist bench','own','Placeholder 3 × 1.2 ft.',22.8,3.9,24.0,6.9,1.6,0x222222,0);
 FP('#2 Carved dark-wood panel with mirrored mosaic inlay (art wall)','own','Inventory: ~4 ft wide (height not logged — placeholder 3 ft). Feature wall = interior west wall of the lounge: no sun, no heat, faces the vaulted space and the entry sightline. Hang on a French cleat into studs (add blocking if pine/paneling covers it); picture light or ceiling accent wash.',12.15,4,12.35,8,3,0x4a2e1a,5.2);
-FP('Low modern club sofa (proposed new)','pnew','~7 × 3 ft leather/boucle, under the art wall, facing east.',30.6,5.0,33.6,12.0,2.6,0x5a4636,0);
-FP('#4 Tufted dark-leather bench / cocktail table','own','Placeholder 4 × 2 ft. Centered in the lounge group.',27,6,29,10,1.5,0x2a1c14,0);
-FP('#15 Black leather cigar chair (1 of 2)','own','Placeholder 3 × 3 ft (dims not logged). Faces the sofa.',22.9,5.0,25.9,8.0,3,0x111111,0);
-FP('#15 Black leather cigar chair (2 of 2)','own','Placeholder 3 × 3 ft.',22.9,8.6,25.9,11.6,3,0x111111,0);
+FP('#4 Tufted dark-leather bench / cocktail table','own','Placeholder 4 × 2 ft. Centered in the lounge group.',27.6,6.3,29.6,10.3,1.5,0x2a1c14,0);
+FP('#15 Black leather cigar chair (1 of 2)','own','Placeholder 3 × 3 ft (dims not logged). Faces the sofa.',30.8,5.0,33.8,8.0,3,0x111111,0);
+FP('#15 Black leather cigar chair (2 of 2)','own','Placeholder 3 × 3 ft.',30.8,8.6,33.8,11.6,3,0x111111,0);
 FP('Back bar / bar cabinet (proposed new)','pnew','~7 ft bar cabinet on the south wall with display shelving above; bar cart alternative.',26,0.3,33,2,3.5,0x3a2a20,0);
 FP('Kitchen island ~9 × 4.1 ft, quartz, seats 4, storage both sides (proposed)','prop','Replaces the dining area (no formal dining). 42-48 in work aisle to the north counters; 12-15 in seating overhang on the south; optional prep sink; required island outlet; 2-3 pendants.',21,23.0,30,26,3,0xf4f4f4,0);
 for(let i=0;i<4;i++)FP('Counter stool '+(i+1)+' of 4 (proposed new)','pnew','24 in per stool; 36-44 in clear behind.',21.8+i*2.2,20.1,23.2+i*2.2,21.5,2.5,0x2b2b2b,0);
@@ -812,7 +811,7 @@ const EXTRAS=[];
    // cushion seams
    const n=Math.max(1,Math.round(((back==='n'||back==='s')?(x1-x0):(z1-z0))/2.6));for(let i=1;i<n;i++){const t=i/n;if(back==='n'||back==='s')B(x0+(x1-x0)*t-0.02,x0+(x1-x0)*t+0.02,z0,z1,y+seatH,0.02,0x111111);else B(x0,x1,z0+(z1-z0)*t-0.02,z0+(z1-z0)*t+0.02,y+seatH,0.02,0x111111);}}
  window.__furn.forEach(f=>{f.mesh=f.mesh||null;});
- const want=[[/cigar chair \(1/,'w',0x15110e,1.5,3.2,1],[/cigar chair \(2/,'w',0x15110e,1.5,3.2,1],[/club sofa/,'e',0x6b5442,1.5,2.7,1],[/#3 Seabreeze gray sectional/,'w',0x9a9fa6,1.5,2.7,1]];
+ const want=[[/cigar chair \(1/,'e',0x15110e,1.5,3.2,1],[/cigar chair \(2/,'e',0x15110e,1.5,3.2,1],[/club sofa/,'e',0x6b5442,1.5,2.7,1],[/#3 Seabreeze gray sectional/,'w',0x9a9fa6,1.5,2.7,1]];
  for(const [re,back,c,sh,bh,arm] of want)for(const f of byName(re)){hideBox(f);uph(f,back,c,sh,bh,arm);}
  for(const f of byName(/#3 Sectional chaise/)){hideBox(f);uph(f,'s',0x9a9fa6,1.5,1.6,0);}
  // tufted bench
@@ -1007,13 +1006,13 @@ const NET=[];
 
 
 // --- floor finish toggle (default: long gray porcelain wood-look plank, like 339 Sandbar)
-{const F=[];const seen=new Set();groups.house.traverse(o=>{if(o.isMesh&&!Array.isArray(o.material)&&o.material.map&&!seen.has(o.material)){const h=o.material.color.getHex();if(h===0xe2cfae||h===0xd9ccb6){seen.add(o.material);F.push([o.material,h]);}}});
+{const F=[];const seen=new Set();scene.traverse(o=>{if(!o.isMesh)return;for(const m of (Array.isArray(o.material)?o.material:[o.material])){if(!m||!m.color||seen.has(m))continue;const h=m.color.getHex();if(h===0xe2cfae||h===0xd9ccb6||h===0xf3efe6&&false){seen.add(m);F.push([m,h]);}}});
  window.setFloor=k=>{F.forEach(([m,h])=>m.color.setHex(k==='wood'?h:0xb4b4b0));};
  const lay=document.getElementById('layers');if(lay){const w=document.createElement('label');w.innerHTML='Floor: <select id="flSel"><option value="gray">gray plank tile</option><option value="wood">wood</option></select>';lay.appendChild(w);w.querySelector('select').onchange=e=>setFloor(e.target.value);}
  const qf=new URLSearchParams(location.search).get('floor')||'gray';setFloor(qf);const e=document.getElementById('flSel');if(e)e.value=qf;}
 
 // --- deck & rail color (default brown = matches the barn door trim); house siding unchanged
-{const D=[],R=[];const seen=new Set();groups.bldg.traverse(o=>{if(!o.isMesh||Array.isArray(o.material)||seen.has(o.material))return;const h=o.material.color.getHex();if(h===0x8a6242&&o.material.map){seen.add(o.material);D.push(o.material);}else if(h===0x5a3f2c){seen.add(o.material);R.push(o.material);}});
+{const D=[],R=[];const seen=new Set();groups.bldg.traverse(o=>{if(!o.isMesh)return;for(const m of (Array.isArray(o.material)?o.material:[o.material])){if(!m||!m.color||seen.has(m))continue;const h=m.color.getHex();if(h===0x8a6242&&m.map){seen.add(m);D.push(m);}else if(h===0x5a3f2c){seen.add(m);R.push(m);}}});
  const C={current:[0x8a6242,0x5a3f2c],brown:[0x6b4a2e,0x5a3e2a],cream:[0xe6dcc4,0xdccfb0]};
  window.setDeck=k=>{const c=C[k]||C.brown;D.forEach(m=>m.color.setHex(c[0]));R.forEach(m=>m.color.setHex(c[1]));const e=document.getElementById('dkSel');if(e)e.value=k;};
  const lay=document.getElementById('layers');if(lay){const w=document.createElement('label');w.innerHTML='Deck &amp; rail color: <select id="dkSel"><option value="brown">brown (matches door trim)</option><option value="cream">cream</option><option value="current">current</option></select>';lay.appendChild(w);w.querySelector('select').onchange=e=>setDeck(e.target.value);}
@@ -1063,7 +1062,7 @@ vo('🛰 Aerial overview','Whole 6-acre parcel: house, pole barn, gym barn, pond
 {const t=[H.x0+22,HM+4,H.z0-14];vo('🌊 Pond-side elevation','East glass gable, wraparound deck above the walk-out, pond in front.',t,[t[0]+95,t[1]+22,t[2]+30]);}
 vw('🪵 Deck — teak dining table','8-ft teak table on the ~10 ft deck; cocktails and dinners outside.',39,26.5,HM,38.5,14,-0.18);VP[VP.length-1].walk.fov=68;
 {const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0]+20,HL+3.2,t[1]+20],[c[0]+4.4,HL+4.9,c[1]-0.6]);VP[VP.length-1].orbit.fov=72;}
-vw('🍸 Great room — lounge/club','Steinway B, cigar chairs, art panel #2 on the inner west wall, back bar; existing warm wood vaulted ceiling kept.',33,15.5,HM,13,4,-0.07);VP[VP.length-1].walk.fov=68;
+vw('🍸 Great room — lounge/club','Steinway B centered as the focal piece, 2 cigar chairs + #4 bench by the glass, art panel #2 on the inner west wall, back bar; existing warm wood vaulted ceiling kept.',33,15.5,HM,13,4,-0.07);VP[VP.length-1].walk.fov=68;
 vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',25.5,15.8,HM,25.5,31,-0.2);VP[VP.length-1].walk.fov=68;
 vw('💻 Office (main floor)','Smaller main-floor bedroom: Seabreeze glass desk + Aeron, wall shelving.',10.2,10.6,HM,2,3,-0.12);VP[VP.length-1].walk.fov=72;
 vw('🛋 Office / guest (futon)','Larger main-floor bedroom: second desk, queen sleeper sofa, side table; direct door to the main bath.',10.4,21.4,HM,2,29,-0.12);VP[VP.length-1].walk.fov=72;
