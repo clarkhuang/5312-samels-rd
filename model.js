@@ -211,12 +211,12 @@ lwall('bldg',H,0,0,0,32,-9,9,0x9a958a,'photo',[],true);
 lwall('bldg',H,34,0,34,32,-9,9,sid,'photo',[[4,6.5,6.8],[9,12,6.8,3],[16,26,7]],true);
 // main level
 lwall('bldg',H,0,0,34,0,0,9,sid,'photo',[[3,7,6.8,3],[20,24,6.8,3],[28,31,6.8,3]],true);
-lwall('bldg',H,0,32,34,32,0,9,sid,'photo',[[3,7,6.8,3],[16,19,6.8],[23,27,6.8,3.4]],true);    // door to garage
-lwall('bldg',H,0,0,0,32,0,9,sid,'photo',[[4,8,6.8,3],[13,16,6.8,3.5],[22,25,6.8]],true);   // opening = future pass-through
-lwall('bldg',H,34,0,34,32,0,9,sid,'photo',[[1,7,8.4,1.2],[8,24,7.5],[25,31,8.4,1.2]],true);  // glass gable + sliders to deck
+lwall('bldg',H,0,32,34,32,0,9,sid,'photo',[[1,4.5,6.8,3],[25.5,28.5,6.8]],true);    // door to garage
+lwall('bldg',H,0,0,0,32,0,9,sid,'photo',[[4,8,6.8,3],[19,22,6.8,3.5],[26.5,29.5,6.8,3]],true);   // opening = future pass-through
+lwall('bldg',H,34,0,34,32,0,9,sid,'photo',[[1,7,8.4,1.2],[8,24,7.5],[28.5,31.5,6.8]],true);  // glass gable + sliders to deck
 gableRoof('bldg',H.x0,H.z0-32,34,32,HM+9,20,true,roofC,2); gableEnds('bldg',H.x0,H.z0-32,34,32,HM+9,20,true,sid);
 // main floor with a stair opening (u12.5-16.5, v12.5-19.5); light oak (modern remodel)
-for(const [u0,v0,u1,v1] of [[0,0,34,12.5],[0,19.5,34,32],[0,12.5,12.5,19.5],[16.5,12.5,34,19.5]]){const a=H.P(u0,v0),b=H.P(u1,v1);floorT('house',a[0],a[1],b[0],b[1],HM,0xe2cfae,'photo','plank',0xf3efe6);}
+for(const [u0,v0,u1,v1] of [[0,0,34,16],[0,26.5,34,32],[0,16,14,26.5],[17.5,16,34,26.5]]){const a=H.P(u0,v0),b=H.P(u1,v1);floorT('house',a[0],a[1],b[0],b[1],HM,0xe2cfae,'photo','plank',0xf3efe6);}
 floorT('house',H.x0,H.z0,H.x0+34,H.z0-32,HL,0xd9ccb6,'photo','plank');
 info('House — 1997 chalet (1.5 story + walk-out)','photo','Seen: steep metal roof, vaulted pine ceilings, glass east gable, wraparound deck, landscaped pond in front (p01-p36). Record: 1,480 sf above grade + 900 sf lower; 4 bd / 2 full + 1 ¾ bath; propane forced air, central air; built 1997 (permit 1996). Footprint 34 × 32 ft is estimated from satellite.',[H.x0+17,HM+31,H.z0-16]);
 // deck (east) + stair to grade
@@ -228,14 +228,18 @@ railing('bldg',H.P(44,0),H.P(44,13),HM);railing('bldg',H.P(44,17),H.P(44,32),HM)
 info('Deck (cable-free wood rail)','photo','Seen p09, p33-p36: covered wraparound deck on the east (pond) side, main-floor level. Stairs to grade are inferred.',[H.x0+40,HM+5,H.z0-30]);
 // main level rooms (inferred from photos)
 const iw=0xf1eee8;
-lwall('house',H,0,12,12,12,0,8,iw,'inf',[[8,11]]); lwall('house',H,12,0,12,12,0,8,iw,'inf',[]);
-lwall('house',H,0,20,12,20,0,8,iw,'inf',[[4.4,6.9,6.8],[8,11]]); lwall('house',H,12,20,12,32,0,8,iw,'inf',[]);
-lwall('house',H,8,12,8,20,0,8,iw,'inf',[[3,6]]);
+const __w0=groups.house.children.length,__wc=colliders.length;
+// v9 layout (per Clark): front door on the east porch → entry hall west along the north wall (garage door immediately on the right) → cross hall (2 rooms west) → left/south into the great room
+lwall('house',H,0,16.7,10,16.7,0,8,iw,'inf',[]); lwall('house',H,0,24.5,10,24.5,0,8,iw,'inf',[]);
+lwall('house',H,10,16.7,10,32,0,8,iw,'inf',[[2.3,4.8,6.8],[9.8,12.3,6.8]]);
+lwall('house',H,17.5,19,17.5,26.5,0,8,iw,'inf',[]); lwall('house',H,17.5,19,25,19,0,8,iw,'inf',[]); lwall('house',H,25,19,25,26.5,0,8,iw,'inf',[]);
+lwall('house',H,17.5,26.5,34,26.5,0,8,iw,'inf',[[2,4.5,6.8]]);
+for(let i=__w0;i<groups.house.children.length;i++)groups.house.children[i].userData.keepLayout=1;for(let i=__wc;i<colliders.length;i++)colliders[i].keepLayout=1;
 const STAIR_INFO=info('Stairs (main ↔ loft ↔ lower)','photo','Stair seen p19. Location inferred. Press L in walk mode to change level.');
-lbox('house',H,17,30,34,32,3,0xf2f2f2,'photo',info('Kitchen — white cabinets, stainless','photo','Seen p05, p06, p10, p17, p18. Layout position inferred (north side, near garage entry).'),0);
-lbox('house',H,1,1,7,8,0.04,0x6d5a4a,'inf',info('Office (main bedroom 1)','inf','Smaller main-floor bedroom → pure office. 2 bedrooms on main per listing; placement inferred.'),0);
-lbox('house',H,1,24,7,31,0.04,0x6d5a4a,'inf',info('Office / guest (futon) — main bedroom 2','inf','Larger main-floor bedroom (sellers\' master) with a direct door to the main bath → office + guest overflow. Placement inferred.'),0);
-lbox('house',H,1,13,7,19,0.04,0xbfd7e0,'inf',info('Full bath (main)','photo','Bath seen p27/p28; placement inferred.'),0);
+lbox('house',H,17,30,34,32,3,0xf2f2f2,'photo',info('Kitchen — white cabinets, stainless','photo','Seen p05, p06, p10, p17, p18. On the right (west) side of the great room under the loft, per the owner walkthrough.'),0);
+lbox('house',H,1,1,7,8,0.04,0x6d5a4a,'inf',info('Office (main bedroom 1)','inf','First room off the cross hall (west side) → pure office. Placement per the owner walkthrough; exact sizes inferred.'),0);
+lbox('house',H,1,24,7,31,0.04,0x6d5a4a,'inf',info('Office / guest (futon) — main bedroom 2','inf','Second room off the cross hall (northwest) → office + guest overflow. Placement per the owner walkthrough; sizes inferred.'),0);
+lbox('house',H,1,13,7,19,0.04,0xbfd7e0,'inf',info('Full bath (main)','photo','Bath seen p27/p28; off the entry hall (placement inferred).'),0);
 // loft (visual only)
 lbox('house',H,0,0,14,32,0.4,0xd9c7a6,'photo',info('Loft: bedroom 3 + ¾ bath','photo','Upper bedroom with skylights seen p21-p26 (pine ceiling). Walkable in v2 (stairs or the Loft level button). Headroom is limited near the north/south eaves.'),9,{edges:true});
 // lower level rooms
@@ -623,7 +627,7 @@ FP('Great room lounge — MAIN level = entertaining (zone label)','prop','Lounge
 FP('#5 Steinway Model B grand (6′11″ × 4′10″, ~760 lb)','own','Interior zone beside the stair, ~12 ft from the east glass and out of direct sun; keep off any heat register. Lid shown raised. Add a Dampp-Chaser humidity system (vaulted wood room). Keyboard faces the lounge.',15.0,3.0,21.92,7.83,3.3,0x111111,0);
 FP('#5 Steinway lid (raised)','own','Lid prop ~45°.',13,1.2,13.01,1.21,0.01,0x222222,3.3);
 FP('#5 Steinway artist bench','own','Placeholder 3 × 1.2 ft.',22.8,3.9,24.0,6.9,1.6,0x222222,0);
-FP('#2 Carved dark-wood panel with mirrored mosaic inlay (art wall)','own','Inventory: ~4 ft wide (height not logged — placeholder 3 ft). Feature wall = interior west wall of the lounge: no sun, no heat, faces the vaulted space and the entry sightline. Hang on a French cleat into studs (add blocking if pine/paneling covers it); picture light or ceiling accent wash.',12.15,4,12.35,8,3,0x4a2e1a,5.2);
+FP('#2 Carved dark-wood panel with mirrored mosaic inlay (art wall)','own','Inventory: ~4 ft wide (height not logged — placeholder 3 ft). Feature wall = interior west wall of the lounge: no sun, no heat, faces the vaulted space and the entry sightline. Hang on a French cleat into studs (add blocking if pine/paneling covers it); picture light or ceiling accent wash.',25.05,21.5,25.25,25.5,3,0x4a2e1a,3.4);
 FP('#4 Tufted dark-leather bench / cocktail table','own','Placeholder 4 × 2 ft. Centered in the lounge group.',27.6,6.3,29.6,10.3,1.5,0x2a1c14,0);
 FP('#15 Black leather cigar chair (1 of 2)','own','Placeholder 3 × 3 ft (dims not logged). Faces the sofa.',30.8,5.0,33.8,8.0,3,0x111111,0);
 FP('#15 Black leather cigar chair (2 of 2)','own','Placeholder 3 × 3 ft.',30.8,8.6,33.8,11.6,3,0x111111,0);
@@ -646,8 +650,8 @@ FP('LOWER = clean, modern, cozy master retreat (zone label)','prop','Primary bed
 FP('#3 Seabreeze gray sectional, large L — size to verify','own','Real dimensions are not in the move inventory or notes, so this is a 12 × 10 ft L, 40 in deep (SIZE TO VERIFY). In the NW corner of the lower level, facing a TV on a new media wall ~12 ft away; ≥3 ft walkways. 10 ft to the TV. Keeps a ~7 ft clear path from the walk-out to the bedroom/bath doors. Deliver through the walk-out sliders; confirm it splits into sections.',0.3,20,3.63,32,2.4,0x8a8f96,-9);
 FP('#3 Sectional chaise (left)','own','',3.63,28.67,10.3,32,2,0x8a8f96,-9);
 FP('#3 Sectional chaise (right)','own','',3.63,31.9,3.64,31.91,0.01,0x8a8f96,-9);
-FP('#7 White media console (4-door) + #9 soundbar/sub','own','Placeholder 6 × 1.5 ft, on the north wall.',13.3,23,14.75,29,2.2,0xffffff,-9);
-FP('#8 Samsung 75″ TV (wall-mounted)','own','~5.5 × 3.1 ft; on the new media wall, ~12 ft from the sectional main seat.',14.6,23.25,14.75,28.75,3.1,0x050505,-5.7);
+FP('#7 White media console (4-door) + #9 soundbar/sub','own','Placeholder 6 × 1.5 ft, on the north wall.',12.35,23,13.8,29,2.2,0xffffff,-9);
+FP('#8 Samsung 75″ TV (wall-mounted)','own','~5.5 × 3.1 ft; on the new media wall, ~12 ft from the sectional main seat.',13.68,23.25,13.83,28.75,3.1,0x050505,-5.7);
 FP('Coffee bar nook (proposed): counter, outlet for espresso, optional small sink','prop','~5.5 ft base cabinets + quartz on the wall shared with laundry (easy water/drain). Dedicated 20 A circuit.',18.5,12.3,24,14.3,3,0xe8e0d0,-9);
 FP('Morning coffee: 2 chairs + café table at the walk-out patio (proposed new)','pnew','Under-deck concrete pad seen in p49. Upgrade: extend with pavers ~12 × 14 ft.',35.5,8,39.5,12,2.8,0x6a5040,-9);
 
@@ -687,19 +691,18 @@ const RUGS=[];function rug(u0,v0,u1,v1,y0,c){const r=Dx(u0,v0,u1,v1,0.04,c,y0+0.
 function pendant(u,v,yTop,y0){const p=P(u,v);PL(new THREE.CylinderGeometry(0.02,0.02,yTop-y0,6),BLK,p[0],HM+(y0+yTop)/2,p[1]);PL(new THREE.CylinderGeometry(0.35,0.55,0.6,16,1,true),BLK,p[0],HM+y0,p[1],'house',{side:THREE.DoubleSide});PL(new THREE.SphereGeometry(0.22,10,8),0,p[0],HM+y0-0.2,p[1],'house',{mat:emis(0xffe2a8)});}
 function can(u,v,yC,layer,F){const p=(F||H).P(u,v);PL(new THREE.CylinderGeometry(0.28,0.28,0.04,14),0,p[0],(F||H).y+yC-0.03,p[1],layer||'house',{mat:emis(0xfff4d8)});}
 
-// ---- stairs: lower flight (u12.5-14.5) rises south v19.5→12.5 from HL to HM; loft flight (u14.5-16.5) rises north v12.5→19.5 from HM to HM+9.4
-{const tread=new THREE.MeshLambertMaterial({color:0xc9b08a}),riserM=new THREE.MeshLambertMaterial({color:0xf3f0ea});
+// ---- stairs (v9): basement flight u14-17.5 descends south v27→16 (HM→HL) on the LEFT of the cross hall; loft flight v12.5-15.5 rises WEST u27.5→14 (HM→loft)
+{const tread=new THREE.MeshLambertMaterial({color:0xc9b08a}),riserM=new THREE.MeshLambertMaterial({color:0xf3f0ea});const __s0=groups.house.children.length,__sc=colliders.length,__ss=surfaces.length;
  const step=(u0,u1,va,vb,yBot,yTop)=>{const a=P(u0,va),b=P(u1,vb);const x=(a[0]+b[0])/2,z=(a[1]+b[1])/2,w=Math.abs(b[0]-a[0]),d=Math.abs(b[1]-a[1]);
    const m=new THREE.Mesh(new THREE.BoxGeometry(w,yTop-yBot,d),[riserM,riserM,tread,riserM,riserM,riserM]);m.position.set(x,(yBot+yTop)/2,z);groups.house.add(m);occl.push(m);
    surf(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[0],b[0]),Math.max(a[1],b[1]),yTop);colliders.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,y0:yBot,y1:yTop});};
- const N1=15;for(let k=1;k<=N1;k++){const va=19.5-(k-1)*7/N1,vb=19.5-k*7/N1;step(12.5,14.5,vb,va,HL,HL+k*9/N1);}
- const N2=16;for(let k=1;k<=N2;k++){const va=12.5+(k-1)*7/N2,vb=12.5+k*7/N2;step(14.5,16.5,va,vb,HM,HM+k*9.4/N2);}
- Dx(14.5,12.5,16.5,19.5,9,0xe9e4dc,-9,true); // enclosed under-stair storage below the loft flight
- const st=P(14.5,16);STAIR_INFO.pos=[st[0],HM+3,st[1]];
- // landing at loft level + rails (black steel, modern)
- {const a=P(13.5,19.5),b=P(16.5,21.2);floor('house',a[0],a[1],b[0],b[1],HM+9.4,0xc9b08a,'photo');}
- railing('house',P(12.5,12.6),P(12.5,19.5),HM,BLK);railing('house',P(12.5,19.5),P(14.5,19.5),HM,BLK);railing('house',P(16.5,12.6),P(16.5,19.5),HM,BLK);
- railing('house',P(14,0.5),P(14,19.5),HM+9.4,BLK);railing('house',P(14,21.2),P(14,31.5),HM+9.4,BLK);railing('house',P(16.5,19.5),P(16.5,21.2),HM+9.4,BLK);railing('house',P(13.5,21.2),P(16.5,21.2),HM+9.4,BLK);
+ const N1=15;for(let k=1;k<N1;k++){const va=26.5-(k-1)*10.5/N1,vb=26.5-k*10.5/N1;step(14.1,17.4,vb,va,HL,HM-k*9/N1);}
+ const N2=16;for(let k=1;k<=N2;k++){const ub=27.5-(k-1)*13.5/N2,ua=27.5-k*13.5/N2;step(ua,ub,12.5,15.5,HM,HM+k*9.4/N2);}
+ Dx(13.85,16,14.1,30.5,8.95,0xe9e6df,-9,true); Dx(17.4,16,17.65,26.5,8.95,0xe9e6df,-9,true); // lower-level stair enclosure (TV wall on the west face)
+ const st=P(15.7,22);STAIR_INFO.pos=[st[0],HM+3,st[1]];
+ railing('house',P(14,16),P(14,26.5),HM,BLK);railing('house',P(14,16),P(17.5,16),HM,BLK);railing('house',P(17.5,16),P(17.5,19),HM,BLK);
+ railing('house',P(14,0.5),P(14,12.5),HM+9.4,BLK);railing('house',P(14,15.5),P(14,31.5),HM+9.4,BLK);
+ for(let i=__s0;i<groups.house.children.length;i++)groups.house.children[i].userData.keepLayout=1;for(let i=__sc;i<colliders.length;i++)colliders[i].keepLayout=1;for(let i=__ss;i<surfaces.length;i++)surfaces[i].keepLayout=1;
  // loft walkable + headroom limits (invisible)
  surf(H.x0,H.z0-32,H.x0+14,H.z0,HM+9.4);
  for(const [a,b] of [[P(0,3.6),P(14,3.4)],[P(0,28.6),P(14,28.4)],[P(-0.4,0),P(0.2,32)]])colliders.push({x0:Math.min(a[0],b[0]),x1:Math.max(a[0],b[0]),z0:Math.min(a[1],b[1]),z1:Math.max(a[1],b[1]),y0:HM+9.4,y1:HM+20});}
@@ -707,7 +710,7 @@ function can(u,v,yC,layer,F){const p=(F||H).P(u,v);PL(new THREE.CylinderGeometry
 {const wood=new THREE.MeshLambertMaterial({color:0x9a6a3c});const a=H.P(0,16),b=H.P(34,16);const rb=new THREE.Mesh(new THREE.BoxGeometry(34,1.0,0.7),wood);rb.position.set((a[0]+b[0])/2,HM+28.4,a[1]);groups.house.add(rb);
  for(const v of [6,26]){const y=HM+9+20*(1-Math.abs(v-16)/16)-0.9;const p=H.P(17,v);const pb=new THREE.Mesh(new THREE.BoxGeometry(34,0.6,0.5),wood);pb.position.set(p[0],y,p[1]);groups.house.add(pb);}
  // wood trim around the east glass gable openings
- for(const [v0,v1,h] of [[1,7,8.4],[8,24,7.5],[25,31,8.4]]){const c=H.P(33.65,(v0+v1)/2);const t1=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.35,v1-v0+0.6),wood);t1.position.set(c[0],HM+h+0.15,c[1]);groups.house.add(t1);}}
+ for(const [v0,v1,h] of [[1,7,8.4],[8,24,7.5]]){const c=H.P(33.65,(v0+v1)/2);const t1=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.35,v1-v0+0.6),wood);t1.position.set(c[0],HM+h+0.15,c[1]);groups.house.add(t1);}}
 // ---- LOWER: master suite
 rug(1.2,1.2,9.2,10.8,-9,0xd8d2c6);
 Dx(0.4,3,7.4,9.7,1.1,0x6b4f3a,-9,true);Dx(0.6,3.1,7.3,9.6,0.9,0xf4f2ee,-7.9);Dx(3.6,3.0,7.4,9.7,0.35,0x9aa3ad,-7.0); // platform king, duvet throw
@@ -725,7 +728,7 @@ acrylicShower(15,3.6,17.75,6.6,-9);vanity(12.3,4.0,14.1,9.6,-9,2,'W');toilet(17.
 Dx(12.3,0.3,17.7,11.7,0.03,0xe6e6e2,-9+0.01);
 info('Lower PRIMARY bath concept (Option B)','prop','Freestanding tub + 36×60-style acrylic shower + double vanity + matching toilet. The existing room is only ~5×9 (long and narrow) — this layout needs space borrowed from the craft/storage room (Option B, mid ~$50K). Measure at the visit.',[P(15,6)[0],HL+8,P(15,6)[1]],{near:true,layer:'house'});
 // lower sitting / TV + coffee nook details
-rug(4.2,20.5,12.8,28.2,-9,0xcfc8bb);Dx(14.75,21.5,15.3,30.5,8,0xe9e6df,-9,true);info('Proposed media wall (TV + console)','prop','Short new partition (~9 ft) so the TV faces the corner sectional at ~12 ft. Walkway ≥4.5 ft between the sectional end and the media wall; the walk-out path behind it stays open.',[H.P(15,26)[0],HL+9,H.P(15,26)[1]],{near:true,layer:'house'});can(17,24,0,'house');can(26,20,0,'house');can(6,6,0,'house');can(15,6,0,'house');
+rug(4.2,20.5,12.8,28.2,-9,0xcfc8bb);info('Proposed media wall (TV + console)','prop','Short new partition (~9 ft) so the TV faces the corner sectional at ~12 ft. Walkway ≥4.5 ft between the sectional end and the media wall; the walk-out path behind it stays open.',[H.P(15,26)[0],HL+9,H.P(15,26)[1]],{near:true,layer:'house'});can(17,24,0,'house');can(26,20,0,'house');can(6,6,0,'house');can(15,6,0,'house');
 // walk-out patio pavers under the deck + coffee spot
 {const a=P(34.3,1),b=P(44,14);const pv=box('site',(a[0]+b[0])/2,HL-0.18,(a[1]+b[1])/2,Math.abs(b[0]-a[0]),0.2,Math.abs(b[1]-a[1]),0xbab3a6,'photo',null,{edges:false});texMat(pv.material,'tile',3,3);surf(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[0],b[0]),Math.max(a[1],b[1]),HL);}
 
@@ -744,7 +747,7 @@ vanity(0.3,15.4,1.9,18.6,0,1,'W');toilet(7.75,14,'E',0);
 info('Main bath concept','prop','One-piece fiberglass/acrylic tub-shower unit, new vanity + quartz top if the existing one reads dated (p27/p28), black fixtures, toilet matching the other two baths.',[P(4,16)[0],HM+7,P(4,16)[1]],{near:true,layer:'house'});
 closet(9.6,0.5,11.75,6,0,'W');closet(9.6,26,11.75,31.5,0,'W');
 rug(14,1.5,27,10,0,0x8e8174);
-{const p=P(13,10.6);PL(new THREE.CylinderGeometry(0.04,0.04,5.5,8),BLK,p[0],HM+2.75,p[1]);PL(new THREE.CylinderGeometry(0.4,0.5,0.8,14),0,p[0],HM+5.6,p[1],'house',{mat:emis(0xffe9c0)});}
+{const p=P(25.6,11.4);PL(new THREE.CylinderGeometry(0.04,0.04,5.5,8),BLK,p[0],HM+2.75,p[1]);PL(new THREE.CylinderGeometry(0.4,0.5,0.8,14),0,p[0],HM+5.6,p[1],'house',{mat:emis(0xffe9c0)});}
 // ---- LOFT: guest loft with shower-only ¾ bath
 lwall('house',H,0,13,4.4,13,9.4,7.5,iw,'photo',[]);lwall('house',H,0,19.2,4.4,19.2,9.4,7.5,iw,'photo',[]);lwall('house',H,4.4,13,4.4,19.2,9.4,7.5,iw,'photo',[[3.4,5.9,6.8]]);
 acrylicShower(0.3,13.3,3.3,16.3,9.4);toilet(0.3,17.9,'W',9.4);
@@ -1090,10 +1093,10 @@ const NET=[];
  p=PB.P(30,0);cam('pole barn doors',p[0],PBy+11,p[1]+0.5,Math.PI);
  p=GY.P(28,4);cam('gym barn',p[0]+0.5,GYy+9,p[1],-Math.PI/2);
  cam('solar field',SOLAR.x-30,elev(SOLAR.x-30,SOLAR.z)+10,SOLAR.z-20,Math.PI*0.85,'Ring Spotlight Cam Pro Plug-In on the AP post, powered from the array conduit.');
- p=G.P(-0.3,12);{const d=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.5,0.25),LMv(0x111111));d.position.set(p[0]-0.1,HM+4.2,p[1]);groups.cams.add(d);const it=NI('Ring Wired Doorbell Pro (entry)','prop','Ring Wired Doorbell Pro, $199.99 (Ring/Amazon list), on the main entry by the garage (entry location inferred).',[p[0],HM+6.5,p[1]],'cams',{short:'Ring doorbell',pri:5});d.userData.item=it;pickables.push(d);}}
+ p=H.P(34.25,27.9);{const d=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.5,0.25),LMv(0x111111));d.position.set(p[0]+0.1,HM+4.2,p[1]);groups.cams.add(d);const it=NI('Ring Wired Doorbell Pro (entry)','prop','Ring Wired Doorbell Pro, $199.99 (Ring/Amazon list), at the front door off the east deck (entry location per the owner walkthrough).',[p[0],HM+6.5,p[1]],'cams',{short:'Ring doorbell',pri:5});d.userData.item=it;pickables.push(d);}}
 // --- smart home labels
 {const lock=(name,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.5,0.25),new THREE.MeshBasicMaterial({color:0x40c060}));m.position.set(x,y,z);groups.smart.add(m);const it=NI('Smart lock — '+name,'prop','Yale Assure Lock 2 with Wi-Fi ($259.99 list; often ~$140-195 on sale), works with Ring/Alexa. Level Lock+ is the alternative.',[x,y+2,z],'smart',{short:'Smart lock: '+name,pri:4});m.userData.item=it;pickables.push(m);};
- let p=G.P(-0.3,12);lock('main entry',p[0]-0.2,HM+3.4,p[1]-1.5);
+ let p=H.P(34.25,28.8);lock('main entry',p[0]+0.1,HM+3.4,p[1]);
  p=H.P(34.3,5.2);lock('walk-out door',p[0]+0.2,HL+3.4,p[1]);
  p=PB.P(27.5,0);lock('pole barn walk-in',p[0],PBy+3.4,p[1]+0.5);
  p=GY.P(23.5,0);lock('gym man door',p[0],GYy+3.4,p[1]+0.5);
@@ -1177,18 +1180,22 @@ vo('🛰 Aerial overview','Whole 6-acre parcel: house, pole barn, gym barn, pond
 vw('🪵 Deck — teak dining table','8-ft teak table on the ~10 ft deck; cocktails and dinners outside.',39,26.5,HM,38.5,14,-0.18);VP[VP.length-1].walk.fov=68;
 {const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0]+20,HL+3.2,t[1]+20],[c[0]+4.4,HL+4.9,c[1]-0.6]);VP[VP.length-1].orbit.fov=72;}
 vw('🍸 Great room — lounge/club','Steinway B centered as the focal piece, 2 cigar chairs + #4 bench by the glass, art panel #2 on the inner west wall, back bar; existing warm wood vaulted ceiling kept.',33,15.5,HM,13,4,-0.07);VP[VP.length-1].walk.fov=68;
-vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',25.5,15.8,HM,25.5,31,-0.2);VP[VP.length-1].walk.fov=68;
-vw('💻 Office (main floor)','Smaller main-floor bedroom: Seabreeze glass desk + Aeron, wall shelving.',10.2,10.6,HM,2,3,-0.12);VP[VP.length-1].walk.fov=72;
-vw('🛋 Office / guest (futon)','Larger main-floor bedroom: second desk, queen sleeper sofa, side table; direct door to the main bath.',10.4,21.4,HM,2,29,-0.12);VP[VP.length-1].walk.fov=72;
+vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',16.5,10.5,HM,4,6,-0.22);VP[VP.length-1].walk.fov=68;
+vw('💻 Office (main floor)','First room off the cross hall: Seabreeze glass desk + Aeron, wall shelving.',9.2,22.6,HM,2,17,-0.12);VP[VP.length-1].walk.fov=72;
+vw('🛋 Office / guest (futon)','Second room off the cross hall (northwest): second desk, queen sleeper sofa, side table.',9.2,26.2,HM,2,30,-0.12);VP[VP.length-1].walk.fov=72;
 vw('🛏 Lower master bedroom','King bed, finished closet with doors, light oak floor, warm white walls.',10.6,10.8,HL,2,5,-0.12);VP[VP.length-1].walk.fov=68;
 vw('🛁 Lower primary bath','Freestanding tub, acrylic shower, double vanity (Option B: borrows craft-room space).',15.2,11.2,HL,15,2,-0.3);VP[VP.length-1].walk.fov=68;
-vw('📺 Lower sitting / TV room','Large L sectional in the NW corner (size to verify) facing the 75″ TV on a new media wall ~12 ft away.',13.6,16.2,HL,2,30,-0.12);VP[VP.length-1].walk.fov=68;
+vw('📺 Lower sitting / TV room','Large L sectional in the NW corner (size to verify) facing the 75″ TV on the basement-stair wall; the stairs from the main-floor hall land just behind it.',10.6,17.4,HL,4,30,-0.12);VP[VP.length-1].walk.fov=68;
 vw('🛌 Guest loft','Guest loft for guests or the kids; shower-only ¾ bath.',12.6,10,HM+9.4,6,24,-0.2);VP[VP.length-1].walk.fov=68;
 {const t=PB.P(20,18),c=PB.P(38,-7);vo('🚐 Big barn — van + pontoon','Airstream Interstate 24X camper van (Sprinter 3500 dually) and the pontoon on its trailer in the large section.',[t[0],PBy+1,t[1]],[c[0],PBy+31,c[1]]);VP[VP.length-1].orbit.fov=55;VP[VP.length-1].noRoof=true;}
 {const t=GY.P(11,18),c=GY.P(27.2,0.8);vo('🏋 Gym barn — CrossFit + recovery','4-station rig with lifting zones, turf sled lane, rower/SkiErg, Peloton, storage wall, wall balls, and the recovery corner (Plunge, sauna, massage chair).',[t[0],GYy+2,t[1]],[c[0],GYy+8.6,c[1]]);VP[VP.length-1].orbit.fov=70;}
 {const t=[SOLAR.x,rawElev(SOLAR.x,SOLAR.z)+4,SOLAR.z];vo('☀ Ground-mount solar (concept)','~20 kW in two racked rows at ~40°, facing south; trench to the house.',t,[t[0]+75,t[1]+48,t[2]+62]);}
 vo('🟪 Guest suite site (future, ~2 yrs)','Future guest suite footprint beside the chalet (purple layer).',[SU.x0+10,HM,SU.z0-14],[SU.x0-55,HM+48,SU.z0+45]);
 ['aerial','arrival','front','pond','deck','coffee','great_room','kitchen','office','office_guest','lower_master','lower_bath','tv_room','loft','big_barn','gym','solar','guest_suite'].forEach((id,i)=>{if(VP[i])VP[i].id=id;});
+vw('🚪 Front entry — garage door on the right','In through the front door off the covered deck: the door to the garage is immediately on the right, and the hall runs straight ahead to the cross hall.',33.2,27.4,HM,22,31.2,-0.04);Object.assign(VP[VP.length-1],{id:'entry'});VP[VP.length-1].walk.fov=84;
+vw('⬇ Basement stairs (off the hall)','At the end of the entry hall, turn toward the great room: the stairs down to the lower level / TV room open on the left.',11.6,31,HM,16,17,-0.32);Object.assign(VP[VP.length-1],{id:'basement_stairs'});VP[VP.length-1].walk.fov=74;
+vw('🍳🛋 Great room from the hall — kitchen right, living left','Turning left out of the cross hall into the great room: kitchen and island on the right under the loft, the Steinway lounge on the left by the glass.',12,16.2,HM,15,1,-0.12);Object.assign(VP[VP.length-1],{id:'great_room_hall'});VP[VP.length-1].walk.fov=88;
+vw('⬆ Loft stairs','The loft stair climbs west along the back of the great room, starting on the far side from the deck glass and landing at the loft edge.',31.5,3,HM,19,14,0.12);Object.assign(VP[VP.length-1],{id:'loft_stairs'});VP[VP.length-1].walk.fov=74;
 {const a=VP.find(v=>v.id==='arrival');if(a&&a.orbit){const t=a.orbit.t,p=a.orbit.pos;p[0]+=(p[0]-t[0])*0.25;p[2]+=(p[2]-t[2])*0.25;p[1]+=16;}}
 {const t=GY.P(9,15.5),c=GY.P(25.6,4.2);VP.push({id:'gym_beauty',n:'🏋 Gym — 4-station rig',cap:'Compact 2-sided rig with 4 barbell stations, each on its own 8 × 6 ft lifting zone; pull-up bars at 7.5–9 ft, high and low rings, turf sled lane alongside, storage wall with dumbbells, kettlebells, bumpers and bars.',orbit:{t:[t[0],GYy+3.2,t[1]],pos:[c[0],GYy+7.2,c[1]],fov:68}});}
 {const t=GY.P(6.5,27.8),c=GY.P(9.2,20.6);VP.push({id:'recovery',n:'🧊 Recovery — Plunge + Sauna',cap:'The Plunge tub (66⅝ × 31½ × 26 in) at 39°F, Plunge The Sauna Standard (cedar, glass front, HUUM heater), massage chair, cedar slat wall.',orbit:{t:[t[0],GYy+3.4,t[1]],pos:[c[0],GYy+6.2,c[1]],fov:72}});}
@@ -1222,11 +1229,14 @@ const TOUR=[
  ['drone','From above','Six quiet wooded acres in Whitewater Township: the chalet and pond, two barns, the south field and a wall of pines.'],
 ['arrival','Welcome to 5312 Samels Road','Six quiet wooded acres in Whitewater Township. The drive winds up past the barns to the house on the rise.'],
  ['front','The house','A sage-gray chalet with a standing-seam metal roof, brown trim and a covered wraparound deck. Big gable windows face the trees.'],
+ ['entry','Coming in the front door','Up the deck under the porch roof and through the red front door. The garage door is right there on the right, and the hall runs straight back.'],
+ ['basement_stairs','Down to the lower level','Where the entry hall meets the cross hall, the stairs to the lower level open on the left, just before the great room.'],
  ['great_room','The great room','The warm knotty-pine vaulted ceiling stays. The Steinway B sits at the center of the lounge as the focal piece, with a quiet conversation corner by the glass.'],
- ['kitchen','Kitchen island','A long quartz island seats four, with storage on both sides and an easy aisle to the counters and range.'],
- ['office','Main-floor offices','A focused office with the glass desk and Aeron chair, and across the hall a second office that doubles as a guest room with a fold-out futon.'],
+ ['kitchen','Kitchen island','On the right as you enter the great room, a long quartz island seats four, with storage on both sides and an easy aisle to the counters and range.'],
+ ['office','Main-floor offices','Off the cross hall, a focused office with the glass desk and Aeron chair, and next to it a second office that doubles as a guest room with a fold-out futon.'],
  ['tv_room','Lower level: lounge and movies','The big L sectional settles into the corner facing the TV, steps from the walk-out patio and the morning-coffee spot.'],
  ['lower_master','Lower-level master retreat','A calm primary bedroom with a finished closet and a new full bath, its own floor away from the main living space.'],
+ ['loft_stairs','Up to the loft','The loft stair rises along the back of the great room, away from the deck, and lands at the loft rail.'],
  ['loft','The loft','A bright guest and kids space under the roof, with Milan\'s bed, a desk under the skylight and room for a daybed.'],
  ['deck','The deck','The covered wraparound deck, stained to match the barn trim, with a teak table for long summer dinners.'],
  ['aerial_p09','The chalet from the air','Like the listing drone shot: the chalet on its rise, the stone-edged pond in front and the barns tucked behind.'],
@@ -1303,7 +1313,7 @@ const TF=(()=>{const V3=THREE.Vector3,B3=THREE.Box3;
  function tourGo(v){cur=null;ui();const p=stopPose(v);if(!p){goVP(v);return;}caption(v);go(p.pose,p.lv,p.roof,null,1700);}
  // buildings: door point (just outside), outward azimuth, interior and exterior views
  const BLD={
-  house:{door:()=>{const p=H.P(21,32);return new V3(p[0],HM+3.5,p[1]);},az:Math.PI,inside:()=>({pose:fit(lvl.main(),Math.PI*0.8,0.95),lv:'main',roof:false}),outside:()=>({pose:fit(house(),Math.PI*0.85,0.38),lv:'all',roof:true})},
+  house:{door:()=>{const p=H.P(34,30);return new V3(p[0],HM+3.5,p[1]);},az:Math.PI/2,inside:()=>({pose:fit(lvl.main(),Math.PI*0.8,0.95),lv:'main',roof:false}),outside:()=>({pose:fit(house(),Math.PI*0.62,0.38),lv:'all',roof:true})},
   gym:{door:()=>{const p=GY.P(28,15);return new V3(p[0],GYy+4,p[1]);},az:Math.PI/2,inside:()=>({pose:fit(gym(),Math.PI*0.6,1.0),lv:'all',roof:false}),outside:()=>({pose:fit(gym(),Math.PI*0.62,0.35),lv:'all',roof:true})},
   barn:{door:()=>{const p=PB.P(16,0);return new V3(p[0],PBy+5,p[1]);},az:0,inside:()=>({pose:fit(barn(),0.35,1.0),lv:'all',roof:false}),outside:()=>({pose:fit(barn(),0.3,0.33),lv:'all',roof:true})}};
  function busy(){if(tour)stopTour();}
@@ -1570,7 +1580,7 @@ pickables.forEach(o=>{const it=o.userData.item;if(it&&/^Sauna 6|Bathroom \/ show
   G.position.set(cx,y,(k.z0+k.z1)/2);G.rotation.y=Math.PI;groups.house.add(G);fxLamp(k.x0+0.4,y,k.z1-0.4,1.3,0xf2efe8);}}
  // lamps + plants (tasteful, few)
  const gr=fz(/Steinway Model B/),lw=fz(/#3 Seabreeze gray sectional/),ch=fz(/cigar chair \(2/),kd=fz(/Kids desk/),ns=fz(/Milan's nightstand/);
- if(gr){fxPlant(gr.c.x0-1.6,gr.c.y0,gr.c.z0-1.4,1.1,'fig');}
+ if(gr){const fp=H.P(32.6,11.6);fxPlant(fp[0],gr.c.y0,fp[1],1.1,'fig');}
  if(ch){fxLamp(ch.c.x1+0.9,ch.c.y0,ch.c.z0-0.6,4.6,0xf0e4cc);}
  if(lw){fxLamp(lw.c.x0+1.4,lw.c.y0,lw.c.z1+1.0,4.8,0xefe7d8);fxPlant(lw.c.x0+1.2,lw.c.y0,lw.c.z0-0.9,0.9,'snake');}
  if(kd){fxPlant(kd.c.x1+0.9,kd.c.y0,kd.c.z1-0.5,0.7,'snake');}
@@ -1821,6 +1831,22 @@ window.__mergeStatic=function(){const t0=performance.now();
  for(const o of all){const need=Array.isArray(o.material)&&o.geometry.groups.length?o.geometry.groups.length:1;if(o.userData._mp>=need){o.layers.set(1);merged.add(o);}}
  // partially merged multi-material originals: rendering both is harmless (identical depth)
  refresh();window.__mergeInfo={meshes:all.length,dynamic:dyn.size,dynMats:dynMat.size,merged:merged.size,newMeshes:made,ms:Math.round(performance.now()-t0)};return window.__mergeInfo;};
+// ---- v9 relayout: move kitchen (north) → west under the loft (rotated 90°), office SW → west-middle, main bath → off the entry hall
+{const reg=[{n:'kitchen',u0:16.8,u1:34.2,v0:19.6,v1:32.2,rot:1,tu:0,tv:0},{n:'office',u0:0,u1:9.9,v0:0,v1:11.9,du:0,dv:15.4},{n:'bath',u0:0,u1:8.5,v0:12.2,v1:15.4,du:17.5,dv:7}];
+ const x0=H.x0,z0=H.z0,tx=x0+32-z0,tz=z0+x0+17.4;
+ const inR=(r,x,y,z)=>{const u=x-x0,v=z0-z;return !(r.rot&&u>24.95&&u<25.35&&v>21&&v<26)&&y>HM-0.4&&y<HM+8.7&&u>=r.u0&&u<=r.u1&&v>=r.v0&&v<=r.v1;};
+ const fx=(r,x,z)=>r.rot?[z+tx,-x+tz]:[x+r.du,z-r.dv];
+ const bb=new THREE.Box3(),c=new THREE.Vector3(),sz=new THREE.Vector3();const moves=[];
+ for(const o of groups.house.children){if(o.userData.keepLayout)continue;bb.setFromObject(o);if(bb.isEmpty()){c.copy(o.position);sz.set(0,0,0);}else{bb.getCenter(c);bb.getSize(sz);}
+   if(sz.y<0.5&&Math.max(sz.x,sz.z)>14&&c.y<HM+0.5)continue;const r=reg.find(r=>inR(r,c.x,c.y,c.z));if(r)moves.push([o,r]);}
+ if(/nov9=1/.test(location.search))moves.length=0;{const m=location.search.match(/skip9=(\w+)/);if(m){for(let i=moves.length-1;i>=0;i--)if(moves[i][1].n===m[1])moves.splice(i,1);}}for(const [o,r] of moves){const M=new THREE.Matrix4();if(r.rot){M.makeRotationY(Math.PI/2);M.setPosition(tx,0,tz);}else M.makeTranslation(r.du,0,-r.dv);o.applyMatrix4(M);
+   if(r.n==='office'){bb.setFromObject(o);bb.getCenter(c);const u=c.x-x0,v=z0-c.z;if(u<1.7&&v>19.5){const zc=z0-21.5,S=new THREE.Matrix4().makeTranslation(0,0,zc).multiply(new THREE.Matrix4().makeScale(1,1,0.55)).multiply(new THREE.Matrix4().makeTranslation(0,0,-zc));o.applyMatrix4(S);}}
+   o.updateMatrixWorld(true);}
+ const box=(k)=>{const r=reg.find(r=>inR(r,(k.x0+k.x1)/2,(k.y0+Math.min(k.y1,k.y0+3))/2,(k.z0+k.z1)/2));if(!r||k.keepLayout)return;const a=fx(r,k.x0,k.z0),b=fx(r,k.x1,k.z1);k.x0=Math.min(a[0],b[0]);k.x1=Math.max(a[0],b[0]);k.z0=Math.min(a[1],b[1]);k.z1=Math.max(a[1],b[1]);};
+ colliders.forEach(box);surfaces.forEach(k=>{if(k.keepLayout)return;const y=k.y;const r=reg.find(r=>inR(r,(k.x0+k.x1)/2,y,(k.z0+k.z1)/2));if(!r||(k.x1-k.x0)>14||(k.z1-k.z0)>14)return;const a=fx(r,k.x0,k.z0),b=fx(r,k.x1,k.z1);k.x0=Math.min(a[0],b[0]);k.x1=Math.max(a[0],b[0]);k.z0=Math.min(a[1],b[1]);k.z1=Math.max(a[1],b[1]);});
+ for(const it of items){const p=it.pos;if(!p)continue;const r=reg.find(r=>inR(r,p[0],p[1]-1.5,p[2]));if(!r)continue;const q=fx(r,p[0],p[2]);p[0]=q[0];p[2]=q[1];}
+ window.__v9list=(u0,v0,u1,v1)=>{const out=[];for(const o of groups.house.children){bb.setFromObject(o);if(bb.isEmpty())continue;bb.getCenter(c);bb.getSize(sz);const u=c.x-x0,v=z0-c.z;if(u>u0&&u<u1&&v>v0&&v<v1&&c.y>HM-1.5&&c.y<HM+8.7)out.push([o.type,o.geometry&&o.geometry.type,+u.toFixed(1),+v.toFixed(1),+(c.y-HM).toFixed(1),+sz.x.toFixed(1),+sz.y.toFixed(1),+sz.z.toFixed(1),!!o.userData.keepLayout]);}return out;};
+ window.__v9moved=moves.map(m=>m[1].n).reduce((a,n)=>(a[n]=(a[n]||0)+1,a),{});}
 {let q0=null;try{q0=localStorage.getItem('samelsQ');}catch(e){}const Q0=new URLSearchParams(location.search);if(Q0.get('clean')==='1')q0='high';if(Q0.get('q'))q0=Q0.get('q');if(!q0)q0=(matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high';window.__matTier=q0==='low'?'lambert':'standard';if(q0!=='low'){try{window.__toStandard();}catch(e){console.warn('std failed',e);}}}
 // ===== v8 photo-real (High only): CC0 Poly Haven PBR textures, HDRI environment, glTF furniture (lazy per room) =====
 if(window.__V8HI&&window.__matTier==='standard'){try{
@@ -1856,7 +1882,7 @@ try{window.__mergeStatic();}catch(e){console.warn('merge failed',e);}
 {const Q=new URLSearchParams(location.search);const clean=Q.get('clean')==='1';let q=null;try{q=localStorage.getItem('samelsQ');}catch(e){}
  if(clean)q='high';else if(!q)q=(matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high';if(Q.get('q'))q=Q.get('q');setQuality(q);
  if(clean){document.body.classList.add('clean');document.getElementById('lblT').checked=false;if(Q.get('vp')!=='guest_suite')document.querySelectorAll('#layers input').forEach(c=>{if(['plan','future','elec'].includes(c.dataset.l))c.checked=false;});refresh();resize();}
- const vp=Q.get('vp');if(vp){setTimeout(()=>{if(vp==='dollhouse_main'||vp==='dollhouse_lower'){cutaway(vp.split('_')[1]);anim=null;const t=[H.x0+15,vp==='dollhouse_lower'?HL:HM,H.z0-20];camera.position.set(t[0]+36,t[1]+60,t[2]+50);enterOrbit(new THREE.Vector3(...t));}
+ const vp=Q.get('vp');if(vp){setTimeout(()=>{if(vp==='plan_main'||vp==='plan_lower'){cutaway(vp.split('_')[1]);anim=null;const t=[H.x0+17,vp==='plan_lower'?HL:HM,H.z0-16];camera.position.set(t[0],t[1]+62,t[2]+0.5);enterOrbit(new THREE.Vector3(...t));}else if(vp==='dollhouse_main'||vp==='dollhouse_lower'){cutaway(vp.split('_')[1]);anim=null;const t=[H.x0+15,vp==='dollhouse_lower'?HL:HM,H.z0-20];camera.position.set(t[0]+36,t[1]+60,t[2]+50);enterOrbit(new THREE.Vector3(...t));}
    else{const v=VP.find(x=>x.id===vp);if(v)goVP(v,true);}window.__ready=true;},50);}else window.__ready=true;}
 const v3=new THREE.Vector3();let last=performance.now(),lastHud=0;
 function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
