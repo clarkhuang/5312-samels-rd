@@ -42,11 +42,16 @@ main{position:relative;overflow:hidden}#c3d{position:absolute;inset:0}
 #mmMode{position:absolute;left:6px;top:-26px;font-size:11px;padding:2px 8px}
 .lbl{transition:opacity .25s}
 @media (max-width:900px){aside{max-height:24vh}#minimapWrap{width:140px}#minimap{width:140px}#mmMode{display:none}#hud{display:none}#tb{top:4px;max-width:100%;padding:3px;gap:2px}#tb button{padding:3px 6px;font-size:11px}#tb .sep{display:none}#pad{grid-template-columns:repeat(3,40px);grid-template-rows:repeat(3,40px);bottom:12px;left:10px}#caption{top:72px;max-width:92%}}
+#burger{display:none;position:absolute;left:8px;top:6px;z-index:6;font-size:18px;padding:4px 10px;text-align:center}
+body.clean #app{grid-template-columns:1fr}body.clean aside,body.clean #tb,body.clean #minimapWrap,body.clean #hud,body.clean #pad,body.clean #labels,body.clean #caption,body.clean #north,body.clean #tourBar,body.clean #burger,body.clean #info{display:none!important}
+@media (max-width:900px){#app{grid-template-columns:1fr!important;grid-template-rows:1fr}aside{position:fixed;left:0;top:0;bottom:0;width:86vw;max-width:340px;max-height:none!important;z-index:20;transform:translateX(-105%);transition:transform .25s;box-shadow:0 0 30px rgba(0,0,0,.6)}
+ body.menu aside{transform:none}#burger{display:block}#tb{left:52px;right:8px;transform:none;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;-webkit-overflow-scrolling:touch;max-width:none}#tb button{flex:0 0 auto}main{height:100vh}}
 </style></head><body>
 <div id="app"><aside>
 <h1>5312 Samels Rd <span style="color:var(--accent)">3D</span></h1>
-<div class="sub">Parcel 13-002-015-25 · 6.00 ac · Whitewater Twp · A-1 · Esri imagery ground · real USGS 3DEP elevations (9×6 samples) · <a href="index.html">← summary</a></div>
+<div class="sub">Parcel 13-002-015-25 · 6.00 ac · Whitewater Twp · A-1 · Esri imagery ground · real USGS 3DEP elevations (9×6 samples) · <a href="index.html">← project page</a> · live at <a href="https://clarkhuang.github.io/5312-samels-rd/">clarkhuang.github.io/5312-samels-rd</a> · presentation captures: <code>model.html?clean=1&amp;vp=great_room</code></div>
 <h2>Mode</h2>
+<label class="t" style="margin-bottom:6px">Quality <select id="qSel" onchange="setQuality(this.value)" style="background:#1f232c;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 6px"><option value="high">High (shadows, full trees)</option><option value="low">Low (fast: no shadows, fewer trees)</option></select></label>
 <button class="big on" id="bOrbit" onclick="setMode('orbit')">🛰 Orbit / aerial <kbd>O</kbd></button>
 <button class="big" id="bWalk" onclick="setMode('walk')">🚶 Walk — first person, 5.5 ft eye <kbd>F</kbd></button>
 <button class="big" onclick="toggleHelp(true)">? Controls &amp; gestures <kbd>H</kbd></button>
@@ -73,7 +78,7 @@ main{position:relative;overflow:hidden}#c3d{position:absolute;inset:0}
 <h2>Legend</h2><div id="legend"></div>
 <div class="note">Parcel outline from Grand Traverse County GIS (TaxParcel layer). Building positions read from Esri World Imagery (z19) and listing aerials p09/p60; dimensions other than the 32×38 pole barn and 24×24 attached garage are estimated. County GIS shows no FEMA flood zone, mapped waterbody, or mapped wetland on the parcel. Built Oct 26, 2026; v2 navigation + detail pass Oct 26 night. Window positions, interior fixtures, furniture, the van and pontoon are approximate concepts.</div>
 </aside>
-<main><canvas id="c3d"></canvas><div id="labels"></div>
+<main><button id="burger" onclick="document.body.classList.toggle('menu')" aria-label="Menu">☰</button><canvas id="c3d"></canvas><div id="labels"></div>
 <div id="north"><svg width="40" height="40" viewBox="-20 -20 40 40"><g id="narrow"><polygon points="0,-16 6,4 0,0 -6,4" fill="#d19a5b"/><text x="0" y="16" fill="#e8e6e1" font-size="10" text-anchor="middle">N</text></g></svg></div>
 <div id="info"></div>
 <div id="tb"><button data-mode="orbit" onclick="setMode('orbit')">🛰 Orbit</button><button data-mode="walk" onclick="setMode('walk')">🚶 Walk</button><button id="bLock" onclick="lockMouse()" title="Pointer lock: look with the mouse, Esc to release">🖱 Mouse-look</button><span class="sep"></span><button id="bTour" onclick="toggleTour()">▶ Tour</button><span class="sep"></span><button onclick="levelStep(1)" title="Up a level (] / PageUp)">⤒ Up</button><button onclick="levelStep(-1)" title="Down a level ([ / PageDown)">⤓ Down</button><button onclick="cutaway('lower')" title="Remove roof + upper floors">🏠 Cutaway</button><button onclick="document.getElementById('xrayT').click()">X-ray</button><button onclick="document.getElementById('lblT').click()">Labels</button><span class="sep"></span><button onclick="resetView()">⟲ Reset</button><button onclick="toggleHelp(true)">?</button></div>

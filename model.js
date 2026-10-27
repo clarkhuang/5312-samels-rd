@@ -18,12 +18,18 @@ function elev(x,z){for(const f of flats) if(x>=f.x0&&x<=f.x1&&z>=f.z0&&z<=f.z1) 
 const canvas=document.getElementById('c3d');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(2,devicePixelRatio));
-const scene=new THREE.Scene(); window.__scene=scene; scene.background=new THREE.Color(0xa9c4d8); scene.fog=new THREE.Fog(0xa9c4d8,900,2200);
+const scene=new THREE.Scene(); window.__scene=scene; scene.background=new THREE.Color(0x9cc0de); scene.fog=new THREE.Fog(0xd8e3ea,550,1700);
+{const sg=new THREE.SphereGeometry(5000,32,16);const sm=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{top:{value:new THREE.Color(0x3f78b8)},mid:{value:new THREE.Color(0x9cc0de)},bot:{value:new THREE.Color(0xdfe7ea)}},
+  vertexShader:'varying vec3 vp;void main(){vp=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:'uniform vec3 top;uniform vec3 mid;uniform vec3 bot;varying vec3 vp;void main(){float h=vp.y;vec3 c=h>0.15?mix(mid,top,smoothstep(0.15,0.7,h)):mix(bot,mid,smoothstep(-0.05,0.15,h));gl_FragColor=vec4(c,1.0);}'});
+ const sky=new THREE.Mesh(sg,sm);sky.renderOrder=-1;scene.add(sky);window.__sky=sky;
+ const cc=document.createElement('canvas');cc.width=cc.height=256;const cg=cc.getContext('2d');for(let i=0;i<14;i++){const x=60+Math.random()*136,y=100+Math.random()*60,r=30+Math.random()*40;const gr=cg.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.9)');gr.addColorStop(1,'rgba(255,255,255,0)');cg.fillStyle=gr;cg.fillRect(0,0,256,256);}
+ const ct=new THREE.CanvasTexture(cc);for(let i=0;i<14;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:ct,transparent:true,opacity:0.85,fog:false,depthWrite:false}));const a=i/14*Math.PI*2+Math.random()*0.4,r=1500+Math.random()*1300;sp.position.set(Math.cos(a)*r-150,520+Math.random()*380,Math.sin(a)*r);const sc=700+Math.random()*700;sp.scale.set(sc,sc*0.45,1);scene.add(sp);}}
 const camera=new THREE.PerspectiveCamera(55,1,0.8,6000);
-scene.add(new THREE.HemisphereLight(0xf4f7ff,0x6a6650,0.78));scene.add(new THREE.AmbientLight(0xffffff,0.12));
+scene.add(new THREE.HemisphereLight(0xf4f7ff,0x6a6650,0.78));scene.add(new THREE.AmbientLight(0xffffff,0.2));
 const sun=new THREE.DirectionalLight(0xfff4e2,0.85); sun.position.set(-300,500,400); scene.add(sun);
 
-const LAYERS={site:'Site features (pond, well, septic, propane, firepit)',bldg:'Buildings (exteriors)',house:'House interior (inferred plan)',barn:'Pole barn: Airstream Interstate 24X van, pontoon, bench',gym:'Gym barn: owned + proposed gear',elec:'Electrical callouts',solar:'Solar candidates',plan:'Setbacks + ADU spot',trees:'Trees (illustrative)',future:'Future (2+ yrs): guest suite'};
+const LAYERS={site:'Site features (pond, well, septic, propane, firepit)',bldg:'Buildings (exteriors)',house:'House interior (inferred plan)',barn:'Pole barn: Airstream Interstate 24X van, pontoon, bench',gym:'Gym barn: owned + proposed gear',elec:'Electrical callouts',solar:'Solar candidates',plan:'Setbacks + ADU spot',trees:'Trees (illustrative)',future:'Future (2+ yrs): guest suite',cars:'Vehicles: garage cars + barn fit',net:'Network: UniFi APs + bridges',netcov:'Network coverage (approx. circles)',cams:'Ring cameras + doorbell',camcov:'Camera view cones',smart:'Smart locks, thermostats, myQ'};
 const groups={}; for(const k in LAYERS){groups[k]=new THREE.Group();scene.add(groups[k]);}
 const TAGS={photo:['seen in photo','t-photo'],sat:['satellite','t-sat'],rec:['public record','t-rec'],inf:['inferred','t-inf'],prop:['proposed','t-prop'],own:['owned – Seabreeze inventory','t-own'],pnew:['proposed new','t-prop'],future:['future (2+ yrs)','t-fut']};
 const items=[], colliders=[], surfaces=[], pickables=[], extWalls=[], roofs=[], occl=[], panes=[], softMats=[], softLines=[];
@@ -127,7 +133,7 @@ function gableRoof(layer,x0,z0,w,d,yEave,rise,ridgeAlongX,color,overhang,inner){
   g.setIndex(idx);g.computeVertexNormals();
   const om=new THREE.MeshLambertMaterial({color,side:THREE.FrontSide});texMat(om,'seam',1,1);
   const m=new THREE.Mesh(g,om);groups[layer].add(m);roofs.push(m);occl.push(m);
-  const im=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:inner||(color===roofC?0xf3efe6:0xc9ccd0),side:THREE.BackSide}));im.position.y=-0.25;groups[layer].add(im);roofs.push(im);m.userData.inner=im;
+  const imM=new THREE.MeshLambertMaterial({color:inner||(color===roofC?0xc98f58:0xc9ccd0),side:THREE.BackSide});if(!inner&&color===roofC)texMat(imM,'plank',0.55,1.4);const im=new THREE.Mesh(g,imM);im.position.y=-0.25;groups[layer].add(im);roofs.push(im);m.userData.inner=im;
   const e=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x1a1a1a,transparent:true,opacity:.6}));m.add(e);
   return m;
 }
@@ -179,7 +185,7 @@ const tg=new THREE.PlaneGeometry(S.bboxW,S.bboxH,156,106); tg.rotateX(-Math.PI/2
 const tp=tg.attributes.position; for(let k=0;k<tp.count;k++){tp.setY(k,elev(tp.getX(k),tp.getZ(k)));} tg.computeVertexNormals();
 const satMat=new THREE.MeshLambertMaterial({map:tex}), plainMat=new THREE.MeshLambertMaterial({color:0x6f8a52});
 const terrain=new THREE.Mesh(tg,satMat); scene.add(terrain);
-const outer=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0x4d6b3a}));outer.position.y=-8;scene.add(outer);
+const outer=new THREE.Mesh(new THREE.PlaneGeometry(9000,9000).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0x56703c}));outer.position.y=-8;scene.add(outer);
 // parcel line (county GIS)
 line('site',S.ring.map(p=>[W(p[0]),Zs(p[1])]),0xffe14a,'rec',1.2);
 info('Parcel 13-002-015-25 (6.00 ac)','rec','Grand Traverse County TaxParcel layer. Legal: S 878.39 ft from W¼ corner Sec 2 T27N R9W; E 698.62 ft; S 412.78 ft; W 698.61 ft; N to POB, exc. road R/W. Zoning A1-AG. Shape is a true ~698 × 413 ft rectangle running east–west. Elevations: USGS 3DEP point samples, ~40 ft of relief, lowest toward the east-center.',[W(700),rawElev(W(700),Zs(70))+12,Zs(70)]);
@@ -218,16 +224,17 @@ floorT('bldg',H.x0+34,H.z0,H.x0+44,H.z0-32,HM,0x8a6242,'photo','deck',0xd8d2c8);
 for(const [u0,v] of [[44,0],[44,32]]){} // rails
 railing('bldg',H.P(44,0),H.P(44,13),HM);railing('bldg',H.P(44,17),H.P(44,32),HM);railing('bldg',H.P(34,0),H.P(44,0),HM);railing('bldg',H.P(34,32),H.P(44,32),HM);
 {const gy=rawElev(H.x0+52,H.z0-15);const steps=Math.max(1,Math.round((HM-gy)/0.6));for(let s=1;s<=steps;s++){const y=HM-s*(HM-gy)/steps,x=H.x0+44+s*0.9;floor('bldg',x-0.9,H.z0-13,x,H.z0-17,y,0x6a4a30,'inf');}}
+{const gy=rawElev(H.x0+52,H.z0-15);const steps=Math.max(1,Math.round((HM-gy)/0.6));const run=steps*0.9,len=Math.hypot(run,HM-gy),ang=Math.atan2(HM-gy,run);for(const zz of [H.z0-13.1,H.z0-16.9]){const st=new THREE.Mesh(new THREE.BoxGeometry(len,0.9,0.2),new THREE.MeshLambertMaterial({color:0x5a4030}));st.position.set(H.x0+44+run/2,(HM+gy)/2-0.6,zz);st.rotation.z=-ang;groups.bldg.add(st);}}
 info('Deck (cable-free wood rail)','photo','Seen p09, p33-p36: covered wraparound deck on the east (pond) side, main-floor level. Stairs to grade are inferred.',[H.x0+40,HM+5,H.z0-30]);
 // main level rooms (inferred from photos)
 const iw=0xf1eee8;
 lwall('house',H,0,12,12,12,0,8,iw,'inf',[[8,11]]); lwall('house',H,12,0,12,12,0,8,iw,'inf',[]);
-lwall('house',H,0,20,12,20,0,8,iw,'inf',[[8,11]]); lwall('house',H,12,20,12,32,0,8,iw,'inf',[]);
+lwall('house',H,0,20,12,20,0,8,iw,'inf',[[4.4,6.9,6.8],[8,11]]); lwall('house',H,12,20,12,32,0,8,iw,'inf',[]);
 lwall('house',H,8,12,8,20,0,8,iw,'inf',[[3,6]]);
 const STAIR_INFO=info('Stairs (main ↔ loft ↔ lower)','photo','Stair seen p19. Location inferred. Press L in walk mode to change level.');
 lbox('house',H,17,30,34,32,3,0xf2f2f2,'photo',info('Kitchen — white cabinets, stainless','photo','Seen p05, p06, p10, p17, p18. Layout position inferred (north side, near garage entry).'),0);
-lbox('house',H,1,1,7,8,0.04,0x6d5a4a,'inf',info('Main bedroom 1','inf','2 bedrooms on main per listing; placement inferred.'),0);
-lbox('house',H,1,24,7,31,0.04,0x6d5a4a,'inf',info('Main bedroom 2','inf','Placement inferred.'),0);
+lbox('house',H,1,1,7,8,0.04,0x6d5a4a,'inf',info('Office (main bedroom 1)','inf','Smaller main-floor bedroom → pure office. 2 bedrooms on main per listing; placement inferred.'),0);
+lbox('house',H,1,24,7,31,0.04,0x6d5a4a,'inf',info('Office / guest (futon) — main bedroom 2','inf','Larger main-floor bedroom (sellers\' master) with a direct door to the main bath → office + guest overflow. Placement inferred.'),0);
 lbox('house',H,1,13,7,19,0.04,0xbfd7e0,'inf',info('Full bath (main)','photo','Bath seen p27/p28; placement inferred.'),0);
 // loft (visual only)
 lbox('house',H,0,0,14,32,0.4,0xd9c7a6,'photo',info('Loft: bedroom 3 + ¾ bath','photo','Upper bedroom with skylights seen p21-p26 (pine ceiling). Walkable in v2 (stairs or the Loft level button). Headroom is limited near the north/south eaves.'),9,{edges:true});
@@ -243,7 +250,7 @@ const G=frame(263+5,308-32,HM);
 lwall('bldg',G,0,0,0,24,0,9,sid,'rec',[[8,11,6.8]],true); lwall('bldg',G,24,0,24,24,0,9,sid,'rec',[],true);
 lwall('bldg',G,0,24,24,24,0,9,sid,'rec',[[4,20,7]],true);
 lwall('bldg',G,0,0,5,0,0,9,sid,'rec',[],true);
-gableRoof('bldg',G.x0,G.z0-24,24,24,HM+9,7,false,roofC,1.5); gableEnds('bldg',G.x0,G.z0-24,24,24,HM+9,7,false,sid);
+gableRoof('bldg',G.x0,G.z0-24,24,24,HM+9,7,false,roofC,1.5,0xc9ccd0); gableEnds('bldg',G.x0,G.z0-24,24,24,HM+9,7,false,sid);
 floor('bldg',G.x0,G.z0,G.x0+24,G.z0-24,HM,0x9b9b9b,'rec');
 info('Attached 2-car garage 24 × 24','rec','1996 permit: house with attached 24 × 24 garage. Seen p03, p53. ~7 ft door (inferred) — no Airstream.',[G.x0+12,HM+18,G.z0-12]);
 
@@ -260,38 +267,53 @@ lbox('barn',PB,14,-0.3,24,0.3,0.2,0xffffff,'photo',info('Overhead door (with ope
 lbox('barn',PB,26,-0.3,29,0.3,0.2,0xffffff,'photo',info('Walk-in door','photo','Seen p51, right of the overhead door.'),6.8);
 lbox('barn',PB,2,-0.3,8,0.3,0.2,0x7a5a3a,'photo',info('Old wooden double door','photo','Seen p51 at far left. ~7 × 6 ft (estimated). Could become a 2nd overhead door for the boat.'),7);
 // Airstream Interstate 24X = Class B camper VAN on a 2021 Mercedes Sprinter 3500 dually chassis (~24 ft). Nose-in, large section.
-{const it=info('Airstream Interstate 24X camper van (2022, Sprinter 3500 dually)','own','Class B camper van on a 2021 Mercedes-Benz Sprinter 3500 dual-rear-wheel chassis, ~24 ft long, ~6.7 ft wide (body), ~9.8 ft tall incl. roof A/C (approximate). Parked nose-in in the large section behind the tall overhead door (Clark confirmed the door fits). Shore power: 30 A outlet beside it.');
- const [cx,cz]=PB.P(16.9,15.5);const y0=PBy;const silver=new THREE.MeshPhongMaterial({color:0xcfd4d9,shininess:110,specular:0xffffff}),dark=new THREE.MeshLambertMaterial({color:0x1b1d20}),glass=new THREE.MeshPhongMaterial({color:0x101820,shininess:150,specular:0x99aabb});
- const g=groups.barn,add=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);g.add(o);return o;};
- // v along -z; van spans v 3.5 (rear, toward door) .. 27.5 (front hood)
- const Z=v=>PB.P(0,v)[1];
- const body=add(new THREE.BoxGeometry(6.7,7.4,18.3),silver,cx,y0+1.4+3.7,Z(3.5+9.15));body.userData.item=it;pickables.push(body);
- const cab=add(new THREE.BoxGeometry(6.7,6.0,3.2),silver,cx,y0+1.4+3.0,Z(21.8+1.6));cab.userData.item=it;pickables.push(cab);
- const wind=add(new THREE.BoxGeometry(6.3,2.6,0.3),glass,cx,y0+5.5,Z(25.0));wind.rotation.x=0.5;
- add(new THREE.BoxGeometry(6.6,3.2,2.6),silver,cx,y0+1.2+1.6,Z(25+1.3)); // hood
- add(new THREE.BoxGeometry(6.4,1.0,0.3),dark,cx,y0+1.8,Z(27.55)); // grille/bumper
- add(new THREE.BoxGeometry(6.75,1.4,24.1),dark,cx,y0+1.6,Z(15.5)); // lower dark band (Airstream style)
- for(const v of [6,10,14])for(const sd of [-1,1])add(new THREE.BoxGeometry(0.08,1.8,2.6),glass,cx+sd*3.36,y0+6.2,Z(v));
- add(new THREE.BoxGeometry(2.4,0.9,3),new THREE.MeshLambertMaterial({color:0xf2f2f2}),cx,y0+9.3,Z(12)); // roof A/C
- add(new THREE.BoxGeometry(6.2,0.15,10),new THREE.MeshLambertMaterial({color:0x1d3b66}),cx,y0+8.9,Z(7)); // roof solar
- add(new THREE.BoxGeometry(5.8,6.4,0.2),glass,cx,y0+4.9,Z(3.45)); // rear doors
- const tg=new THREE.CylinderGeometry(1.25,1.25,0.75,22);tg.rotateZ(Math.PI/2);
- for(const sd of [-1,1]){add(tg,dark,cx+sd*3.0,y0+1.25,Z(24.0)); // front singles
-   add(tg,dark,cx+sd*2.75,y0+1.25,Z(10.2));add(tg,dark,cx+sd*3.5,y0+1.25,Z(10.2));} // rear duals
- colliders.push({x0:cx-3.6,x1:cx+3.6,z0:Math.min(Z(3.3),Z(27.7)),z1:Math.max(Z(3.3),Z(27.7)),y0:PBy,y1:PBy+9.8});
- it.pos=[cx,PBy+11.2,cz];}
+{const it=info('Airstream Interstate 24X camper van (2022, Sprinter 3500 dually)','own','Class B camper van on a 2021 Mercedes-Benz Sprinter 3500 dual-rear-wheel chassis, ~24 ft long, ~6.7 ft wide (body), ~9.8 ft tall incl. roof A/C (approximate). Parked nose-in in the large section behind the tall overhead door (Clark confirmed the door fits). Shore power: 30 A outlet beside it.',null,{short:'Airstream Interstate 24X van',pri:9});
+ const [cx]=PB.P(16.9,0);const y0=PBy;const Z=v=>PB.P(0,v)[1];const g=groups.barn;
+ const silver=new THREE.MeshPhongMaterial({color:0xd3d8dd,shininess:120,specular:0xffffff}),dark=new THREE.MeshLambertMaterial({color:0x17191c}),glass=new THREE.MeshPhongMaterial({color:0x0e1720,shininess:160,specular:0x8899aa});
+ // side profile (x = length from rear, y = height), extruded across the width with a bevel for rounded edges
+ const L=24,sh=new THREE.Shape();sh.moveTo(0,1.5);sh.lineTo(0,8.6);sh.quadraticCurveTo(0,9.0,0.5,9.0);sh.lineTo(18.6,9.0);sh.quadraticCurveTo(19.6,9.0,19.9,8.4);
+ sh.lineTo(21.9,5.3);sh.quadraticCurveTo(22.2,4.75,22.8,4.65);sh.lineTo(23.6,4.5);sh.quadraticCurveTo(24,4.4,24,3.9);sh.lineTo(24,1.9);sh.quadraticCurveTo(24,1.5,23.6,1.5);sh.lineTo(0,1.5);
+ const bev=0.35,W2=6.7-2*bev;const geo=new THREE.ExtrudeGeometry(sh,{depth:W2,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:4,curveSegments:10});geo.rotateY(Math.PI/2);
+ const body=new THREE.Mesh(geo,silver);body.position.set(cx-W2/2,y0,Z(3.5));g.add(body);body.userData.item=it;pickables.push(body);body.castShadow=true;
+ const add=(gm,m,x,y,z,ry)=>{const o=new THREE.Mesh(gm,m);o.position.set(x,y,z);if(ry)o.rotation.y=ry;g.add(o);return o;};
+ const zr=Z(3.5); // rear plane; front = zr-24
+ // windshield on the slope (from x=19.9,y=8.4 to x=21.9,y=5.3)
+ const ws=add(new THREE.PlaneGeometry(6.2,3.6),glass,cx,y0+6.85,zr-20.95);ws.rotation.x=-Math.atan2(2.0,3.1);ws.position.y+=0.02;ws.translateZ(0.42);
+ for(const s of [-1,1]){
+  add(new THREE.BoxGeometry(0.05,2.2,2.6),glass,cx+s*3.72,y0+6.4,zr-19.6); // cab door window
+  for(const [v,w] of [[5.2,2.4],[10.5,3.2],[14.8,1.8]])add(new THREE.BoxGeometry(0.05,1.6,w),glass,cx+s*3.72,y0+6.5,zr-v);
+  add(new THREE.BoxGeometry(0.05,0.28,22.5),new THREE.MeshLambertMaterial({color:0x3c4f66}),cx+s*3.73,y0+4.6,zr-11.6); // Airstream stripe
+  add(new THREE.BoxGeometry(0.05,0.1,22.5),new THREE.MeshLambertMaterial({color:0x8fa3b8}),cx+s*3.73,y0+4.3,zr-11.6);
+  add(new THREE.BoxGeometry(0.06,0.5,2.2),new THREE.MeshLambertMaterial({color:0xf2f2f2}),cx+s*3.73,y0+7.6,zr-3.2); // decal plate
+  add(new THREE.BoxGeometry(0.06,1.0,22.8),dark,cx+s*3.72,y0+1.95,zr-12); // rocker / lower trim
+  add(new THREE.BoxGeometry(0.5,0.8,0.25),dark,cx+s*3.95,y0+6.3,zr-21.0); // mirror
+  add(new THREE.BoxGeometry(0.06,0.45,0.9),new THREE.MeshBasicMaterial({color:0xfff6dc}),cx+s*2.6,y0+3.7,zr-24.02).rotation.y=Math.PI/2; // headlight
+ }
+ add(new THREE.BoxGeometry(5.2,1.0,0.12),dark,cx,y0+3.1,zr-24.05);add(new THREE.BoxGeometry(6.8,0.7,0.5),dark,cx,y0+1.9,zr-24.1); // grille, bumper
+ add(new THREE.BoxGeometry(6.8,0.6,0.5),dark,cx,y0+1.9,zr+0.15); // rear bumper
+ add(new THREE.BoxGeometry(5.6,6.0,0.05),new THREE.MeshPhongMaterial({color:0xc8cdd2,shininess:90}),cx,y0+5.3,zr+0.37); // rear doors
+ add(new THREE.BoxGeometry(0.05,6.0,0.06),dark,cx,y0+5.3,zr+0.4);
+ add(new THREE.BoxGeometry(2.4,0.8,3),new THREE.MeshLambertMaterial({color:0xf2f2f2}),cx,y0+9.6,zr-12); // roof A/C
+ add(new THREE.BoxGeometry(5.8,0.12,9),new THREE.MeshPhongMaterial({color:0x1a2f55,shininess:80}),cx,y0+9.45,zr-6); // roof solar
+ add(new THREE.BoxGeometry(4.6,0.2,0.2),dark,cx,y0+9.3,zr-17.5);
+ const tg=new THREE.CylinderGeometry(1.25,1.25,0.72,24);tg.rotateZ(Math.PI/2);const hub=new THREE.CylinderGeometry(0.55,0.55,0.74,16);hub.rotateZ(Math.PI/2);const hm=new THREE.MeshPhongMaterial({color:0xbfc3c8,shininess:100});
+ for(const s of [-1,1]){add(tg,dark,cx+s*3.05,y0+1.25,zr-19.9);add(hub,hm,cx+s*3.08,y0+1.25,zr-19.9);
+   for(const o of [2.75,3.5]){add(tg,dark,cx+s*o,y0+1.25,zr-6.2);}add(hub,hm,cx+s*3.53,y0+1.25,zr-6.2);
+   add(new THREE.BoxGeometry(0.4,0.5,3.2),dark,cx+s*3.6,y0+2.7,zr-6.2);} // dually fender flare
+ colliders.push({x0:cx-3.9,x1:cx+3.9,z0:zr-24.3,z1:zr+0.4,y0:PBy,y1:PBy+10});
+ it.pos=[cx,PBy+11.2,zr-12];}
 // Pontoon boat on a tandem trailer, east side of the large section
-{const it=info('Pontoon boat on trailer (large section)','own','Clark: the big barn\'s large section holds the van AND a pontoon. Modeled as a typical ~22 ft pontoon (8.5 ft beam) on a bunk trailer, tongue toward the door. Size is a placeholder; it must come in through the 10 ft overhead door and then shift east — measure door and bay widths.');
- const [cx]=PB.P(25.9,0);const Z=v=>PB.P(0,v)[1],y=PBy,g=groups.barn,add=(geo,c,x,yy,z,m)=>{const o=new THREE.Mesh(geo,m||new THREE.MeshLambertMaterial({color:c}));o.position.set(x,yy,z);g.add(o);return o;};
+{const it=info('Pontoon boat on trailer (large section)','own','Clark: the big barn\'s large section holds the van AND a pontoon. Modeled as a typical ~22 ft pontoon (8.5 ft beam) on a bunk trailer, tongue toward the door. Size is a placeholder; it must come in through the 10 ft overhead door and then shift east — measure door and bay widths.',null,{short:'Pontoon boat on trailer',pri:8});
+ const [cx]=PB.P(25.6,0);const Z=v=>PB.P(0,v+4)[1],y=PBy,g=groups.barn,add=(geo,c,x,yy,z,m)=>{const o=new THREE.Mesh(geo,m||new THREE.MeshLambertMaterial({color:c}));o.position.set(x,yy,z);g.add(o);return o;};
  const tube=new THREE.CylinderGeometry(0.95,0.95,21,18);tube.rotateX(Math.PI/2);const alu=new THREE.MeshPhongMaterial({color:0xd5d9dd,shininess:90});
- for(const sd of [-1,0,1])add(tube,0,cx+sd*2.9,y+2.6,Z(18),alu); // tritoon
+ for(const sd of [-1,1]){add(tube,0,cx+sd*2.9,y+2.6,Z(18),alu);const cone=new THREE.Mesh(new THREE.SphereGeometry(0.95,16,10,0,Math.PI*2,0,Math.PI/2),alu);cone.rotation.x=-Math.PI/2;cone.scale.set(1,2.2,1);cone.position.set(cx+sd*2.9,y+2.6,Z(28.5));g.add(cone);}
  const deck=add(new THREE.BoxGeometry(8.5,0.3,22),0x7a7f86,cx,y+3.75,Z(18));deck.userData.item=it;pickables.push(deck);
  const fence=new THREE.MeshLambertMaterial({color:0xeeeeee});
  for(const [w,d,x,z] of [[0.15,20,cx-4.17,Z(18.5)],[0.15,20,cx+4.17,Z(18.5)],[8.5,0.15,cx,Z(28.6)]]){const f=add(new THREE.BoxGeometry(w,2.6,d),0,x,y+5.2,z,fence);f.userData.item=it;pickables.push(f);}
- add(new THREE.BoxGeometry(8.4,0.18,22),0x1e2a3a,cx,y+6.55,Z(18)); // gunwale stripe
+ add(new THREE.BoxGeometry(8.6,0.25,22),0x2f5d8a,cx,y+6.55,Z(18)); // gunwale stripe
  add(new THREE.BoxGeometry(2,3.2,2),0xeeeeee,cx+2.5,y+5.5,Z(24)); // console
- for(const v of [11,14,21,26])add(new THREE.BoxGeometry(2.6,1.6,2.4),0x2d3b4c,cx-2.4,y+4.7,Z(v)); // seats
- add(new THREE.BoxGeometry(8,0.1,9),0x1e2a3a,cx,y+11.0,Z(18)); // bimini (raised)
+ for(const v of [11,14,21,26])add(new THREE.BoxGeometry(2.6,1.6,2.4),0xf1eee6,cx-2.4,y+4.7,Z(v)); // seats
+ add(new THREE.BoxGeometry(8,0.1,9),0xd8d0bc,cx,y+11.0,Z(18)); // bimini (raised)
  for(const sd of [-1,1])for(const v of [14,22])add(new THREE.CylinderGeometry(0.05,0.05,4.4,6),0x999999,cx+sd*3.9,y+8.8,Z(v));
  add(new THREE.BoxGeometry(1.2,4.2,1.6),0x111111,cx,y+3.6,Z(7.0)); // outboard
  // trailer
@@ -350,13 +372,13 @@ G1('Cold plunge tub (owned #36 — "take to Michigan")','own','Model/size to con
  lbox('gym',GY,16.5,0.6,22.5,1.6,3.6,0x1c3c2c,'own',it,0,{collide:true});}
 lbox('elec',GY,22.7,0,23.3,0.3,0.8,0xff5040,'prop',info('eBike charging spot (proposed)','prop','Dedicated 20 A GFCI outlet on a timer, away from the sauna; lithium charging on a non-combustible shelf.',null,{gym:true,near:true}),3.5);
 // proposed new gear
-G1('Assault / Echo air bike (proposed new)','pnew','Not in the Seabreeze inventory.',25,25.5,27.5,29.5,4.2,0x30a050);
-G1('GHD (proposed new)','pnew','~6 × 2.5 ft.',20,20.5,26,23,3.6,0x30a050);
-G1('Plyo box set (proposed new)','pnew','Soft/stackable 20/24/30 in set.',15.5,4.5,19.5,6.5,2.5,0x30a050);
-G1('Wall balls (proposed new)','pnew','14/20 lb.',1,21,3,23,1,0x30a050,0,{nocol:true});
-lbox('gym',GY,0,21.5,0.3,22.5,1,0x30a050,'pnew',info('Wall-ball target at 9-10 ft (proposed new)','pnew','On the west wall.',null,{gym:true,near:true}),9);
-G1('Kettlebell set (proposed new, additional)','pnew','Adds to the ~6 owned (one 35 lb). Weights TBD.',4.5,16,7,17.5,1.2,0x30a050,0,{nocol:true});
-G1('Sled (proposed new)','pnew','Push out the overhead door onto the drive/grass.',8,20.5,11,23,1.3,0x30a050);
+G1('Assault / Echo air bike (proposed new)','pnew','Not in the Seabreeze inventory.',25,25.5,27.5,29.5,4.2,0x5f7f68);
+G1('GHD (proposed new)','pnew','~6 × 2.5 ft.',20,20.5,26,23,3.6,0x5f7f68);
+G1('Plyo box set (proposed new)','pnew','Soft/stackable 20/24/30 in set.',15.5,4.5,19.5,6.5,2.5,0x5f7f68);
+G1('Wall balls (proposed new)','pnew','14/20 lb.',1,21,3,23,1,0x5f7f68,0,{nocol:true});
+lbox('gym',GY,0,21.5,0.3,22.5,1,0x5f7f68,'pnew',info('Wall-ball target at 9-10 ft (proposed new)','pnew','On the west wall.',null,{gym:true,near:true}),9);
+G1('Kettlebell set (proposed new, additional)','pnew','Adds to the ~6 owned (one 35 lb). Weights TBD.',4.5,16,7,17.5,1.2,0x5f7f68,0,{nocol:true});
+G1('Sled (proposed new)','pnew','Push out the overhead door onto the drive/grass.',8,20.5,11,23,1.3,0x5f7f68);
 // recovery corner
 G1('Sauna 6 × 6 — OPTIONAL concept','prop','Optional, not in the base plan. ~8 kW 240 V heater (~33 A, 40-50 A circuit). Recovery corner (NW).',0,24,6,30,7,0xb5824f);
 G1('Bathroom / shower spot (proposed)','prop','~7 × 8 ft. Water from the well (trench), septic tie-in or separate system needs GT County Environmental Health review; building + plumbing permits; garage may need to be permitted first. Est. $25-60K.',0,0,7,8,8,0x88b8d8);
@@ -400,7 +422,9 @@ info('Shed (~10 × 12)','inf','Listing lists a shed; only glimpsed at the edge o
  const o=new THREE.Object3D();
  pts.forEach((p,i)=>{const y=rawElev(p[0],p[1]);o.position.set(p[0],y+5*p[2],p[1]);o.scale.set(p[2],10*p[2],p[2]);o.rotation.set(0,0,0);o.updateMatrix();trunk.setMatrixAt(i,o.matrix);});
  con.forEach((p,i)=>{const y=rawElev(p[0],p[1]);o.scale.set(p[2],p[2],p[2]);o.position.set(p[0],y+(8+10)*p[2],p[1]);o.updateMatrix();t1.setMatrixAt(i,o.matrix);o.position.set(p[0],y+(20+8)*p[2],p[1]);o.updateMatrix();t2.setMatrixAt(i,o.matrix);});
- dec.forEach((p,i)=>{const y=rawElev(p[0],p[1]);o.scale.set(p[2]*1.1,p[2]*0.9,p[2]*1.1);o.position.set(p[0],y+17*p[2],p[1]);o.updateMatrix();cr.setMatrixAt(i,o.matrix);});}
+ cr.material.color.set(0xffffff);const FALL=[0x4c7a3a,0x5b8a3c,0xc9772e,0xd9a43a,0xa8452a,0x6f8f3a,0xe0b04a,0x8a3a22];const tc=new THREE.Color();
+ window.__trees=[trunk,t1,t2,cr];
+ dec.forEach((p,i)=>{cr.setColorAt(i,tc.set(FALL[Math.floor((Math.sin(i*12.9898)*43758.5453%1+1)%1*FALL.length)]));const y=rawElev(p[0],p[1]);o.scale.set(p[2]*1.1,p[2]*0.9,p[2]*1.1);o.position.set(p[0],y+17*p[2],p[1]);o.updateMatrix();cr.setMatrixAt(i,o.matrix);});}
 
 // ================= ELECTRICAL / SOLAR =================
 const meter=G.P(-0.3,12); cyl('elec',meter[0],HM+4,meter[1],0.6,1.2,0xff5040,'inf',info('Electric meter / service entrance (inferred)','inf','Utility likely Cherryland Electric Co-op (confirm from bill). Service size NOT listed: likely 200 A, could be 100-150 A. Plan a 400 A (2×200) upgrade (~$4-10K) or a 2nd meter at the gym.',[meter[0],HM+8,meter[1]]));
@@ -417,7 +441,7 @@ info('Proposed trench → gym: 100 A feeder','prop','~110-150 ft. $8-25/ft for t
  m.userData.item=info('Roof solar on the chalet — not recommended (snow)','inf','Superseded: roof panels hold snow, are dangerous to clear on a steep roof, and trees shade 20-50%. Use the ground-mount array in the field instead.',[H.x0+17,HM+24,H.z0+2]);pickables.push(m);}
 const SOLAR={};
 {const it=info('Proposed ground-mount solar (concept) — ~20 kW','prop','About 20 kW DC: 52 × 400 W panels in 2 racked rows (2 panels high, portrait), tilted ~40° facing true south, in the open field. Notes: ~20 kW for annual net-zero (~22,500 kWh/yr est.); ground mount at 40-50° sheds snow and can be cleared by hand; Dec/Jan output only ~25-30% of summer. Published northern-MI installed cost ~$3.00-3.80/W ground mount → ~$60-76K before any tax credit. Needs a shade report, Whitewater Twp land-use permit (setbacks), GT County building/electrical permits, Cherryland interconnection. Position is a concept only.');
- const pm=new THREE.MeshPhongMaterial({color:0x1a2f55,shininess:80,specular:0x6688aa}),fm=new THREE.MeshLambertMaterial({color:0x9aa0a6});
+ const pm=new THREE.MeshLambertMaterial({color:0x1b2f5c}),fm=new THREE.MeshLambertMaterial({color:0x9aa0a6});
  const pt=ctex(256,(gx,n)=>{gx.fillStyle='#fff';gx.fillRect(0,0,n,n);gx.fillStyle='#9fb0c8';for(let i=0;i<=6;i++){gx.fillRect(i*n/6-1,0,2,n);}for(let j=0;j<=10;j++)gx.fillRect(0,j*n/10-1,n,2);});
  pm.map=pt;pt.repeat.set(13,2);
  const len=13*3.75,slope=2*5.6,tilt=40*Math.PI/180,X0=W(420),Zr=[Zs(352),Zs(378)];
@@ -480,7 +504,7 @@ const FUTNAME='Future consideration (~2 years out): Guest suite addition, only i
 // ================= LABELS / UI =================
 const lblDiv=document.getElementById('labels');
 items.forEach((it,k)=>{if(!it.pos)return;const d=document.createElement('div');d.className='lbl'+(it.tag==='future'?' fut':it.tag==='inf'?' inf':soft(it.tag)?' prop':it.tag==='own'?' own':'');
-  d.textContent=it.tag==='future'&&it.name.startsWith('Future consideration')?it.name:it.name.replace(/\s*\(.*$/,'').slice(0,46);d.title=it.name;d.onclick=()=>showInfo(it);lblDiv.appendChild(d);it.el=d;
+  d.textContent=it.short||(it.name.startsWith('Future consideration')?'Future guest suite':(()=>{let t=it.name.replace(/^#\d+\s*/,'').split(/\s+\(|\s+—\s+|:\s+|\s+–\s+/)[0];return t.length>30?t.slice(0,28)+'…':t;})());it.pri=it.pri!==undefined?it.pri:(it.layer==='bldg'?7:it.tag==='own'?6:it.tag==='photo'||it.tag==='rec'||it.tag==='sat'?4:it.tag==='future'?3:3);d.title=it.name;d.onclick=()=>showInfo(it);lblDiv.appendChild(d);it.el=d;
   it.layer=it.layer||guessLayer(it);});
 function guessLayer(it){if(it.gym)return 'gym';const n=it.name;if(/panel|meter|feeder|trench|Wall Connector|Powerwall|RV outlet|eBike charging/.test(n))return 'elec';if(/Solar/.test(n))return 'solar';if(it.tag==='future')return 'future';if(/ADU|Setback/.test(n))return 'plan';
   if(/Airstream|boat|Workbench|shelf|door|Overhead/.test(n))return 'barn';if(/bedroom|bath|Kitchen|Dining|Great|Loft|Stairs|family|Laundry/i.test(n))return 'house';if(/House|garage|barn|Shed|Deck|Second/i.test(n))return 'bldg';return 'site';}
@@ -517,9 +541,9 @@ function flyCam(toP,toL,dur,done){const fromP=camera.position.clone(),fromL=look
   const D=fromP.distanceTo(toP);dur=dur||Math.min(2600,Math.max(900,D*6));
   if(document.pointerLockElement)document.exitPointerLock();mode='fly';controls.enabled=false;
   anim={t0:performance.now(),dur,fromP,fromL,toP:toP.clone(),toL:toL.clone(),lift:D>90?Math.min(120,D*0.3):0,done};uiMode();}
-function enterOrbit(t){mode='orbit';controls.enabled=true;controls.target.copy(t);camera.near=0.8;camera.updateProjectionMatrix();uiMode();}
+function enterOrbit(t,fov){mode='orbit';controls.enabled=true;controls.target.copy(t);camera.near=0.8;camera.fov=fov||55;camera.updateProjectionMatrix();uiMode();}
 function enterWalk(s){mode='walk';controls.enabled=false;player.x=s.x;player.z=s.z;player.feet=s.feet!==undefined?s.feet:groundAt(s.x,s.z,elev(s.x,s.z)+1);player.vy=0;
-  player.yaw=s.yaw||0;player.pitch=s.pitch||0;camera.rotation.order='YXZ';camera.near=0.2;camera.fov=FOV;camera.updateProjectionMatrix();uiMode();}
+  player.yaw=s.yaw||0;player.pitch=s.pitch||0;camera.rotation.order='YXZ';camera.near=0.2;FOV=s.fov||55;camera.fov=FOV;camera.updateProjectionMatrix();uiMode();}
 const walkPose=s=>{const feet=s.feet!==undefined?s.feet:groundAt(s.x,s.z,elev(s.x,s.z)+1);const p=new THREE.Vector3(s.x,feet+5.5,s.z);
   const d=new THREE.Vector3(-Math.sin(s.yaw||0)*Math.cos(s.pitch||0),Math.sin(s.pitch||0),-Math.cos(s.yaw||0)*Math.cos(s.pitch||0));return {p,l:p.clone().add(d.multiplyScalar(10)),feet};};
 function goWalk(s,animate){const w=walkPose(s);const ss=Object.assign({},s,{feet:w.feet});if(animate===false){enterWalk(ss);return;}flyCam(w.p,w.l,null,()=>enterWalk(ss));}
@@ -585,7 +609,7 @@ window.toggleHelp=function(v){const h=document.getElementById('help');h.style.di
 window.__furn=[];
 function FP(name,tag,text,u0,v0,u1,v1,h,color,y0){const t=tag||'prop';const m=lbox('house',H,Math.min(u0,u1),Math.min(v0,v1),Math.max(u0,u1),Math.max(v0,v1),h,color,t,info(name,t,text,null,{near:true}),y0,{collide:true});window.__furn.push({name,c:colliders[colliders.length-1],mesh:m});return m;}
 // MAIN LEVEL — entertaining
-FP('Great room lounge — MAIN level = entertaining (zone label)','prop','Lounge/club look: piano, cigar chairs, low sofa, back bar, art wall. Vaulted pine ceiling (paint white per remodel plan).',22,10.5,22.2,10.7,0.1,0xd19a5b,0);
+FP('Great room lounge — MAIN level = entertaining (zone label)','prop','Lounge/club look: piano, cigar chairs, low sofa, back bar, art wall. Existing vaulted wood tongue-and-groove ceiling and wood character are KEPT (Clark, Oct 26); modern furnishings around it.',22,10.5,22.2,10.7,0.1,0xd19a5b,0);
 FP('#5 Steinway Model B grand (6′11″ × 4′10″, ~760 lb)','own','Interior zone beside the stair, ~12 ft from the east glass and out of direct sun; keep off any heat register. Lid shown raised. Add a Dampp-Chaser humidity system (vaulted wood room). Keyboard faces the lounge.',17,12.5,21.8,19.4,3.3,0x111111,0);
 FP('#5 Steinway lid (raised)','own','Lid prop ~45°.',17.3,13.5,17.5,19,2.2,0x222222,3.3);
 FP('#5 Steinway artist bench','own','Placeholder 3 × 1.2 ft.',18.4,11.1,20.4,12.2,1.6,0x222222,0);
@@ -672,6 +696,10 @@ function can(u,v,yC,layer,F){const p=(F||H).P(u,v);PL(new THREE.CylinderGeometry
  surf(H.x0,H.z0-32,H.x0+14,H.z0,HM+9.4);
  for(const [a,b] of [[P(0,3.6),P(14,3.4)],[P(0,28.6),P(14,28.4)],[P(-0.4,0),P(0.2,32)]])colliders.push({x0:Math.min(a[0],b[0]),x1:Math.max(a[0],b[0]),z0:Math.min(a[1],b[1]),z1:Math.max(a[1],b[1]),y0:HM+9.4,y1:HM+20});}
 
+{const wood=new THREE.MeshLambertMaterial({color:0x9a6a3c});const a=H.P(0,16),b=H.P(34,16);const rb=new THREE.Mesh(new THREE.BoxGeometry(34,1.0,0.7),wood);rb.position.set((a[0]+b[0])/2,HM+28.4,a[1]);groups.house.add(rb);
+ for(const v of [6,26]){const y=HM+9+20*(1-Math.abs(v-16)/16)-0.9;const p=H.P(17,v);const pb=new THREE.Mesh(new THREE.BoxGeometry(34,0.6,0.5),wood);pb.position.set(p[0],y,p[1]);groups.house.add(pb);}
+ // wood trim around the east glass gable openings
+ for(const [v0,v1,h] of [[1,7,8.4],[8,24,7.5],[25,31,8.4]]){const c=H.P(33.65,(v0+v1)/2);const t1=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.35,v1-v0+0.6),wood);t1.position.set(c[0],HM+h+0.15,c[1]);groups.house.add(t1);}}
 // ---- LOWER: master suite
 rug(1.2,1.2,9.2,10.8,-9,0xd8d2c6);
 Dx(0.4,3,7.4,9.7,1.1,0x6b4f3a,-9,true);Dx(0.6,3.1,7.3,9.6,0.9,0xf4f2ee,-7.9);Dx(3.6,3.0,7.4,9.7,0.35,0x9aa3ad,-7.0); // platform king, duvet throw
@@ -704,7 +732,7 @@ for(const u of [23,25.5,28])pendant(u,24.25,9.5,6.6);
 // main bath (fiberglass tub/shower unit, new vanity, matching toilet)
 Dx(0.3,12.3,5.3,14.9,1.7,WHT,0,true);Dx(0.3,12.3,5.3,12.5,6.6,WHT,0);Dx(0.3,12.3,0.5,14.9,6.6,WHT,0);Dx(5.1,12.3,5.3,14.9,6.6,WHT,0);
 {const p=P(2.8,14.95);PL(new THREE.BoxGeometry(5,0.04,0.04),BLK,p[0],HM+6.6,p[1]);}
-vanity(3.4,18.3,7.6,19.8,0,1,'N');toilet(1.4,19.85,'N',0);
+vanity(0.3,15.4,1.9,18.6,0,1,'W');toilet(7.75,14,'E',0);
 info('Main bath concept','prop','One-piece fiberglass/acrylic tub-shower unit, new vanity + quartz top if the existing one reads dated (p27/p28), black fixtures, toilet matching the other two baths.',[P(4,16)[0],HM+7,P(4,16)[1]],{near:true,layer:'house'});
 closet(9.6,0.5,11.75,6,0,'W');closet(9.6,26,11.75,31.5,0,'W');
 rug(14,1.5,27,10,0,0x8e8174);
@@ -811,11 +839,145 @@ const EXTRAS=[];
  // massage chair
  for(const f of byName(/Massage chair/)){hideBox(f);uph(f,'s',0x2e2e2e,1.8,4.2,1);}
  // coffee chairs + cafe table at walk-out
- for(const f of byName(/Morning coffee/)){hideBox(f);const k=f.c,y=k.y0,cx=(k.x0+k.x1)/2,cz=(k.z0+k.z1)/2;const t=new THREE.Mesh(new THREE.CylinderGeometry(1,1,0.1,20),new THREE.MeshLambertMaterial({color:0x222222}));t.position.set(cx,y+2.4,cz);groups.house.add(t);B(cx-.06,cx+.06,cz-.06,cz+.06,y,2.4,0x222222);
-   for(const s of [-1,1]){const x=cx+s*1.6;B(x-0.9,x+0.9,cz-0.9,cz+0.9,y+1.2,0.4,0xd8d0c0);B(s<0?x-0.9:x+0.7,s<0?x-0.7:x+0.9,cz-0.9,cz+0.9,y+1.2,1.6,0xd8d0c0);B(x-0.9,x+0.9,cz-0.9,cz+0.9,y,1.2,0x2a2a2a);}}
+ for(const f of byName(/Morning coffee/)){hideBox(f);const k=f.c,y=k.y0,cx=(k.x0+k.x1)/2+0.6,cz=(k.z0+k.z1)/2;const t=new THREE.Mesh(new THREE.CylinderGeometry(0.95,0.95,0.08,24),new THREE.MeshLambertMaterial({color:0x2a2a2a}));t.position.set(cx,y+2.4,cz);groups.house.add(t);B(cx-.05,cx+.05,cz-.05,cz+.05,y,2.4,0x222222);
+   const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.12,0.3,12),new THREE.MeshLambertMaterial({color:0xf4f1ea}));cup.position.set(cx-0.3,y+2.6,cz+0.2);groups.house.add(cup);const cup2=cup.clone();cup2.position.set(cx+0.35,y+2.6,cz-0.25);groups.house.add(cup2);
+   for(const s2 of [-1,1]){const z=cz+s2*1.7;B(cx-0.85,cx+0.85,z-0.85,z+0.85,y+1.5,0.12,0x2a2a2a);B(cx-0.85,cx+0.85,s2<0?z-0.85:z+0.73,s2<0?z-0.73:z+0.85,y+1.5,1.5,0x2a2a2a);for(const [dx,dz] of [[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]])B(cx+dx-.05,cx+dx+.05,z+dz-.05,z+dz+.05,y,1.5,0x2a2a2a);B(cx-0.8,cx+0.8,z-0.8,z+0.8,y+1.62,0.2,0xd9cfbf);}}
  // back bar: cabinet + shelves + bottles
  for(const f of byName(/Back bar/)){const k=f.c,y=k.y0;for(let i=0;i<14;i++){const x=k.x0+0.4+i*(k.x1-k.x0-0.8)/13;const b=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.12,0.9,8),new THREE.MeshPhongMaterial({color:[0x7a3b12,0x2f5d2a,0xc9b27a,0x5a1a1a][i%4],shininess:90}));b.position.set(x,y+3.95,(k.z0+k.z1)/2);groups.house.add(b);}
    B(k.x0,k.x1,k.z1-0.4,k.z1,y+5,0.1,0x3a2a20);}}
+
+// ---- v3 GYM premium pass: wall linings + accent wall, rubber speckle floor, plate tree, dumbbells, recovery bench + towel hooks, warm lights
+{const g=groups.gym,F=GY,yb=GYy;const LM=c=>new THREE.MeshLambertMaterial({color:c});
+ const pan=(u0,v0,u1,v1,y0,h,c)=>{const a=F.P(u0,v0),b=F.P(u1,v1);const o=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.06,Math.abs(b[0]-a[0])),h,Math.max(0.06,Math.abs(b[1]-a[1]))),LM(c));o.position.set((a[0]+b[0])/2,yb+y0+h/2,(a[1]+b[1])/2);o.receiveShadow=true;g.add(o);return o;};
+ const UP=0xd9d6cf,WA=0x2f3338,ACC=0x23394d;
+ // wall runs (inside face) with gaps: south v=0.3 (door u22-25), north v=29.7 (door u13-16), east u=27.7 (overhead v11-19), west u=0.3 = accent
+ const runs=[['S',[[0.3,22],[25,27.7]]],['N',[[0.3,13],[16,27.7]]],['E',[[0.3,11],[19,29.7]]]];
+ for(const [side,segs] of runs)for(const [a,b] of segs){if(side==='S'){pan(a,0.28,b,0.32,0.08,3.9,WA);pan(a,0.28,b,0.32,4,6,UP);}if(side==='N'){pan(a,29.68,b,29.72,0.08,3.9,WA);pan(a,29.68,b,29.72,4,6,UP);}if(side==='E'){pan(27.68,a,27.72,b,0.08,3.9,WA);pan(27.68,a,27.72,b,4,6,UP);}}
+ pan(0.28,0.3,0.32,29.7,0.08,9.9,ACC); // logo-free accent wall (deep blue-slate)
+ for(let i=0;i<5;i++)pan(0.33,3+i*5.5,0.36,3.15+i*5.5,0.08,9.9,0x1b2c3c); // vertical batten lines on the accent wall
+ // speckled rubber floor texture
+ const rt=ctex(256,(c,n)=>{c.fillStyle='#2a2a2a';c.fillRect(0,0,n,n);let r=5;const rnd=()=>{r=(r*16807)%2147483647;return r/2147483647;};for(let i=0;i<2600;i++){const v=60+Math.floor(rnd()*80);c.fillStyle=`rgb(${v},${v},${v})`;c.fillRect(rnd()*n,rnd()*n,1.6,1.6);}c.fillStyle='#161616';c.fillRect(0,0,n,2);c.fillRect(0,0,2,n);});
+ rt.repeat.set(7,7.5);const fl=pan(0.3,0.3,27.7,29.7,0.03,0.04,0xffffff);fl.material.map=rt;fl.material.needsUpdate=true;
+ // plate tree with bumpers (west wall, near the barbell tree)
+ {const [x,z]=F.P(2.6,23.6);const post=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,4.2,10),LM(0x1d1f22));post.position.set(x,yb+2.1,z);g.add(post);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.2,2.4),LM(0x1d1f22));base.position.set(x,yb+0.1,z);g.add(base);
+  const cols=[0xc23b3b,0x2f6fb5,0xd9b23a,0x3b8f4a,0x222222];for(let i=0;i<8;i++){const r=[1.48,1.48,1.48,1.48,1.2,1.2,0.9,0.9][i];const pg=new THREE.CylinderGeometry(r,r,0.22,26);pg.rotateZ(Math.PI/2);const p=new THREE.Mesh(pg,LM(cols[i%5]));const side=i%2?1:-1;p.position.set(x+side*(0.3+Math.floor(i/2)*0.24),yb+[3.2,3.2,2.2,2.2,1.6,1.6,1.1,1.1][i],z);g.add(p);}}
+ // dumbbells on the 3-tier rack (south wall, u23.5-27.5)
+ {const dg=new THREE.CylinderGeometry(0.28,0.28,0.35,6);dg.rotateZ(Math.PI/2);const hg=new THREE.CylinderGeometry(0.07,0.07,0.6,8);hg.rotateZ(Math.PI/2);
+  for(let t=0;t<3;t++)for(let i=0;i<5;i++){const [x,z]=F.P(24+i*0.75,0.6+t*0.35);const y=yb+1.0+t*1.05;for(const s of [-1,1]){const d=new THREE.Mesh(dg,LM(0x1a1a1a));d.position.set(x+s*0.32,y,z);d.rotation.x=Math.PI/6;g.add(d);}const h=new THREE.Mesh(hg,LM(0xbfc4c8));h.position.set(x,y,z);g.add(h);}}
+ // recovery corner: cedar bench + towel hooks + towels by the plunge (north wall)
+ {pan(13,27.6,16.6,29.0,1.4,0.15,0xb07a4a);for(const u of [13.3,16.3])pan(u-0.1,27.8,u+0.1,28.8,0.04,1.4,0x1d1f22);
+  for(let i=0;i<4;i++){const u=13.2+i*1.0;pan(u-0.05,29.55,u+0.05,29.66,5.2,0.12,0x1d1f22);pan(u-0.35,29.48,u+0.35,29.6,3.6,1.6,[0xf2efe8,0x9fb3bf,0xf2efe8,0x9fb3bf][i]);}
+  colliders.push((()=>{const a=F.P(13,27.6),b=F.P(16.6,29);return {x0:Math.min(a[0],b[0]),x1:Math.max(a[0],b[0]),z0:Math.min(a[1],b[1]),z1:Math.max(a[1],b[1]),y0:yb,y1:yb+1.6};})());}
+ // warm wall-wash lights along the accent wall + 2 extra soft fills
+ for(let i=0;i<5;i++){const [x,z]=F.P(0.7,3+i*5.8);const l=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.8),new THREE.MeshBasicMaterial({color:0xfff0d0}));l.position.set(x,yb+9.6,z);g.add(l);}
+ for(const [u,v] of [[7,8],[20,22]]){const [x,z]=F.P(u,v);const pl=new THREE.PointLight(0xfff1dc,0.45,26,1.3);pl.position.set(x,yb+9,z);scene.add(pl);ilights.push(pl);}}
+
+// ================= v4: vehicles, barn fit, modern doors, network, cameras, smart home, offices =================
+const NEWITEMS=[];const NI=(name,tag,text,pos,layer,extra)=>{const it=info(name,tag,text,pos,Object.assign({layer,near:false},extra||{}));NEWITEMS.push(it);return it;};
+const LMv=c=>new THREE.MeshLambertMaterial({color:c});
+function car(layer,cx,cz,y,L,Wd,Hh,color,kind,it,rot){ // simple car: body + cabin + wheels; L along z (nose toward -z unless rot)
+  const g=new THREE.Group();const paint=new THREE.MeshPhongMaterial({color,shininess:110,specular:0x666666}),glass=new THREE.MeshPhongMaterial({color:0x111a22,shininess:150}),blk=LMv(0x151515);
+  const lowH=kind==='sport'?Hh*0.55:Hh*0.5;const b=new THREE.Mesh(new THREE.BoxGeometry(Wd,lowH,L),paint);b.position.y=0.55+lowH/2;g.add(b);
+  const cl=kind==='sport'?L*0.42:L*0.62,ch=Hh-0.55-lowH;const cab=new THREE.Mesh(new THREE.BoxGeometry(Wd*0.86,ch,cl),glass);cab.position.set(0,0.55+lowH+ch/2,kind==='sport'?L*0.05:L*0.06);g.add(cab);
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(Wd*0.8,0.12,cl*0.8),paint);roof.position.set(0,Hh-0.06,cab.position.z);g.add(roof);
+  const tg=new THREE.CylinderGeometry(1.15,1.15,0.8,20);tg.rotateZ(Math.PI/2);const wb=kind==='sport'?L*0.27:L*0.3;for(const s of [-1,1])for(const z of [-wb,wb]){const w=new THREE.Mesh(tg,blk);w.position.set(s*(Wd/2-0.3),1.15,z);g.add(w);}
+  for(const s of [-1,1]){const hl=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.25,0.08),new THREE.MeshBasicMaterial({color:0xfff6dc}));hl.position.set(s*Wd*0.33,0.55+lowH*0.8,-L/2-0.02);g.add(hl);const tl=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.2,0.08),new THREE.MeshBasicMaterial({color:0xb01010}));tl.position.set(s*Wd*0.33,0.55+lowH*0.85,L/2+0.02);g.add(tl);}
+  g.position.set(cx,y,cz);if(rot)g.rotation.y=rot;groups[layer].add(g);g.traverse(o=>{if(o.isMesh){o.castShadow=true;if(it){o.userData.item=it;pickables.push(o);}}});
+  colliders.push({x0:cx-Wd/2,x1:cx+Wd/2,z0:cz-L/2,z1:cz+L/2,y0:y,y1:y+Hh});return g;}
+const IN=v=>v/12;
+// --- main garage: Tesla Model Y + Cadillac XT5 (manufacturer specs)
+{const y=HM;const MY=NI('Tesla Model Y (Clark)','own','Tesla spec: 188.7 in L × 75.6 in W (83.8 in with mirrors, 78.0 folded) × 63.8 in H. West bay, next to the Tesla Wall Connector (west wall). Source: tesla.com owner\'s manual (Model Y dimensions).',null,'cars',{short:'Tesla Model Y',pri:8});
+ const XT=NI('Cadillac XT5 (Jenny)','own','Cadillac spec: 189.6 in L × 74.9 in W × 66.1 in H. East bay. Source: cadillac.com XT5 specifications. 24 × 24 garage (record): two SUVs side by side leave ~10 ft of width for walkways between and beside them.',null,'cars',{short:'Cadillac XT5',pri:8});
+ const a=G.P(6.2,11.5),b=G.P(17.4,11.5);
+ car('cars',a[0],a[1],y,IN(188.7),IN(75.6),IN(63.8),0xe8e8ea,'suv',MY);car('cars',b[0],b[1],y,IN(189.6),IN(74.9),IN(66.1),0x1c2a3a,'suv',XT);
+ MY.pos=[a[0],y+8,a[1]];XT.pos=[b[0],y+8,b[1]];}
+// --- pole barn small section: future sports car test-fit (Porsche 911 992)
+{const y=PBy;const it=NI('Future sports car test-fit: Porsche 911 (992) in the smaller section','prop','Porsche spec (992.2 Carrera): 178.8 in L × 72.9 in W (80.0 in with mirrors) × 51.1 in H (newsroom.porsche.com tech specs). Alternative Shelby GT350: 188.9 × 75.9 in (caranddriver.com). Fits the ~11.5 ft-wide smaller section with a 3+ ft walkway, but NOT through the old ~7 ft wooden double door: replace it with a 9 × 7 ft modern overhead door (proposed). It does not fit in the large section with the van + pontoon.',null,'cars',{short:'Porsche 911 (future) test-fit',pri:8});
+ const p=PB.P(5.4,12);car('cars',p[0],p[1],y,IN(178.8),IN(72.9),IN(51.1),0xb3121a,'sport',it,Math.PI);it.pos=[p[0],y+7,p[1]];}
+// --- modern barn doors (Hanna look: black flush insulated steel + cedar accent above + black up/down sconces)
+{const it=NI('Proposed modern doors (concept): black flush steel, Hanna-style','prop','Matches the Hanna garage look (listing photo 09): black/charcoal insulated flush steel sectional doors with fine horizontal texture, no glass, set in black siding with a cedar tongue-and-groove band above and black up/down sconces. E.g. Clopay Modern Steel (flush panel, R-18.4, black). Pole barn: keep the tall ~10 × 11.5 ft opening for the van (custom size); replace the old wooden double door with a 9 × 7 ft door; gym barn: 8 ft-wide door. Published: Clopay Modern Steel 16×7 black, no windows, $2,347 door-only (Home Depot); installed 9×7/10×7 $3,300-5,800 and 16×7 $4,100-6,600 (Reynolds Door, Clopay dealer). Custom tall door priced by quote. myQ-ready openers.',null,'barn',{short:'Proposed modern doors (concept)',pri:7});
+ const doorTex=ctex(256,(c,n)=>{c.fillStyle='#262729';c.fillRect(0,0,n,n);for(let i=0;i<32;i++){c.fillStyle=i%8===7?'#121314':'#1e1f21';c.fillRect(0,i*n/32,n,1.5);}});
+ const cedar=new THREE.MeshLambertMaterial({color:0xc99a62});texMat(cedar,'plank',1,1);
+ const mk=(F,y0,uA,uB,v,h,side,acc)=>{const L=uB-uA;const mat=new THREE.MeshLambertMaterial({color:0xffffff});const t=doorTex.clone();t.needsUpdate=true;t.repeat.set(1,h/3.2);mat.map=t;
+   let a,b;if(side==='S'){a=F.P(uA,v);b=F.P(uB,v);}else{a=F.P(v,uA);b=F.P(v,uB);}
+   const horiz=side==='S';const d=new THREE.Mesh(new THREE.BoxGeometry(horiz?L:0.2,h,horiz?0.2:L),mat);d.position.set((a[0]+b[0])/2,y0+h/2,(a[1]+b[1])/2+(horiz?0.42:0));if(!horiz)d.position.x+=0.42;groups.barn.add(d);d.userData.item=it;pickables.push(d);
+   // frame
+   const fr=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+0.8:0.3,h+0.4,horiz?0.3:L+0.8),LMv(0x111111));fr.position.copy(d.position);fr.position.y=y0+(h+0.4)/2;if(horiz)fr.position.z-=0.06;else fr.position.x-=0.06;groups.barn.add(fr);
+   if(acc){const ah=acc;const cb=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+0.8:0.1,ah,horiz?0.1:L+0.8),cedar);cb.position.set(d.position.x+(horiz?0:0.05),y0+h+0.5+ah/2,d.position.z+(horiz?0.05:0));groups.barn.add(cb);
+     const sc=new THREE.Mesh(new THREE.BoxGeometry(horiz?0.35:0.5,0.9,horiz?0.5:0.35),LMv(0x111111));sc.position.set(d.position.x+(horiz?0:0.3),y0+h+0.5+ah*0.45,d.position.z+(horiz?0.3:0));groups.barn.add(sc);}
+   // hide/disable the old white door slab at the same place if any
+   };
+ // pole barn south face (v=0): tall van door u14-24 h11.5 with cedar band to eave; small-section door u2-8 h7 (proposed 9 x 7 when widened)
+ mk(PB,PBy,14,24,-0.3,11.5,'S',0);mk(PB,PBy,2,8,-0.3,7,'S',3.6);
+ // gym barn east face (u=28): v11-19 h8
+ mk(GY,GYy,11,19,28.0,8,'E',1.6);
+ it.pos=[PB.P(19,0)[0],PBy+14.5,PB.P(19,0)[1]+4];
+ // remove the old white overhead/door slabs from view
+ groups.barn.children.forEach(o=>{const n=o.userData&&o.userData.item&&o.userData.item.name;if(n&&/^Overhead door \(with opener\)|^Old wooden double door/.test(n))o.visible=false;});}
+// --- UniFi network (prosumer)
+const NET=[];
+{const add=(name,txt,x,y,z,r,kind)=>{const col=kind==='gw'?0x2a7fff:kind==='out'?0x00b0a0:kind==='br'?0xffa000:0x3a8fff;
+  const m=new THREE.Mesh(kind==='br'?new THREE.BoxGeometry(0.8,0.8,0.4):new THREE.CylinderGeometry(0.55,0.55,0.18,20),new THREE.MeshBasicMaterial({color:col}));m.position.set(x,y,z);groups.net.add(m);
+  const it=NI(name,'prop',txt,[x,y+2.5,z],'net',{short:name.split(' (')[0],pri:6});m.userData.item=it;pickables.push(m);
+  if(r){const ring=new THREE.Mesh(new THREE.RingGeometry(r-1.2,r,64),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.35,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(x,(kind==='out'?elev(x,z):y-5)+1.2,z);groups.netcov.add(ring);
+    const disc=new THREE.Mesh(new THREE.CircleGeometry(r,64),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.09,side:THREE.DoubleSide,depthWrite:false}));disc.rotation.x=-Math.PI/2;disc.position.copy(ring.position);groups.netcov.add(disc);}};
+ const h=(u,v)=>H.P(u,v);
+ {const p=h(27,6);add('UniFi Cloud Gateway Ultra + Switch Lite 8 PoE (gateway)','House network core in the lower mechanical room next to the ISP modem: Cloud Gateway Ultra ($129) + Switch Lite 8 PoE ($109) powering the APs (store.ui.com list, Oct 2026).',p[0],HL+4,p[1],0,'gw');}
+ {const p=h(20,20);add('UniFi U7 Pro AP — lower level','Ceiling AP, WiFi 7, ~1,500 sf each ($189, store.ui.com).',p[0],HL+8.6,p[1],45,'ap');}
+ {const p=h(24,14);add('UniFi U7 Pro AP — main level','Great room ceiling ($189).',p[0],HM+8.6,p[1],50,'ap');}
+ {const p=h(7,15);add('UniFi U7 Pro AP — loft','Loft ceiling ($189).',p[0],HM+17,p[1],40,'ap');}
+ {const p=h(44,30);add('UniFi U7 Outdoor AP — deck / yard / pond','Mounted at the NE deck corner ($199, store.ui.com); covers the deck, walk-out, pond and fire pit.',p[0],HM+7,p[1],150,'out');}
+ {const x=W(330),z=Zs(330);add('UniFi U7 Outdoor AP — field / solar (on a post)','Post-mounted outdoor AP fed by PoE in the solar trench conduit ($199).',x,elev(x,z)+9,z,170,'out');}
+ {const p=G.P(-0.3,20);add('UniFi Building Bridge (UBB) — house end','60 GHz point-to-point bridge, house → pole barn (~200 ft line of sight). UBB kit $279 (store.ui.com; out of stock as of Oct 2026 — alternative: Device Bridge or a 2nd outdoor AP in mesh). Alternative: bury Cat6/fiber in the planned barn trench.',p[0],HM+10,p[1],0,'br');}
+ {const p=PB.P(16,0);add('UBB — pole barn end + U7 Pro inside','Bridge on the barn gable; U7 Pro inside for the van and shop ($189).',p[0],PBy+12.5,p[1]+0.6,60,'br');}
+ {const p=GY.P(28,26);add('UBB / mesh link — gym barn + U7 Pro inside','Second bridge (or mesh from the pole-barn AP) to the gym; U7 Pro inside for the Peloton/TV/cameras ($189).',p[0]+0.4,GYy+9.5,p[1],55,'br');}
+}
+// --- Ring cameras (hard-wired power, Wi-Fi data) + doorbell
+{const cam=(name,x,y,z,yaw,txt)=>{const g=new THREE.Group();const b=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.7,0.5),LMv(0x111111));g.add(b);const l=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.1,14),new THREE.MeshBasicMaterial({color:0x3399ff}));l.rotation.x=Math.PI/2;l.position.z=-0.28;g.add(l);
+   const cone=new THREE.Mesh(new THREE.ConeGeometry(9,26,24,1,true),new THREE.MeshBasicMaterial({color:0xff5050,transparent:true,opacity:0.08,side:THREE.DoubleSide,depthWrite:false}));cone.rotation.x=Math.PI/2+0.35;cone.position.set(0,-4,-13);groups.camcov.add(cone);
+   g.position.set(x,y,z);g.rotation.y=yaw;groups.cams.add(g);cone.parent=null;const cw=new THREE.Group();cw.position.copy(g.position);cw.rotation.y=yaw;cw.add(cone);groups.camcov.add(cw);
+   const it=NI('Ring camera — '+name,'prop',txt||'Ring Spotlight Cam Pro Plug-In ($229.99, Macy\'s/Ring), hard-wired to a junction box (Wi-Fi data).',[x,y+2,z],'cams',{short:'Ring cam: '+name,pri:5});b.userData.item=it;pickables.push(b);};
+ const h=(u,v)=>H.P(u,v);let p;
+ p=G.P(2,24.3);cam('garage / front entry',p[0],HM+8.5,p[1],0);
+ p=h(44.3,16);cam('deck + sliders',p[0],HM+8,p[1],-Math.PI/2);
+ p=h(34.3,8);cam('walk-out patio',p[0],HL+8,p[1],-Math.PI/2);
+ cam('driveway',W(236),elev(W(236),Zs(112))+12,Zs(112),Math.PI*0.8,'Ring Spotlight Cam Pro Plug-In on a light post at the drive bend, facing the approach from Samels Rd.');
+ p=PB.P(30,0);cam('pole barn doors',p[0],PBy+11,p[1]+0.5,Math.PI);
+ p=GY.P(28,4);cam('gym barn',p[0]+0.5,GYy+9,p[1],-Math.PI/2);
+ cam('solar field',SOLAR.x-30,elev(SOLAR.x-30,SOLAR.z)+10,SOLAR.z-20,Math.PI*0.85,'Ring Spotlight Cam Pro Plug-In on the AP post, powered from the array conduit.');
+ p=G.P(-0.3,12);{const d=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.5,0.25),LMv(0x111111));d.position.set(p[0]-0.1,HM+4.2,p[1]);groups.cams.add(d);const it=NI('Ring Wired Doorbell Pro (entry)','prop','Ring Wired Doorbell Pro, $199.99 (Ring/Amazon list), on the main entry by the garage (entry location inferred).',[p[0],HM+6.5,p[1]],'cams',{short:'Ring doorbell',pri:5});d.userData.item=it;pickables.push(d);}}
+// --- smart home labels
+{const lock=(name,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.5,0.25),new THREE.MeshBasicMaterial({color:0x40c060}));m.position.set(x,y,z);groups.smart.add(m);const it=NI('Smart lock — '+name,'prop','Yale Assure Lock 2 with Wi-Fi ($259.99 list; often ~$140-195 on sale), works with Ring/Alexa. Level Lock+ is the alternative.',[x,y+2,z],'smart',{short:'Smart lock: '+name,pri:4});m.userData.item=it;pickables.push(m);};
+ let p=G.P(-0.3,12);lock('main entry',p[0]-0.2,HM+3.4,p[1]-1.5);
+ p=H.P(34.3,5.2);lock('walk-out door',p[0]+0.2,HL+3.4,p[1]);
+ p=PB.P(27.5,0);lock('pole barn walk-in',p[0],PBy+3.4,p[1]+0.5);
+ p=GY.P(23.5,0);lock('gym man door',p[0],GYy+3.4,p[1]+0.5);
+ const th=(name,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.4,0.4),new THREE.MeshBasicMaterial({color:0xf0f0f0}));m.position.set(x,y,z);groups.smart.add(m);const it=NI('Smart thermostat — '+name,'prop','ecobee Smart Thermostat Premium ($259.99, ecobee.com); Nest Learning is the alternative. Alexa/Ring-compatible.',[x,y+2,z],'smart',{short:'ecobee: '+name,pri:4});m.userData.item=it;pickables.push(m);};
+ p=H.P(12.2,8);th('main level',p[0],HM+5,p[1]);p=H.P(12.2,18);th('lower level',p[0]+0.2,HL+5,p[1]+6);
+ const mq=(name,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.3,0.5),new THREE.MeshBasicMaterial({color:0xffb000}));m.position.set(x,y,z);groups.smart.add(m);const it=NI('myQ opener — '+name,'prop','Chamberlain myQ Smart Garage Control ($59.99-64.99, Amazon list) or a myQ-built-in opener; Alexa/Ring integrations.',[x,y+1.5,z],'smart',{short:'myQ: '+name,pri:3});m.userData.item=it;pickables.push(m);};
+ p=G.P(12,20);mq('main garage',p[0],HM+8.5,p[1]);p=PB.P(19,4);mq('pole barn tall door',p[0],PBy+11.5,p[1]);p=PB.P(5,3);mq('pole barn small door',p[0],PBy+8,p[1]);p=GY.P(25,15);mq('gym door',p[0],GYy+9,p[1]);}
+// --- main-floor offices
+{const Bx=(u0,v0,u1,v1,h,c,y0,col)=>Dx(u0,v0,u1,v1,h,c,y0===undefined?0:y0,col);
+ // Office (bedroom 1): existing Seabreeze desk + Aeron; add shelving on the west wall
+ Bx(0.3,5.2,0.45,11.2,7,0xe8e2d6,0);for(const v of [5.2,11.05])Bx(0.3,v,1.5,v+0.15,7,0xd9d4c8,0);for(let i=1;i<6;i++)Bx(0.35,5.3,1.45,11.1,0.08,0xd9d4c8,i*1.3);
+ for(let i=0;i<14;i++){const v=5.6+i*0.4;Bx(0.5,v,1.3,v+0.25,0.9+(i%3)*0.15,[0x7a3b22,0x2f4d6a,0xc9b27a,0x444444][i%4],1.3*(1+(i%4)));}
+ info('Office','prop','Smaller main-floor bedroom = pure office: Seabreeze #6 glass-top desk + #20 Aeron chair, wall shelving. Room ~12 × 12 ft in the model (inferred; the listing gives no room dimensions).',[H.P(6,6)[0],HM+7,H.P(6,6)[1]],{near:true,layer:'house'});
+ // Office / guest (bedroom 2, larger, direct door to the main bath)
+ const futonIt=info('Office / guest (futon)','prop','Larger main-floor bedroom (sellers\' master, direct door to the main bath kept): second desk (Jenny/guest), queen sleeper sofa/futon (~7 ft × 3 ft closed, ~7 × 6.5 ft open) with ≥3 ft clearance when open, small side table. Room ~12 × 12 ft in the model (inferred).',[H.P(5,26)[0],HM+7,H.P(5,26)[1]],{near:true,layer:'house'});
+ Bx(0.6,28.6,7.6,31.6,1.4,0x3c4a5a,0,true);Bx(0.6,31.0,7.6,31.6,3,0x3c4a5a,0);for(const u of [0.6,7.1])Bx(u,28.6,u+0.5,31.6,2.1,0x3c4a5a,0); // sleeper sofa
+ Bx(0.6,25.1,7.6,28.6,0.04,0x8a96a6,0.02); // ghost of the opened bed footprint (rug-like marker)
+ Bx(7.9,30.0,9.3,31.5,1.9,0x6b4f3a,0,true); // side table
+ Bx(0.3,21.0,2.6,25.0,0.12,0xeeeeee,2.4);for(const v of [21.2,24.8])Bx(0.4,v-0.1,2.5,v+0.1,2.4,0x1d1f22,0); // desk 2
+ Bx(2.9,22.3,4.5,23.9,1.6,0x3a3a3a,0); // task chair (simple)
+ const it2=NI('Office / guest — open futon needs ~3 ft clearance','prop','Opened queen footprint shown as the pale marker; ~3.5 ft remains between it and the desk/door.',null,'house');it2.pos=null;
+ // direct door bedroom 2 -> main bath is the opening at v=20, u4.5-7 (see wall)
+}
+// --- new layers' default state + labels for items created after the label pass
+{const lay=document.getElementById('layers');
+ NEWITEMS.concat(items.filter(i=>!i.el&&i.pos)).forEach(it=>{if(it.el||!it.pos)return;const d=document.createElement('div');d.className='lbl'+(it.tag==='own'?' own':soft(it.tag)?' prop':'');it.layer=it.layer||guessLayer(it);
+   d.textContent=it.short||it.name.split(/\s+\(|\s+—\s+|:\s+/)[0].slice(0,30);it.pri=it.pri!==undefined?it.pri:4;d.title=it.name;d.onclick=()=>showInfo(it);lblDiv.appendChild(d);it.el=d;});
+ lay.querySelectorAll('input').forEach(c=>{if(c.dataset.l==='netcov'||c.dataset.l==='camcov')c.checked=false;});}
 
 // jump-to
 const J=[['🏡 Whole site',()=>{flyTo(home.tgt,560,[-0.3,0.65,0.8]);}],
@@ -846,31 +1008,39 @@ const yawTo=(x,z,tx,tz)=>Math.atan2(-(tx-x),-(tz-z));
 const hp=(u,v)=>H.P(u,v);
 const VP=[];const vw=(n,cap,u,v,feet,tu,tv,pitch,F)=>{F=F||H;const [x,z]=F.P(u,v),[tx,tz]=F.P(tu,tv);VP.push({n,cap,walk:{x,z,feet,yaw:yawTo(x,z,tx,tz),pitch:pitch||0}});};
 const vo=(n,cap,t,pos)=>VP.push({n,cap,orbit:{t,pos}});
-vo('🛰 Aerial overview','Whole 6-acre parcel: house, pole barn, gym barn, pond, field.',home.tgt,home.pos);
-{const x=W(150),z=Zs(71);VP.push({n:'🚗 Arrival — driveway',cap:'Coming up the paved drive from Samels Rd; pole barn ahead, house beyond.',walk:{x,z,yaw:yawTo(x,z,W(262),Zs(200)),pitch:-0.02}});}
+vo('🛰 Aerial overview','Whole 6-acre parcel: house, pole barn, gym barn, pond, field.',[-125,15,-60],[-20,300,95]);
+{const x=W(150),z=Zs(71);VP.push({id:'arrival',n:'🚗 Arrival — driveway',cap:'Coming up the paved drive from Samels Rd; pole barn ahead, house beyond.',walk:{x,z,yaw:yawTo(x,z,W(262),Zs(200)),pitch:-0.02}});}
 {const t=[H.x0+20,HM+6,H.z0-26];vo('🏠 Front exterior (garage side)','Chalet with attached 24×24 garage; steep gray metal roof, light lap siding, black-frame windows.',t,[t[0]-70,t[1]+30,t[2]-75]);}
 {const t=[H.x0+22,HM+4,H.z0-14];vo('🌊 Pond-side elevation','East glass gable, wraparound deck above the walk-out, pond in front.',t,[t[0]+95,t[1]+22,t[2]+30]);}
-vw('🪵 Deck — teak dining table','8-ft teak table on the ~10 ft deck; cocktails and dinners outside.',39,26.5,HM,38.5,14,-0.18);
-vw('☕ Walk-out patio — morning coffee','Paver patio off the lower master suite under the deck; proposed fire pit circle just south-east.',58,-6,undefined,40,10,-0.1);
-vw('🍸 Great room — lounge/club','Steinway B, cigar chairs, art panel #2 on the inner west wall, back bar; white vaulted ceiling.',33,15.5,HM,13,4,-0.07);
-vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',25.5,15.8,HM,25.5,31,-0.2);
-vw('🛏 Lower master bedroom','King bed, finished closet with doors, light oak floor, warm white walls.',10.6,10.8,HL,2,5,-0.12);
-vw('🛁 Lower primary bath','Freestanding tub, acrylic shower, double vanity (Option B: borrows craft-room space).',15.2,11.2,HL,15,2,-0.3);
-vw('📺 Lower sitting / TV room','Sectional #3, 75″ TV, coffee bar; walk-out sliders to the patio.',29,15,HL,16.5,28,-0.08);
-vw('🛌 Guest loft','Guest loft for guests or the kids; shower-only ¾ bath.',12.6,10,HM+9.4,6,24,-0.2);
-{const t=PB.P(20,9),c=PB.P(29.5,36.5);vo('🚐 Big barn — van + pontoon','Airstream Interstate 24X camper van (Sprinter 3500 dually) and the pontoon on its trailer in the large section.',[t[0],PBy+3,t[1]],[c[0],PBy+10.8,c[1]]);}
-vw('🏋 Gym barn — CrossFit + recovery','Rig, barbells, rower/SkiErg, Peloton, treadmill, wall balls, mirrors, cold-plunge recovery corner.',14.5,25.3,GYy,25,3,-0.14,GY);
-{const t=[SOLAR.x,rawElev(SOLAR.x,SOLAR.z)+4,SOLAR.z];vo('☀ Ground-mount solar (concept)','~20 kW in two racked rows at ~40°, facing south; trench to the house.',t,[t[0]-55,t[1]+32,t[2]+75]);}
+vw('🪵 Deck — teak dining table','8-ft teak table on the ~10 ft deck; cocktails and dinners outside.',39,26.5,HM,38.5,14,-0.18);VP[VP.length-1].walk.fov=68;
+{const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0],HL+2.5,t[1]],[c[0],HL+7.2,c[1]]);VP[VP.length-1].orbit.fov=72;}
+vw('🍸 Great room — lounge/club','Steinway B, cigar chairs, art panel #2 on the inner west wall, back bar; existing warm wood vaulted ceiling kept.',33,15.5,HM,13,4,-0.07);VP[VP.length-1].walk.fov=68;
+vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',25.5,15.8,HM,25.5,31,-0.2);VP[VP.length-1].walk.fov=68;
+vw('💻 Office (main floor)','Smaller main-floor bedroom: Seabreeze glass desk + Aeron, wall shelving.',10.2,10.6,HM,2,3,-0.12);VP[VP.length-1].walk.fov=72;
+vw('🛋 Office / guest (futon)','Larger main-floor bedroom: second desk, queen sleeper sofa, side table; direct door to the main bath.',10.4,21.4,HM,2,29,-0.12);VP[VP.length-1].walk.fov=72;
+vw('🛏 Lower master bedroom','King bed, finished closet with doors, light oak floor, warm white walls.',10.6,10.8,HL,2,5,-0.12);VP[VP.length-1].walk.fov=68;
+vw('🛁 Lower primary bath','Freestanding tub, acrylic shower, double vanity (Option B: borrows craft-room space).',15.2,11.2,HL,15,2,-0.3);VP[VP.length-1].walk.fov=68;
+vw('📺 Lower sitting / TV room','Sectional #3, 75″ TV, coffee bar; walk-out sliders to the patio.',29,15,HL,16.5,28,-0.08);VP[VP.length-1].walk.fov=68;
+vw('🛌 Guest loft','Guest loft for guests or the kids; shower-only ¾ bath.',12.6,10,HM+9.4,6,24,-0.2);VP[VP.length-1].walk.fov=68;
+{const t=PB.P(20,18),c=PB.P(38,-7);vo('🚐 Big barn — van + pontoon','Airstream Interstate 24X camper van (Sprinter 3500 dually) and the pontoon on its trailer in the large section.',[t[0],PBy+1,t[1]],[c[0],PBy+31,c[1]]);VP[VP.length-1].orbit.fov=55;VP[VP.length-1].noRoof=true;}
+{const t=GY.P(11,18),c=GY.P(27.2,0.8);vo('🏋 Gym barn — CrossFit + recovery','Rig, barbells, rower/SkiErg, Peloton, treadmill, wall balls, mirrors, cold-plunge recovery corner.',[t[0],GYy+2,t[1]],[c[0],GYy+8.6,c[1]]);VP[VP.length-1].orbit.fov=70;}
+{const t=[SOLAR.x,rawElev(SOLAR.x,SOLAR.z)+4,SOLAR.z];vo('☀ Ground-mount solar (concept)','~20 kW in two racked rows at ~40°, facing south; trench to the house.',t,[t[0]+75,t[1]+48,t[2]+62]);}
 vo('🟪 Guest suite site (future, ~2 yrs)','Future guest suite footprint beside the chalet (purple layer).',[SU.x0+10,HM,SU.z0-14],[SU.x0-55,HM+48,SU.z0+45]);
-function goVP(v){if(v.walk)goWalk(v.walk,true);else goOrbit(v.orbit.t,v.orbit.pos);caption(v);}
+['aerial','arrival','front','pond','deck','coffee','great_room','kitchen','office','office_guest','lower_master','lower_bath','tv_room','loft','big_barn','gym','solar','guest_suite'].forEach((id,i)=>{if(VP[i])VP[i].id=id;});
+{const t=PB.P(16,19),c=PB.P(16,19);VP.push({id:'barn_fit',n:'📐 Barn fit test (plan view)',cap:'Van + pontoon in the large section with a ~3 ft walkway; Porsche 911 test-fit in the smaller section.',orbit:{t:[t[0],PBy,t[1]-0.01],pos:[c[0],PBy+60,c[1]+0.01],fov:50},noRoof:true});}
+{const t=G.P(12,11),c=G.P(12,40);VP.push({id:'garage_cars',n:'🚗 Garage: Model Y + XT5',cap:'Tesla Model Y (west bay, by the Wall Connector) and Cadillac XT5 in the 24×24 garage.',orbit:{t:[t[0],HM+2,t[1]],pos:[c[0]+10,HM+30,c[1]],fov:55},noRoof:true});}
+{VP.push({id:'network',n:'📶 Network + cameras',cap:'UniFi gateway + 3 indoor APs, 2 outdoor APs, bridges to both barns; Ring cameras.',orbit:{t:[-110,10,-10],pos:[-60,330,160],fov:55},showNet:true});}
+{const t=PB.P(18,0),c=PB.P(20,-40);VP.push({id:'barn_doors',n:'🚪 Modern barn doors (Hanna look)',cap:'Black flush steel doors with a cedar band and black sconces (concept).',orbit:{t:[t[0],PBy+7,t[1]],pos:[c[0],PBy+8,c[1]],fov:50}});}
+function goVP(v,instant){{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c&&c.checked!==on){c.checked=on;}};if(v.showNet){set('netcov',true);set('camcov',true);set('net',true);set('cams',true);}else{set('netcov',false);set('camcov',false);}refresh();}const rt=document.getElementById('roofT');if(v.noRoof&&rt.checked){rt.checked=false;refresh();}else if(!v.noRoof&&!rt.checked&&v.orbit){rt.checked=true;refresh();}if(instant){anim=null;if(v.walk){const w=walkPose(v.walk);enterWalk(Object.assign({},v.walk,{feet:w.feet}));}else{camera.position.set(...v.orbit.pos);enterOrbit(new THREE.Vector3(...v.orbit.t),v.orbit.fov);camera.lookAt(...v.orbit.t);}return;}
+  if(v.walk)goWalk(v.walk,true);else{const T=new THREE.Vector3(...v.orbit.t);flyCam(new THREE.Vector3(...v.orbit.pos),T,null,()=>enterOrbit(T,v.orbit.fov));}caption(v);}
 function caption(v){const c=document.getElementById('caption');if(!c)return;c.innerHTML=`<b>${v.n}</b><span>${v.cap||''}</span>`;c.style.opacity=1;clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,tour?5200:4200);}
 let tour=null;
-function stopTour(){if(!tour)return;clearTimeout(tour.t);tour=null;const b=document.getElementById('bTour');if(b){b.classList.remove('on');b.textContent='▶ Tour';}const tb=document.getElementById('tourBar');if(tb)tb.style.display='none';}
+function stopTour(){if(!tour)return;clearTimeout(tour.t);document.getElementById('lblT').checked=tour.lbl;tour=null;const b=document.getElementById('bTour');if(b){b.classList.remove('on');b.textContent='▶ Tour';}const tb=document.getElementById('tourBar');if(tb)tb.style.display='none';}
 function tourStep(){if(!tour)return;const v=VP[tour.i];goVP(v);const tb=document.getElementById('tourBar');tb.style.display='flex';document.getElementById('tourTxt').textContent=`Tour ${tour.i+1}/${VP.length} · ${v.n}`;
   tour.t=setTimeout(()=>{if(!tour)return;tour.i=(tour.i+1)%VP.length;if(tour.i===0){stopTour();return;}tourStep();},6500);}
-window.toggleTour=function(){if(tour){stopTour();return;}tour={i:0};const b=document.getElementById('bTour');b.classList.add('on');b.textContent='■ Stop tour';tourStep();};
+window.toggleTour=function(){if(tour){stopTour();return;}const lt=document.getElementById('lblT');tour={i:0,lbl:lt.checked};lt.checked=false;const b=document.getElementById('bTour');b.classList.add('on');b.textContent='■ Stop tour';tourStep();};
 window.tourNav=function(d){if(!tour)return;clearTimeout(tour.t);tour.i=(tour.i+d+VP.length)%VP.length;tourStep();};
-{const vd=document.getElementById('views');VP.forEach(v=>{const b=document.createElement('button');b.textContent=v.n;b.title=v.cap;b.onclick=()=>{stopTour();goVP(v);};vd.appendChild(b);});}
+{const vd=document.getElementById('views');VP.forEach(v=>{const b=document.createElement('button');b.textContent=v.n;b.title=v.cap;b.onclick=()=>{stopTour();goVP(v);document.body.classList.remove('menu');};vd.appendChild(b);});}
 const jd=document.getElementById('jumps');J.forEach(([n,f])=>{const b=document.createElement('button');b.textContent=n;if(n.includes('Future'))b.title=FUTNAME;b.onclick=()=>{stopTour();f();};jd.appendChild(b);});
 
 // ================= LEVELS / CUTAWAY / PRESENTATION =================
@@ -886,7 +1056,7 @@ window.refresh=function(){document.querySelectorAll('#layers input').forEach(c=>
   for(const k in LVON){const el=document.getElementById('lv_'+k);if(el)LVON[k]=el.checked;}
   roofs.forEach(r=>r.visible=roofOn);houseRoofs.forEach(r=>r.visible=roofOn&&LVON.loft);
   levelOf.forEach((l,o)=>o.visible=LVON[l]);
-  softMats.forEach(({m,tag})=>{if(tag==='future'){return;}m.transparent=!pres;m.opacity=pres?1:0.5;m.depthWrite=pres;m.needsUpdate=true;});
+  softMats.forEach(({m,tag})=>{if(tag==='future'||m.userData.keepSoft){return;}m.transparent=!pres;m.opacity=pres?1:0.5;m.depthWrite=pres;m.needsUpdate=true;});
   softLines.forEach(l=>{if(l.userData.soft)l.visible=!pres;});
   extWalls.forEach(m=>{(Array.isArray(m.material)?m.material:[m.material]).forEach(M=>{if(M.userData.o0===undefined)M.userData.o0=M.opacity;M.transparent=x||M.userData.o0<1;M.opacity=x?0.15:M.userData.o0;M.depthWrite=!M.transparent;});});
   terrain.material=document.getElementById('satT').checked?satMat:plainMat;
@@ -948,13 +1118,27 @@ function updateLabels(){const show=document.getElementById('lblT').checked,r=can
   const n=Math.min(cand.length,40);for(let k=0;k<n;k++){const it=cand[(lblRR+k)%cand.length];const t=new THREE.Vector3(...it.pos);const dir=t.clone().sub(camera.position);const D=dir.length();
     lblRay.set(camera.position,dir.normalize());lblRay.near=0;lblRay.far=Math.max(0,D-1.2);it._occ=lblRay.intersectObjects(occlActive,false).length>0;}
   lblRR+=n;
-  // declutter: in walk mode keep the 14 nearest
-  cand.sort((a,b)=>a._d-b._d);cand.slice(walk?14:16).forEach(it=>it._vis=false);
+  // priority + screen-space collision avoidance; cap 8 in orbit, 12 in walk
+  cand.sort((a,b)=>(b.pri-a.pri)||(a._d-b._d));const placed=[];const cap=walk?12:8;
+  for(const it of cand){if(!it._vis||it._occ)continue;if(placed.length>=cap){it._vis=false;continue;}const x=parseFloat(it.el.style.left),y=parseFloat(it.el.style.top);const w=it.el.textContent.length*6.2+14,h=19;const R={x0:x-w/2,x1:x+w/2,y0:y-h,y1:y};
+    if(placed.some(q=>R.x0<q.x1+4&&R.x1>q.x0-4&&R.y0<q.y1+2&&R.y1>q.y0-2)){it._vis=false;continue;}placed.push(R);}
   for(const it of items){if(!it.el)continue;const v=it._vis&&!it._occ;it.el.style.display=v?'block':'none';if(v)it.el.style.opacity=Math.max(0.25,it._op).toFixed(2);}}
 
+pickables.forEach(o=>{const it=o.userData.item;if(it&&/^Sauna 6|Bathroom \/ shower spot/.test(it.name)&&o.material){o.material.userData.keepSoft=true;o.material.transparent=true;o.material.opacity=0.28;o.material.depthWrite=false;}});
+// ================= QUALITY =================
+let QUALITY='high';
+window.setQuality=function(q){QUALITY=q;const hi=q==='high';renderer.setPixelRatio(hi?Math.min(2,devicePixelRatio):1);
+  const sh=document.getElementById('shT');if(sh)sh.checked=hi;const il=document.getElementById('ilT');if(il)il.checked=hi;
+  (window.__trees||[]).forEach(m=>{if(m.userData.full===undefined)m.userData.full=m.count;m.count=hi?m.userData.full:Math.ceil(m.userData.full/3);});
+  const sel=document.getElementById('qSel');if(sel)sel.value=q;try{localStorage.setItem('samelsQ',q);}catch(e){}resize();refresh();};
 // ================= RESIZE + LOOP =================
 function resize(){const r=canvas.parentElement.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();}
 addEventListener('resize',resize);resize();refresh();uiMode();
+{const Q=new URLSearchParams(location.search);const clean=Q.get('clean')==='1';let q=null;try{q=localStorage.getItem('samelsQ');}catch(e){}
+ if(clean)q='high';else if(!q)q=(matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high';setQuality(q);
+ if(clean){document.body.classList.add('clean');document.getElementById('lblT').checked=false;if(Q.get('vp')!=='guest_suite')document.querySelectorAll('#layers input').forEach(c=>{if(['plan','future','elec'].includes(c.dataset.l))c.checked=false;});refresh();resize();}
+ const vp=Q.get('vp');if(vp){setTimeout(()=>{if(vp==='dollhouse_main'||vp==='dollhouse_lower'){cutaway(vp.split('_')[1]);anim=null;const t=[H.x0+15,vp==='dollhouse_lower'?HL:HM,H.z0-20];camera.position.set(t[0]+36,t[1]+60,t[2]+50);enterOrbit(new THREE.Vector3(...t));}
+   else{const v=VP.find(x=>x.id===vp);if(v)goVP(v,true);}window.__ready=true;},50);}else window.__ready=true;}
 const v3=new THREE.Vector3();let last=performance.now(),lastHud=0;
 function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   if(anim){const t=Math.min(1,(now-anim.t0)/anim.dur),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;camera.position.lerpVectors(anim.fromP,anim.toP,e);camera.position.y+=Math.sin(Math.PI*e)*anim.lift;
@@ -975,5 +1159,5 @@ function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
     if(now-lastHud>400){hud();lastHud=now;}}
   renderer.render(scene,camera);updateLabels();drawMini();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
-window.__model={items:items.length,colliders,surfaces:surfaces.length,setMode,player,blocked,VP,goVP,goLevel,cutaway,get mode(){return mode;},camera,renderer,refresh};
+window.__model={setQuality,items:items.length,colliders,surfaces:surfaces.length,setMode,player,blocked,VP,goVP,goLevel,cutaway,get mode(){return mode;},camera,renderer,refresh};
 })();
