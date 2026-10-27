@@ -29,7 +29,7 @@ const camera=new THREE.PerspectiveCamera(55,1,0.8,6000);
 scene.add(new THREE.HemisphereLight(0xf4f7ff,0x6a6650,0.78));scene.add(new THREE.AmbientLight(0xffffff,0.2));
 const sun=new THREE.DirectionalLight(0xfff4e2,0.85); sun.position.set(-300,500,400); scene.add(sun);
 
-const LAYERS={site:'Site features (pond, well, septic, propane, firepit)',bldg:'Buildings (exteriors)',house:'House interior (inferred plan)',barn:'Pole barn: Airstream Interstate 24X van, pontoon, bench',gym:'Gym barn: owned + proposed gear',elec:'Electrical callouts',solar:'Solar candidates',plan:'Setbacks + ADU spot',trees:'Trees (illustrative)',future:'Future (2+ yrs): guest suite',cars:'Vehicles: garage cars + barn fit',tandem:'Barn fit variant: tandem 911 + Model Y (smaller section)',nowall:'Barn fit variant: divider removed (only if non-structural; no structural work)',net:'Network: UniFi APs + bridges',netcov:'Network coverage (approx. circles)',cams:'Ring cameras + doorbell',camcov:'Camera view cones',smart:'Smart locks, thermostats, myQ'};
+const LAYERS={site:'Site features (pond, well, septic, propane, firepit)',bldg:'Buildings (exteriors)',house:'House interior (inferred plan)',barn:'Pole barn: Airstream Interstate 24X van, pontoon, bench',gym:'Gym barn: owned + proposed gear',elec:'Electrical callouts',solar:'Solar candidates',plan:'Setbacks + ADU spot',trees:'Trees (illustrative)',future:'Future (2+ yrs): guest suite',cars:'Vehicles: garage cars + barn fit',optA:'Small-section door: Option A (replace swing door, front)',optB:'Small-section door: Option B (new rear door, keep swing door)',tandem:'Barn fit variant: tandem 911 + Model Y (smaller section)',nowall:'Barn fit variant: divider removed (only if non-structural; no structural work)',net:'Network: UniFi APs + bridges',netcov:'Network coverage (approx. circles)',cams:'Ring cameras + doorbell',camcov:'Camera view cones',smart:'Smart locks, thermostats, myQ'};
 const groups={}; for(const k in LAYERS){groups[k]=new THREE.Group();scene.add(groups[k]);}
 const TAGS={photo:['seen in photo','t-photo'],sat:['satellite','t-sat'],rec:['public record','t-rec'],inf:['inferred','t-inf'],prop:['proposed','t-prop'],own:['owned – Seabreeze inventory','t-own'],pnew:['proposed new','t-prop'],future:['future (2+ yrs)','t-fut']};
 const items=[], colliders=[], surfaces=[], pickables=[], extWalls=[], roofs=[], occl=[], panes=[], softMats=[], softLines=[];
@@ -133,7 +133,7 @@ function gableRoof(layer,x0,z0,w,d,yEave,rise,ridgeAlongX,color,overhang,inner){
   g.setIndex(idx);g.computeVertexNormals();
   const om=new THREE.MeshLambertMaterial({color,side:THREE.FrontSide});texMat(om,'seam',1,1);
   const m=new THREE.Mesh(g,om);groups[layer].add(m);roofs.push(m);occl.push(m);
-  const imM=new THREE.MeshLambertMaterial({color:inner||(color===roofC?0xc98f58:0xc9ccd0),side:THREE.BackSide});if(!inner&&color===roofC)texMat(imM,'plank',0.55,1.4);const im=new THREE.Mesh(g,imM);im.position.y=-0.25;groups[layer].add(im);roofs.push(im);m.userData.inner=im;
+  const imM=new THREE.MeshLambertMaterial({color:inner||(color===roofC?0xdcaa6e:0xc9ccd0),side:THREE.BackSide});if(!inner&&color===roofC)texMat(imM,'plank',0.55,1.4);const im=new THREE.Mesh(g,imM);im.position.y=-0.25;groups[layer].add(im);roofs.push(im);m.userData.inner=im;
   const e=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x1a1a1a,transparent:true,opacity:.6}));m.add(e);
   return m;
 }
@@ -256,8 +256,8 @@ info('Attached 2-car garage 24 × 24','rec','1996 permit: house with attached 24
 
 // ================= POLE BARN 32 x 38 =================
 
-lwall('bldg',PB,0,0,32,0,0,12,tan,'photo',[[2,8,7],[14,24,11.5],[26,29,6.8]],true);
-lwall('bldg',PB,0,38,32,38,0,12,tan,'photo',[],true);
+lwall('bldg',PB,0,0,32,0,0,12,tan,'photo',[[1.2,10.2,8],[14,24,11.5],[26,29,6.8]],true);
+lwall('bldg',PB,0,38,32,38,0,12,tan,'photo',[[1.2,10.2,8]],true);
 lwall('bldg',PB,0,0,0,38,0,12,tan,'photo',[],true); lwall('bldg',PB,32,0,32,38,0,12,tan,'photo',[],true);
 gableRoof('bldg',PB.x0,PB.z0-38,32,38,PBy+12,5.3,false,0x8f9396,1.2); gableEnds('bldg',PB.x0,PB.z0-38,32,38,PBy+12,5.3,false,tan);
 floor('barn',PB.x0,PB.z0,PB.x0+32,PB.z0-38,PBy+0.01,0xa8a8a2,'photo');
@@ -380,6 +380,11 @@ lbox('gym',GY,0,21.5,0.3,22.5,1,0x5f7f68,'pnew',info('Wall-ball target at 9-10 f
 G1('Kettlebell set (proposed new, additional)','pnew','Adds to the ~6 owned (one 35 lb). Weights TBD.',4.5,16,7,17.5,1.2,0x5f7f68,0,{nocol:true});
 G1('Sled (proposed new)','pnew','Push out the overhead door onto the drive/grass.',8,20.5,11,23,1.3,0x5f7f68);
 // recovery corner
+G1('#1 Seabreeze massage chair — recovery room (size to verify)','own','Clark\'s choice: small-barn recovery room with the gym and cold plunge. Size not logged: modeled ~32 in W × 60 in D upright, up to ~75 in reclined, ~300 lb (VERIFY). Clear zone ≥3 ft beside and behind for recline; dedicated 15/20 A GFCI outlet. Requires the barn to be climate-controlled (mini-split + dehumidifier, insulation): cold/humid air is bad for its electronics and upholstery.',13.6,23.5,16.3,29.75,3.8,0x2b2b2b);
+lbox('gym',GY,13.1,22.6,19.6,30,0.03,0x9fc5a8,'prop',info('Massage chair clearance zone (≥3 ft, recline)','prop','Kept free of gym gear.'),0.02,{edges:false});
+lbox('gym',GY,9,29.4,13,30,1.1,0xf4f4f4,'prop',info('Mini-split heat pump head (cold-climate, ~18k BTU)','prop','e.g. Mitsubishi Hyper-Heat H2i 18k (rated to −13°F), $4.3–5.8K installed (OhmSnap); single-zone Hyper-Heat $4.5–9K installed (LatestCost 2026). Outdoor unit on the north wall.'),7.5);
+lbox('gym',GY,17.5,29,19,30,2.2,0xe8e8e8,'prop',info('Dehumidifier (keep RH ~45–50%)','prop','Ducted/whole-space or a 50-pint unit with a condensate pump to the floor drain; protects the massage chair, plunge area and steel gear. Estimate $300–2,000 (not quoted).'),0);
+info('Climate control: spray-foam insulation + mini-split + dehumidifier','prop','Gym barn insulation status not verified; plan closed-cell spray foam on walls + roof: ~2,100–2,400 sf surface for a 28×30-ish building, $2,100–10,800 (HomeGuide 30×30 range). Plus mini-split $4.5–9K and dehumidifier ~$0.3–2K → ~$7–22K.',[GY.P(14,15)[0],GYy+11,GY.P(14,15)[1]],{layer:'gym',short:'Climate: insulation + mini-split + dehumidifier',pri:6});
 G1('Sauna 6 × 6 — OPTIONAL concept','prop','Optional, not in the base plan. ~8 kW 240 V heater (~33 A, 40-50 A circuit). Recovery corner (NW).',0,24,6,30,7,0xb5824f);
 G1('Bathroom / shower spot (proposed)','prop','~7 × 8 ft. Water from the well (trench), septic tie-in or separate system needs GT County Environmental Health review; building + plumbing permits; garage may need to be permitted first. Est. $25-60K.',0,0,7,8,8,0x88b8d8);
 // outdoor shower outside north door
@@ -610,17 +615,17 @@ window.__furn=[];
 function FP(name,tag,text,u0,v0,u1,v1,h,color,y0){const t=tag||'prop';const m=lbox('house',H,Math.min(u0,u1),Math.min(v0,v1),Math.max(u0,u1),Math.max(v0,v1),h,color,t,info(name,t,text,null,{near:true}),y0,{collide:true});window.__furn.push({name,c:colliders[colliders.length-1],mesh:m});return m;}
 // MAIN LEVEL — entertaining
 FP('Great room lounge — MAIN level = entertaining (zone label)','prop','Lounge/club look: piano, cigar chairs, low sofa, back bar, art wall. Existing vaulted wood tongue-and-groove ceiling and wood character are KEPT (Clark, Oct 26); modern furnishings around it.',22,10.5,22.2,10.7,0.1,0xd19a5b,0);
-FP('#5 Steinway Model B grand (6′11″ × 4′10″, ~760 lb)','own','Interior zone beside the stair, ~12 ft from the east glass and out of direct sun; keep off any heat register. Lid shown raised. Add a Dampp-Chaser humidity system (vaulted wood room). Keyboard faces the lounge.',17,12.5,21.8,19.4,3.3,0x111111,0);
-FP('#5 Steinway lid (raised)','own','Lid prop ~45°.',17.3,13.5,17.5,19,2.2,0x222222,3.3);
-FP('#5 Steinway artist bench','own','Placeholder 3 × 1.2 ft.',18.4,11.1,20.4,12.2,1.6,0x222222,0);
+FP('#5 Steinway Model B grand (6′11″ × 4′10″, ~760 lb)','own','Interior zone beside the stair, ~12 ft from the east glass and out of direct sun; keep off any heat register. Lid shown raised. Add a Dampp-Chaser humidity system (vaulted wood room). Keyboard faces the lounge.',12.8,1.0,19.72,5.83,3.3,0x111111,0);
+FP('#5 Steinway lid (raised)','own','Lid prop ~45°.',13,1.2,13.01,1.21,0.01,0x222222,3.3);
+FP('#5 Steinway artist bench','own','Placeholder 3 × 1.2 ft.',20.6,1.9,21.8,4.9,1.6,0x222222,0);
 FP('#2 Carved dark-wood panel with mirrored mosaic inlay (art wall)','own','Inventory: ~4 ft wide (height not logged — placeholder 3 ft). Feature wall = interior west wall of the lounge: no sun, no heat, faces the vaulted space and the entry sightline. Hang on a French cleat into studs (add blocking if pine/paneling covers it); picture light or ceiling accent wash.',12.15,4,12.35,8,3,0x4a2e1a,5.2);
-FP('Low modern club sofa (proposed new)','pnew','~7 × 3 ft leather/boucle, under the art wall, facing east.',12.6,2.5,15.6,9.5,2.6,0x5a4636,0);
-FP('#4 Tufted dark-leather bench / cocktail table','own','Placeholder 4 × 2 ft. Centered in the lounge group.',17,5,21,7,1.5,0x2a1c14,0);
-FP('#15 Black leather cigar chair (1 of 2)','own','Placeholder 3 × 3 ft (dims not logged). Faces the sofa.',22.5,2.5,25.5,5.5,3,0x111111,0);
-FP('#15 Black leather cigar chair (2 of 2)','own','Placeholder 3 × 3 ft.',22.5,6.5,25.5,9.5,3,0x111111,0);
+FP('Low modern club sofa (proposed new)','pnew','~7 × 3 ft leather/boucle, under the art wall, facing east.',30.6,5.0,33.6,12.0,2.6,0x5a4636,0);
+FP('#4 Tufted dark-leather bench / cocktail table','own','Placeholder 4 × 2 ft. Centered in the lounge group.',27,6,29,10,1.5,0x2a1c14,0);
+FP('#15 Black leather cigar chair (1 of 2)','own','Placeholder 3 × 3 ft (dims not logged). Faces the sofa.',22.9,5.0,25.9,8.0,3,0x111111,0);
+FP('#15 Black leather cigar chair (2 of 2)','own','Placeholder 3 × 3 ft.',22.9,8.6,25.9,11.6,3,0x111111,0);
 FP('Back bar / bar cabinet (proposed new)','pnew','~7 ft bar cabinet on the south wall with display shelving above; bar cart alternative.',26,0.3,33,2,3.5,0x3a2a20,0);
-FP('Kitchen island 9 × 3.5 ft, quartz, seats 4 (proposed)','prop','Replaces the dining area (no formal dining). 42-48 in work aisle to the north counters; 12-15 in seating overhang on the south; optional prep sink; required island outlet; 2-3 pendants.',21,22.5,30,26,3,0xf4f4f4,0);
-for(let i=0;i<4;i++)FP('Counter stool '+(i+1)+' of 4 (proposed new)','pnew','24 in per stool; 36-44 in clear behind.',21.8+i*2.2,20.6,23.2+i*2.2,22,2.5,0x2b2b2b,0);
+FP('Kitchen island ~9 × 4.1 ft, quartz, seats 4, storage both sides (proposed)','prop','Replaces the dining area (no formal dining). 42-48 in work aisle to the north counters; 12-15 in seating overhang on the south; optional prep sink; required island outlet; 2-3 pendants.',21,23.0,30,26,3,0xf4f4f4,0);
+for(let i=0;i<4;i++)FP('Counter stool '+(i+1)+' of 4 (proposed new)','pnew','24 in per stool; 36-44 in clear behind.',21.8+i*2.2,20.1,23.2+i*2.2,21.5,2.5,0x2b2b2b,0);
 // deck
 FP('Teak dining table 8 ft + 8 chairs on the deck (proposed new)','pnew','e.g. Country Casual Hudson 8 ft ($4,176) or Cascade 8 ft (95.75 × 41.5 in, $6,650). Long axis along the 10 ft deck; ~8.5 ft incl. chairs (tight on a 10 ft deck; better on the wider wrap section). Cover or store in the pole barn for winter.',36.7,12,40.2,20,2.5,0x9a6a3a,0);
 // main bedroom 1 -> office
@@ -634,12 +639,11 @@ FP('#10 Kids desk with raised shelf + #11 white chair + #12 monitor (guest loft)
 FP('Daybed / sleeper sofa — 2nd sleeping option (proposal only)','pnew','Twin daybed with trundle, ~3.3 × 6.6 ft.',4.5,9,11.1,12.3,2.5,0x8a8aa0,9.4);
 // LOWER — master retreat
 FP('LOWER = clean, modern, cozy master retreat (zone label)','prop','Primary bedroom + primary bath + sitting/TV room + morning-coffee spot at the walk-out.',30,20,30.2,20.2,0.1,0xd19a5b,-9);
-FP('#3 Gray sectional with 2 chaises (U)','own','Dims NOT logged — placeholder 11 × 6 ft U. 10 ft to the TV. Keeps a ~7 ft clear path from the walk-out to the bedroom/bath doors. Deliver through the walk-out sliders; confirm it splits into sections.',11.5,19,22.5,22,2.6,0x8a8f96,-9);
-FP('#3 Sectional chaise (left)','own','',11.5,22,14.5,25,2,0x8a8f96,-9);
-FP('#3 Sectional chaise (right)','own','',19.5,22,22.5,25,2,0x8a8f96,-9);
-FP('#7 White media console (4-door) + #9 soundbar/sub','own','Placeholder 6 × 1.5 ft, on the north wall.',14,30,20,31.5,2.2,0xffffff,-9);
-FP('#8 Samsung 75″ TV (wall-mounted)','own','~5.5 × 3.1 ft; viewing 9-10 ft from the sectional.',14.25,31.6,19.75,31.8,3.1,0x050505,-5.7);
-FP('#1 Massage chair (recovery corner)','own','Oversized/heavy; walk-out delivery only.',30.5,27.5,33.5,31.5,3.5,0x333333,-9);
+FP('#3 Seabreeze gray sectional, large L — size to verify','own','Real dimensions are not in the move inventory or notes, so this is a 12 × 10 ft L, 40 in deep (SIZE TO VERIFY). In the NW corner of the lower level, facing a TV on a new media wall ~12 ft away; ≥3 ft walkways. 10 ft to the TV. Keeps a ~7 ft clear path from the walk-out to the bedroom/bath doors. Deliver through the walk-out sliders; confirm it splits into sections.',0.3,20,3.63,32,2.4,0x8a8f96,-9);
+FP('#3 Sectional chaise (left)','own','',3.63,28.67,10.3,32,2,0x8a8f96,-9);
+FP('#3 Sectional chaise (right)','own','',3.63,31.9,3.64,31.91,0.01,0x8a8f96,-9);
+FP('#7 White media console (4-door) + #9 soundbar/sub','own','Placeholder 6 × 1.5 ft, on the north wall.',13.3,23,14.75,29,2.2,0xffffff,-9);
+FP('#8 Samsung 75″ TV (wall-mounted)','own','~5.5 × 3.1 ft; on the new media wall, ~12 ft from the sectional main seat.',14.6,23.25,14.75,28.75,3.1,0x050505,-5.7);
 FP('Coffee bar nook (proposed): counter, outlet for espresso, optional small sink','prop','~5.5 ft base cabinets + quartz on the wall shared with laundry (easy water/drain). Dedicated 20 A circuit.',18.5,12.3,24,14.3,3,0xe8e0d0,-9);
 FP('Morning coffee: 2 chairs + café table at the walk-out patio (proposed new)','pnew','Under-deck concrete pad seen in p49. Upgrade: extend with pavers ~12 × 14 ft.',35.5,8,39.5,12,2.8,0x6a5040,-9);
 
@@ -717,7 +721,7 @@ acrylicShower(15,3.6,17.75,6.6,-9);vanity(12.3,4.0,14.1,9.6,-9,2,'W');toilet(17.
 Dx(12.3,0.3,17.7,11.7,0.03,0xe6e6e2,-9+0.01);
 info('Lower PRIMARY bath concept (Option B)','prop','Freestanding tub + 36×60-style acrylic shower + double vanity + matching toilet. The existing room is only ~5×9 (long and narrow) — this layout needs space borrowed from the craft/storage room (Option B, mid ~$50K). Measure at the visit.',[P(15,6)[0],HL+8,P(15,6)[1]],{near:true,layer:'house'});
 // lower sitting / TV + coffee nook details
-rug(10.5,17.8,23.5,28.5,-9,0xcfc8bb);can(17,24,0,'house');can(26,20,0,'house');can(6,6,0,'house');can(15,6,0,'house');
+rug(4.2,20.5,12.8,28.2,-9,0xcfc8bb);Dx(14.75,21.5,15.3,30.5,8,0xe9e6df,-9,true);info('Proposed media wall (TV + console)','prop','Short new partition (~9 ft) so the TV faces the corner sectional at ~12 ft. Walkway ≥4.5 ft between the sectional end and the media wall; the walk-out path behind it stays open.',[H.P(15,26)[0],HL+9,H.P(15,26)[1]],{near:true,layer:'house'});can(17,24,0,'house');can(26,20,0,'house');can(6,6,0,'house');can(15,6,0,'house');
 // walk-out patio pavers under the deck + coffee spot
 {const a=P(34.3,1),b=P(44,14);const pv=box('site',(a[0]+b[0])/2,HL-0.18,(a[1]+b[1])/2,Math.abs(b[0]-a[0]),0.2,Math.abs(b[1]-a[1]),0xbab3a6,'photo',null,{edges:false});texMat(pv.material,'tile',3,3);surf(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[0],b[0]),Math.max(a[1],b[1]),HL);}
 
@@ -727,7 +731,7 @@ Dx(17,29.2,19.9,32,6.9,STL,0,true);                  // fridge (stainless, seen 
 Dx(20,30.9,23,32,2.6,WHT,4.7);Dx(27.2,30.9,34,32,2.6,WHT,4.7); // uppers
 Dx(28.2,30.1,30.7,32,0.1,0x111111,3.16);Dx(28.4,30.6,30.5,32,1.2,STL,5.6); // range top + hood
 {const p=P(25,31.4);PL(new THREE.BoxGeometry(2.2,0.1,1.2),0x333333,p[0],HM+3.12,p[1]);PL(new THREE.CylinderGeometry(0.05,0.05,1.1,8),BLK,p[0],HM+3.7,p[1]-0.4);}
-Dx(20.8,22.3,30.2,26.2,0.15,WHT,3);Dx(21,22.5,30,22.65,2.9,0x3b4048,0.05); // island quartz + charcoal seating face
+Dx(20.8,21.9,30.2,26.2,0.15,WHT,3);Dx(21,22.95,30,23.05,2.85,0x3b4048,0.05);for(let i=0;i<6;i++){Dx(21.1+i*1.48,22.9,21.1+i*1.48+0.04,22.95,2.7,0x2a2d33,0.12);Dx(21.55+i*1.48,22.86,22.15+i*1.48,22.9,0.06,0x111111,2.45);}info('Island seating-side storage: shallow 13 in cabinets','prop','Seating side gets 13 in-deep flat-panel cabinets (charcoal) under a 12-13 in quartz overhang. Island grows to ~49 in deep (24 in base + 13 in cabinets + 12 in overhang) so knees still fit. Work aisle to the perimeter run stays ~46 in.',[H.P(25.5,22.5)[0],HM+4.5,H.P(25.5,22.5)[1]],{near:true,layer:'house'}); // island quartz + charcoal seating face
 for(const u of [23,25.5,28])pendant(u,24.25,9.5,6.6);
 // main bath (fiberglass tub/shower unit, new vanity, matching toilet)
 Dx(0.3,12.3,5.3,14.9,1.7,WHT,0,true);Dx(0.3,12.3,5.3,12.5,6.6,WHT,0);Dx(0.3,12.3,0.5,14.9,6.6,WHT,0);Dx(5.1,12.3,5.3,14.9,6.6,WHT,0);
@@ -808,19 +812,21 @@ const EXTRAS=[];
    // cushion seams
    const n=Math.max(1,Math.round(((back==='n'||back==='s')?(x1-x0):(z1-z0))/2.6));for(let i=1;i<n;i++){const t=i/n;if(back==='n'||back==='s')B(x0+(x1-x0)*t-0.02,x0+(x1-x0)*t+0.02,z0,z1,y+seatH,0.02,0x111111);else B(x0,x1,z0+(z1-z0)*t-0.02,z0+(z1-z0)*t+0.02,y+seatH,0.02,0x111111);}}
  window.__furn.forEach(f=>{f.mesh=f.mesh||null;});
- const want=[[/cigar chair \(1/,'e',0x15110e,1.5,3.2,1],[/cigar chair \(2/,'e',0x15110e,1.5,3.2,1],[/club sofa/,'w',0x6b5442,1.5,2.7,1],[/#3 Gray sectional/,'s',0x9a9fa6,1.5,2.7,1]];
+ const want=[[/cigar chair \(1/,'w',0x15110e,1.5,3.2,1],[/cigar chair \(2/,'w',0x15110e,1.5,3.2,1],[/club sofa/,'e',0x6b5442,1.5,2.7,1],[/#3 Seabreeze gray sectional/,'w',0x9a9fa6,1.5,2.7,1]];
  for(const [re,back,c,sh,bh,arm] of want)for(const f of byName(re)){hideBox(f);uph(f,back,c,sh,bh,arm);}
  for(const f of byName(/#3 Sectional chaise/)){hideBox(f);uph(f,'s',0x9a9fa6,1.5,1.6,0);}
  // tufted bench
  for(const f of byName(/#4 Tufted/)){hideBox(f);const k=f.c;B(k.x0,k.x1,k.z0,k.z1,k.y0+0.35,0.9,0x2a1c14);for(const [x,z] of [[k.x0+.2,k.z0+.2],[k.x1-.2,k.z0+.2],[k.x0+.2,k.z1-.2],[k.x1-.2,k.z1-.2]])B(x-.1,x+.1,z-.1,z+.1,k.y0,0.35,0x111111);}
  // Steinway: curved case approximation (body + tail taper), lid, legs, keyboard, music desk
- for(const f of byName(/Steinway Model B/)){hideBox(f);const k=f.c,y=k.y0;const blk=new THREE.MeshPhongMaterial({color:0x0b0b0b,shininess:120,specular:0x555555});
-   const L=k.z1-k.z0,Wd=k.x1-k.x0;const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Wd,0);sh.lineTo(Wd,L*0.45);sh.quadraticCurveTo(Wd,L,Wd*0.35,L);sh.quadraticCurveTo(0,L,0,L*0.75);sh.lineTo(0,0);
-   const g=new THREE.ExtrudeGeometry(sh,{depth:1.0,bevelEnabled:false});g.rotateX(Math.PI/2);const case_=new THREE.Mesh(g,blk);case_.position.set(k.x0,y+3.3,k.z0);groups.house.add(case_);case_.castShadow=true;
-   const lid=new THREE.Mesh(new THREE.ShapeGeometry(sh),blk);lid.rotation.x=Math.PI/2;lid.position.set(k.x0,y+3.32,k.z0);lid.rotation.y=0;groups.house.add(lid);
-   
-   for(const [x,z] of [[k.x0+.4,k.z0+.4],[k.x1-.4,k.z0+.4],[k.x0+Wd*0.5,k.z0+L*0.85]])B(x-.15,x+.15,z-.15,z+.15,y,2.3,0,blk);
-   B(k.x0+0.2,k.x1-0.2,k.z0-0.75,k.z0,y+2.3,0.15,0xf5f5f0);B(k.x0+0.2,k.x1-0.2,k.z0-0.8,k.z0-0.6,y+2.45,0.1,0x111111);B(k.x0+0.6,k.x1-0.6,k.z0+0.1,k.z0+0.2,y+3.3,0.9,0,blk);}
+ for(const f of byName(/Steinway Model B/)){hideBox(f);const k=f.c,y=k.y0;const blk=new THREE.MeshPhongMaterial({color:0x0b0b0b,shininess:120,specular:0x555555,side:THREE.DoubleSide});
+   const L=k.x1-k.x0,Wd=k.z1-k.z0;const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Wd,0);sh.lineTo(Wd,L*0.45);sh.quadraticCurveTo(Wd,L,Wd*0.35,L);sh.quadraticCurveTo(0,L,0,L*0.75);sh.lineTo(0,0);
+   const G=new THREE.Group();const g=new THREE.ExtrudeGeometry(sh,{depth:1.0,bevelEnabled:false});g.rotateX(Math.PI/2);const cs=new THREE.Mesh(g,blk);cs.position.y=3.3;cs.castShadow=true;G.add(cs);
+   const lp=new THREE.Group();lp.position.set(0,3.32,0);lp.rotation.z=0.75;const lid=new THREE.Mesh(new THREE.ShapeGeometry(sh),blk);lid.rotation.x=Math.PI/2;lp.add(lid);G.add(lp);
+   const stick=new THREE.Mesh(new THREE.BoxGeometry(0.06,2.0,0.06),blk);stick.position.set(Wd*0.8,4.2,L*0.4);G.add(stick);
+   const bx=(x0,x1,z0,z1,y0,h,c)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,h,z1-z0),c?new THREE.MeshLambertMaterial({color:c}):blk);o.position.set((x0+x1)/2,y0+h/2,(z0+z1)/2);G.add(o);};
+   for(const [x,z] of [[0.4,0.4],[Wd-0.4,0.4],[Wd*0.5,L*0.85]])bx(x-.15,x+.15,z-.15,z+.15,0,2.3);
+   bx(0.2,Wd-0.2,-0.75,0,2.3,0.15,0xf5f5f0);bx(0.2,Wd-0.2,-0.8,-0.6,2.45,0.1,0x111111);bx(0.6,Wd-0.6,0.1,0.2,3.3,0.9);
+   G.scale.x=-1;G.rotation.y=-Math.PI/2;G.position.set(k.x1,y,k.z1);groups.house.add(G);}
  for(const f of byName(/Steinway lid/)){hideBox(f);}
  // stools
  for(const f of byName(/Counter stool/)){hideBox(f);const k=f.c,x=(k.x0+k.x1)/2,z=(k.z0+k.z1)/2;const s=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,0.25,18),new THREE.MeshLambertMaterial({color:0x6b4f3a}));s.position.set(x,k.y0+2.4,z);groups.house.add(s);
@@ -895,11 +901,17 @@ const IN=v=>v/12;
 // --- pole barn small section: future sports car test-fit (Porsche 911 992)
 {const y=PBy;const it=NI('Future sports car test-fit: Porsche 911 (992) in the smaller section','prop','Porsche spec (992.2 Carrera): 178.8 in L × 72.9 in W (80.0 in with mirrors) × 51.1 in H (newsroom.porsche.com tech specs). Alternative Shelby GT350: 188.9 × 75.9 in (caranddriver.com). Fits the ~11.5 ft-wide smaller section with a 3+ ft walkway, but NOT through the old ~7 ft wooden double door: replace it with a 9 × 7 ft modern overhead door (proposed). It does not fit in the large section with the van + pontoon.',null,'cars',{short:'Porsche 911 (future) test-fit',pri:8});
  const p=PB.P(5.4,10.5);car('cars',p[0],p[1],y,IN(178.8),IN(72.9),IN(51.1),0xb3121a,'sport',it,Math.PI);it.pos=[p[0],y+7,p[1]];}
+// --- riding mower + lawn gear: large section behind the van
+{const it=NI('Riding mower + lawn gear (relocated)','own','Behind the van in the large section (~12 ft spare behind the 24.5 ft van). The smaller section is too narrow for a car + mower side by side: ~11.2 ft − 7.0 ft (Model Y with mirrors) = ~4.2 ft vs a ~4 ft-wide rider with a 42–46 in deck.',null,'cars',{short:'Riding mower',pri:6});
+ const p=PB.P(15.8,31.5);const g=new THREE.Group();const b=new THREE.Mesh(new THREE.BoxGeometry(3.6,1.6,5.8),LMv(0x2f7a2f));b.position.y=1.5;g.add(b);const st=new THREE.Mesh(new THREE.BoxGeometry(2,1.2,1.2),LMv(0x222222));st.position.set(0,2.8,1.2);g.add(st);
+ const tg=new THREE.CylinderGeometry(0.9,0.9,0.7,14);tg.rotateZ(Math.PI/2);for(const [x,z] of [[-1.7,1.8],[1.7,1.8],[-1.6,-2],[1.6,-2]]){const w=new THREE.Mesh(tg,LMv(0x111111));w.position.set(x,0.9,z);g.add(w);}
+ g.position.set(p[0],PBy,p[1]);groups.cars.add(g);b.userData.item=it;pickables.push(b);it.pos=[p[0],PBy+5,p[1]];
+ for(let k=0;k<3;k++){const q=PB.P(19.5+k*0.9,35.6);const t=new THREE.Mesh(new THREE.BoxGeometry(0.5,4.5,0.3),LMv(0x8b6b4a));t.position.set(q[0],PBy+2.25,q[1]);groups.cars.add(t);}}
 // --- barn-fit variants
 {const it=NI('Tandem variant: Model Y behind the 911 (smaller section)','prop','Smaller section ~11.5 ft wide (divider position estimated) × ~37.3 ft deep. 911 (14.9 ft) + Model Y (15.7 ft) = 30.6 ft, leaving ~6.7 ft for the door end, the gap and the back wall (e.g. 3 + 2 + 1.7 ft). The existing workbench along the back wall (~2.5 ft deep) must move, or end clearance drops to ~1.4 ft. Width: Model Y 7.0 ft with mirrors → ~4.5 ft side walkway. Door: 9×7 or 9×8 is fine (Model Y 5.3 ft tall).',null,'tandem',{short:'Tandem: 911 + Model Y',pri:8});
  const p=PB.P(5.4,27.7);car('tandem',p[0],p[1],PBy,IN(188.7),IN(75.6),IN(63.8),0xe8e8ea,'suv',it,Math.PI);it.pos=[p[0],PBy+7,p[1]];colliders.pop();
  const it2=NI('Divider removed: van + pontoon + sports car (only if non-structural; no structural work)','prop','Only if the wall is non-structural; no structural work. Full ~31.3 ft width: van 7.7 ft with mirrors + pontoon 8.5 ft + 911 6.7 ft with mirrors = 22.9 ft, leaving ~8.4 ft for walkways (about 3 ft between each). Lengths all fit in 37.3 ft. The 911 still enters through the new 9×7 door.',[PB.P(12,19)[0],PBy+14,PB.P(12,19)[1]],'nowall',{short:'Divider removed (if non-structural)',pri:8});
- const Qv=new URLSearchParams(location.search);setTimeout(()=>{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c)c.checked=on;};set('tandem',Qv.get('tandem')==='1');set('nowall',Qv.get('nowall')==='1');if(Qv.get('nowall')==='1'&&window.toggleDivider)toggleDivider();refresh();},0);
+ const Qv=new URLSearchParams(location.search);setTimeout(()=>{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c)c.checked=on;};set('tandem',Qv.get('tandem')==='1');set('nowall',Qv.get('nowall')==='1');if(Qv.get('door')==='B'){set('optA',false);set('optB',true);}if(Qv.get('nowall')==='1'&&window.toggleDivider)toggleDivider();refresh();},0);
  document.addEventListener('change',e=>{if(e.target&&e.target.dataset&&e.target.dataset.l==='nowall'&&window.toggleDivider)toggleDivider();});}
 // --- modern barn doors (Hanna look: black flush insulated steel + cedar accent above + black up/down sconces)
 {const it=NI('Proposed modern doors (concept): full-view glass, brown frame','prop','Full-view aluminum sectional doors with frosted glass lites (clear optional), frame in brown to match the trim (toggle black/brown/cream), set in the existing cream steel siding with a brown trim border. Pole barn: keep the tall ~10 × 11.5 ft van opening; replace the old wooden double door with a 9 × 7; gym barn: 8 ft-wide door. E.g. Clopay Avante or Amarr Vista. myQ-ready openers.',null,'barn',{short:'Proposed modern doors (concept)',pri:7});
@@ -908,19 +920,27 @@ const IN=v=>v/12;
  {const lay=document.getElementById('layers');if(lay){const w=document.createElement('label');w.innerHTML='Door frame: <select id="dfSel"><option value="brown">brown</option><option value="black">black</option><option value="cream">cream</option></select>';lay.appendChild(w);w.querySelector('select').onchange=e=>setDoorFrame(e.target.value);}const qf=new URLSearchParams(location.search).get('frame');if(qf){setDoorFrame(qf);const e=document.getElementById('dfSel');if(e)e.value=qf;}}
  const doorTex=ctex(256,(c,n)=>{c.fillStyle='#262729';c.fillRect(0,0,n,n);for(let i=0;i<32;i++){c.fillStyle=i%8===7?'#121314':'#1e1f21';c.fillRect(0,i*n/32,n,1.5);}});
  const cedar=new THREE.MeshLambertMaterial({color:0xc99a62});texMat(cedar,'plank',1,1);
- const mk=(F,y0,uA,uB,v,h,side,acc)=>{const L=uB-uA;const mat=DGLASS;
+ const mk=(F,y0,uA,uB,v,h,side,acc,grp)=>{const GG=grp||groups.barn;const L=uB-uA;const mat=DGLASS;
    let a,b;if(side==='S'){a=F.P(uA,v);b=F.P(uB,v);}else{a=F.P(v,uA);b=F.P(v,uB);}
-   const horiz=side==='S';const d=new THREE.Mesh(new THREE.BoxGeometry(horiz?L:0.2,h,horiz?0.2:L),mat);d.position.set((a[0]+b[0])/2,y0+h/2,(a[1]+b[1])/2+(horiz?0.42:0));if(!horiz)d.position.x+=0.42;groups.barn.add(d);d.userData.item=it;pickables.push(d);
-   {const nc=Math.max(3,Math.round(L/2.6)),nr=Math.max(4,Math.round(h/1.8));const bar=(w,hh,x,y)=>{const m=new THREE.Mesh(horiz?new THREE.BoxGeometry(w,hh,0.26):new THREE.BoxGeometry(0.26,hh,w),DFRAME);m.position.set(d.position.x+(horiz?x:0.04),y,d.position.z+(horiz?0.04:x));groups.barn.add(m);};
+   const horiz=side==='S';const d=new THREE.Mesh(new THREE.BoxGeometry(horiz?L:0.2,h,horiz?0.2:L),mat);d.position.set((a[0]+b[0])/2,y0+h/2,(a[1]+b[1])/2+(horiz?(v>30?-0.42:0.42):0));if(!horiz)d.position.x+=0.42;GG.add(d);d.userData.item=it;pickables.push(d);
+   {const nc=Math.max(3,Math.round(L/2.6)),nr=Math.max(4,Math.round(h/1.8));const bar=(w,hh,x,y)=>{const m=new THREE.Mesh(horiz?new THREE.BoxGeometry(w,hh,0.26):new THREE.BoxGeometry(0.26,hh,w),DFRAME);m.position.set(d.position.x+(horiz?x:0.04),y,d.position.z+(horiz?(v>30?-0.04:0.04):x));GG.add(m);};
     for(let i=0;i<=nc;i++)bar(0.28,h,-L/2+i*L/nc,y0+h/2);for(let j=0;j<=nr;j++)bar(L,j===0?0.6:0.3,0,y0+(j===0?0.3:j*h/nr));}
    // frame
-   const fr=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+1.2:0.3,h+0.6,horiz?0.3:L+1.2),DTRIM);fr.position.copy(d.position);fr.position.y=y0+(h+0.4)/2;if(horiz)fr.position.z-=0.06;else fr.position.x-=0.06;groups.barn.add(fr);
-   if(acc){const ah=acc;const cb=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+0.8:0.1,ah,horiz?0.1:L+0.8),cedar);cb.position.set(d.position.x+(horiz?0:0.05),y0+h+0.5+ah/2,d.position.z+(horiz?0.05:0));groups.barn.add(cb);
-     const sc=new THREE.Mesh(new THREE.BoxGeometry(horiz?0.35:0.5,0.9,horiz?0.5:0.35),LMv(0x111111));sc.position.set(d.position.x+(horiz?0:0.3),y0+h+0.5+ah*0.45,d.position.z+(horiz?0.3:0));groups.barn.add(sc);}
+   const fr=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+1.2:0.3,h+0.6,horiz?0.3:L+1.2),DTRIM);fr.position.copy(d.position);fr.position.y=y0+(h+0.4)/2;if(horiz)fr.position.z+=(v>30?0.06:-0.06);else fr.position.x-=0.06;GG.add(fr);
+   if(acc){const ah=acc;const cb=new THREE.Mesh(new THREE.BoxGeometry(horiz?L+0.8:0.1,ah,horiz?0.1:L+0.8),cedar);cb.position.set(d.position.x+(horiz?0:0.05),y0+h+0.5+ah/2,d.position.z+(horiz?0.05:0));GG.add(cb);
+     const sc=new THREE.Mesh(new THREE.BoxGeometry(horiz?0.35:0.5,0.9,horiz?0.5:0.35),LMv(0x111111));sc.position.set(d.position.x+(horiz?0:0.3),y0+h+0.5+ah*0.45,d.position.z+(horiz?0.3:0));GG.add(sc);}
    // hide/disable the old white door slab at the same place if any
    };
  // pole barn south face (v=0): tall van door u14-24 h11.5 with cedar band to eave; small-section door u2-8 h7 (proposed 9 x 7 when widened)
- mk(PB,PBy,14,24,-0.3,11.5,'S',0);mk(PB,PBy,2,8,-0.3,7,'S',0);
+ mk(PB,PBy,14,24,-0.3,11.5,'S',0);mk(PB,PBy,1.2,10.2,-0.3,8,'S',0,groups.optA);
+ mk(PB,PBy,1.2,10.2,38.3,8,'S',0,groups.optB);
+ {const sw=new THREE.MeshLambertMaterial({color:0x7a5a3a});texMat(sw,'plank',1,1);const a=PB.P(2.7,-0.35);const d=new THREE.Mesh(new THREE.BoxGeometry(4.2,6.4,0.2),sw);d.position.set(a[0],PBy+3.2,a[1]);groups.optB.add(d);
+  const cr=new THREE.Mesh(new THREE.BoxGeometry(5.6,8.2,0.15),LMv(0xd9d3b8));const b=PB.P(7.6,-0.25);cr.position.set(b[0],PBy+4.1,b[1]);groups.optB.add(cr);
+  const cr2=new THREE.Mesh(new THREE.BoxGeometry(9.2,1.8,0.15),LMv(0xd9d3b8));const c2=PB.P(5.7,-0.25);cr2.position.set(c2[0],PBy+7.3,c2[1]);groups.optB.add(cr2);
+  const bf=new THREE.Mesh(new THREE.BoxGeometry(9.2,8.2,0.15),LMv(0xd9d3b8));const c3=PB.P(5.7,38.25);bf.position.set(c3[0],PBy+4.1,c3[1]);groups.optA.add(bf);
+  const ap=PB.P(5.7,46);const g=new THREE.Mesh(new THREE.PlaneGeometry(12,15),LMv(0x8f8a80));g.rotation.x=-Math.PI/2;g.position.set(ap[0],PBy+0.06,ap[1]);groups.optB.add(g);}
+ NI('Option A: replace the swing door with a 9×8 glass overhead door (front)','prop','Existing double swing door ≈ 4–4.5 ft W × 6–6.5 ft H (estimated from listing photo p51 against the 3 ft man door). A 9×8 needs the opening roughly doubled: cut siding/girts, new header between posts (a post may need relocating → engineering + likely a building permit). Straight-in tandem from the front drive. Mower then shares the 9 ft door; store it behind the van.',[PB.P(5.7,0)[0],PBy+10,PB.P(5.7,0)[1]+2],'optA',{short:'Option A: 9×8 door (front)',pri:8});
+ NI('Option B: add a NEW 9×8 glass overhead door on the rear gable, keep the swing door','prop','Front wall has no room for a 9 ft door beside the swing door (section ~11.5 ft; swing door ~4.2 ft). The rear (north) gable end gives a straight-in tandem: new opening + header between posts, gravel apron/drive around the barn to the back (rear access and grade not verified). Swing door stays for the mower/walk-in.',[PB.P(5.7,38)[0],PBy+10,PB.P(5.7,38)[1]-2],'optB',{short:'Option B: new rear 9×8 door',pri:8});
  // gym barn east face (u=28): v11-19 h8
  mk(GY,GYy,11,19,28.0,8,'E',0);
  it.pos=[PB.P(19,0)[0],PBy+14.5,PB.P(19,0)[1]+4];
@@ -973,7 +993,7 @@ const NET=[];
  // Office (bedroom 1): existing Seabreeze desk + Aeron; add shelving on the west wall
  Bx(0.3,5.2,0.45,11.2,7,0xe8e2d6,0);for(const v of [5.2,11.05])Bx(0.3,v,1.5,v+0.15,7,0xd9d4c8,0);for(let i=1;i<6;i++)Bx(0.35,5.3,1.45,11.1,0.08,0xd9d4c8,i*1.3);
  for(let i=0;i<14;i++){const v=5.6+i*0.4;Bx(0.5,v,1.3,v+0.25,0.9+(i%3)*0.15,[0x7a3b22,0x2f4d6a,0xc9b27a,0x444444][i%4],1.3*(1+(i%4)));}
- info('Office','prop','Smaller main-floor bedroom = pure office: Seabreeze #6 glass-top desk + #20 Aeron chair, wall shelving. Listing: 11 × 9 ft. Model room is ~12 × 12 (kept so the main bath and closets line up).',[H.P(6,6)[0],HM+7,H.P(6,6)[1]],{near:true,layer:'house'});
+ info('Office','prop','Smaller main-floor bedroom = pure office: Seabreeze #6 glass-top desk + #20 Aeron chair, wall shelving. Listing (Real Estate One): 11 × 9 ft. Model room is ~12 × 12 (kept so the main bath and closets line up).',[H.P(6,6)[0],HM+7,H.P(6,6)[1]],{near:true,layer:'house'});
  // Office / guest (bedroom 2, larger, direct door to the main bath)
  const futonIt=info('Office / guest (futon)','prop','Larger main-floor bedroom (sellers\' master, direct door to the main bath kept): second desk (Jenny/guest), queen sleeper sofa/futon (~7 ft × 3 ft closed, ~7 × 6.5 ft open) with ≥3 ft clearance when open, small side table. Listing: 13 × 13 ft. Model room is ~12 × 12 (the house footprint and bath wall fix it).',[H.P(5,26)[0],HM+7,H.P(5,26)[1]],{near:true,layer:'house'});
  Bx(0.6,28.6,7.6,31.6,1.4,0x3c4a5a,0,true);Bx(0.6,31.0,7.6,31.6,3,0x3c4a5a,0);for(const u of [0.6,7.1])Bx(u,28.6,u+0.5,31.6,2.1,0x3c4a5a,0); // sleeper sofa
@@ -985,11 +1005,28 @@ const NET=[];
  // direct door bedroom 2 -> main bath is the opening at v=20, u4.5-7 (see wall)
 }
 
+
+// --- floor finish toggle (default: long gray porcelain wood-look plank, like 339 Sandbar)
+{const F=[];const seen=new Set();groups.house.traverse(o=>{if(o.isMesh&&!Array.isArray(o.material)&&o.material.map&&!seen.has(o.material)){const h=o.material.color.getHex();if(h===0xe2cfae||h===0xd9ccb6){seen.add(o.material);F.push([o.material,h]);}}});
+ window.setFloor=k=>{F.forEach(([m,h])=>m.color.setHex(k==='wood'?h:0xb4b4b0));};
+ const lay=document.getElementById('layers');if(lay){const w=document.createElement('label');w.innerHTML='Floor: <select id="flSel"><option value="gray">gray plank tile</option><option value="wood">wood</option></select>';lay.appendChild(w);w.querySelector('select').onchange=e=>setFloor(e.target.value);}
+ const qf=new URLSearchParams(location.search).get('floor')||'gray';setFloor(qf);const e=document.getElementById('flSel');if(e)e.value=qf;}
+
+// --- deck & rail color (default brown = matches the barn door trim); house siding unchanged
+{const D=[],R=[];const seen=new Set();groups.bldg.traverse(o=>{if(!o.isMesh||Array.isArray(o.material)||seen.has(o.material))return;const h=o.material.color.getHex();if(h===0x8a6242&&o.material.map){seen.add(o.material);D.push(o.material);}else if(h===0x5a3f2c){seen.add(o.material);R.push(o.material);}});
+ const C={current:[0x8a6242,0x5a3f2c],brown:[0x6b4a2e,0x5a3e2a],cream:[0xe6dcc4,0xdccfb0]};
+ window.setDeck=k=>{const c=C[k]||C.brown;D.forEach(m=>m.color.setHex(c[0]));R.forEach(m=>m.color.setHex(c[1]));const e=document.getElementById('dkSel');if(e)e.value=k;};
+ const lay=document.getElementById('layers');if(lay){const w=document.createElement('label');w.innerHTML='Deck &amp; rail color: <select id="dkSel"><option value="brown">brown (matches door trim)</option><option value="cream">cream</option><option value="current">current</option></select>';lay.appendChild(w);w.querySelector('select').onchange=e=>setDeck(e.target.value);}
+ const _df=window.setDoorFrame;window.setDoorFrame=k=>{_df(k);if(k==='brown'||k==='cream')setDeck(k);};
+ const q=new URLSearchParams(location.search);setDeck(q.get('deck')||(q.get('frame')==='cream'?'cream':'brown'));
+ info('Deck & railings: solid stain to match the barn door trim (concept)','prop','~320 sf deck (10 × 32 ft in the model) + ~55 LF of rail. Pro clean + solid stain $1.50–5.50/sf, railings $4–14/LF (RemodelCalculators 2026) → ~$1–4K. Optional alternative: replace wood rails with black/bronze aluminum or cable rail (by quote). House siding color unchanged.',[H.P(39,16)[0],HM+6,H.P(39,16)[1]],{layer:'bldg',short:'Deck: solid stain to match trim',pri:4});}
+// --- big pole barn: freeze protection note (van bay)
+info('Van bay freeze protection (options)','prop','(a) Winterize the Interstate 24X (Timberline system: drain or RV antifreeze in the domestic water; coolant needs none — Airstream Support) and/or keep it on the 30 A shore outlet so the 12 V fresh/gray tank pads (on at 44°F, off at 64°F — 2022 24X owner\'s manual) work. (b) Recommended: insulate the van bay (~2,000 sf closed-cell, $1.80–3.50/sf) + Modine Hot Dawg HD45 LP heater ($963–1,429) on a thermostat at 40°F → ~$6–11K. (c) Insulate the whole barn ~$5–16K + heater. Propane heaters must be vented (power-vent) and the barn needs a CO alarm.',[PB.P(16,20)[0],PBy+13,PB.P(16,20)[1]],{layer:'barn',short:'Van bay freeze protection',pri:5});
 // --- new layers' default state + labels for items created after the label pass
 {const lay=document.getElementById('layers');
  NEWITEMS.concat(items.filter(i=>!i.el&&i.pos)).forEach(it=>{if(it.el||!it.pos)return;const d=document.createElement('div');d.className='lbl'+(it.tag==='own'?' own':soft(it.tag)?' prop':'');it.layer=it.layer||guessLayer(it);
    d.textContent=it.short||it.name.split(/\s+\(|\s+—\s+|:\s+/)[0].slice(0,30);it.pri=it.pri!==undefined?it.pri:4;d.title=it.name;d.onclick=()=>showInfo(it);lblDiv.appendChild(d);it.el=d;});
- lay.querySelectorAll('input').forEach(c=>{if(['netcov','camcov','tandem','nowall'].includes(c.dataset.l))c.checked=false;});}
+ lay.querySelectorAll('input').forEach(c=>{if(['netcov','camcov','tandem','nowall','optB'].includes(c.dataset.l))c.checked=false;});}
 
 // jump-to
 const J=[['🏡 Whole site',()=>{flyTo(home.tgt,560,[-0.3,0.65,0.8]);}],
@@ -1025,14 +1062,14 @@ vo('🛰 Aerial overview','Whole 6-acre parcel: house, pole barn, gym barn, pond
 {const t=[H.x0+20,HM+6,H.z0-26];vo('🏠 Front exterior (garage side)','Chalet with attached 24×24 garage; steep gray metal roof, light lap siding, black-frame windows.',t,[t[0]-70,t[1]+30,t[2]-75]);}
 {const t=[H.x0+22,HM+4,H.z0-14];vo('🌊 Pond-side elevation','East glass gable, wraparound deck above the walk-out, pond in front.',t,[t[0]+95,t[1]+22,t[2]+30]);}
 vw('🪵 Deck — teak dining table','8-ft teak table on the ~10 ft deck; cocktails and dinners outside.',39,26.5,HM,38.5,14,-0.18);VP[VP.length-1].walk.fov=68;
-{const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0]+6,HL+3,t[1]+1],[c[0]+0.9,HL+4.4,c[1]-0.4]);VP[VP.length-1].orbit.fov=72;}
+{const c=H.P(35.2,10.2),t=H.P(47,8);vo('☕ Walk-out patio — morning coffee','From the patio chairs: bistro table for two, looking out to the pond; fire pit circle (proposed) to the right.',[t[0]+20,HL+3.2,t[1]+20],[c[0]+4.4,HL+4.9,c[1]-0.6]);VP[VP.length-1].orbit.fov=72;}
 vw('🍸 Great room — lounge/club','Steinway B, cigar chairs, art panel #2 on the inner west wall, back bar; existing warm wood vaulted ceiling kept.',33,15.5,HM,13,4,-0.07);VP[VP.length-1].walk.fov=68;
 vw('🍳 Kitchen island','9 × 3.5 ft quartz island with 4 stools; no formal dining.',25.5,15.8,HM,25.5,31,-0.2);VP[VP.length-1].walk.fov=68;
 vw('💻 Office (main floor)','Smaller main-floor bedroom: Seabreeze glass desk + Aeron, wall shelving.',10.2,10.6,HM,2,3,-0.12);VP[VP.length-1].walk.fov=72;
 vw('🛋 Office / guest (futon)','Larger main-floor bedroom: second desk, queen sleeper sofa, side table; direct door to the main bath.',10.4,21.4,HM,2,29,-0.12);VP[VP.length-1].walk.fov=72;
 vw('🛏 Lower master bedroom','King bed, finished closet with doors, light oak floor, warm white walls.',10.6,10.8,HL,2,5,-0.12);VP[VP.length-1].walk.fov=68;
 vw('🛁 Lower primary bath','Freestanding tub, acrylic shower, double vanity (Option B: borrows craft-room space).',15.2,11.2,HL,15,2,-0.3);VP[VP.length-1].walk.fov=68;
-vw('📺 Lower sitting / TV room','Sectional #3, 75″ TV, coffee bar; walk-out sliders to the patio.',29,15,HL,16.5,28,-0.08);VP[VP.length-1].walk.fov=68;
+vw('📺 Lower sitting / TV room','Large L sectional in the NW corner (size to verify) facing the 75″ TV on a new media wall ~12 ft away.',13.6,16.2,HL,2,30,-0.12);VP[VP.length-1].walk.fov=68;
 vw('🛌 Guest loft','Guest loft for guests or the kids; shower-only ¾ bath.',12.6,10,HM+9.4,6,24,-0.2);VP[VP.length-1].walk.fov=68;
 {const t=PB.P(20,18),c=PB.P(38,-7);vo('🚐 Big barn — van + pontoon','Airstream Interstate 24X camper van (Sprinter 3500 dually) and the pontoon on its trailer in the large section.',[t[0],PBy+1,t[1]],[c[0],PBy+31,c[1]]);VP[VP.length-1].orbit.fov=55;VP[VP.length-1].noRoof=true;}
 {const t=GY.P(11,18),c=GY.P(27.2,0.8);vo('🏋 Gym barn — CrossFit + recovery','Rig, barbells, rower/SkiErg, Peloton, treadmill, wall balls, mirrors, cold-plunge recovery corner.',[t[0],GYy+2,t[1]],[c[0],GYy+8.6,c[1]]);VP[VP.length-1].orbit.fov=70;}
@@ -1043,6 +1080,7 @@ vo('🟪 Guest suite site (future, ~2 yrs)','Future guest suite footprint beside
 {const t=G.P(12,11),c=G.P(12,40);VP.push({id:'garage_cars',n:'🚗 Garage: Model Y + XT5',cap:'Tesla Model Y (west bay, by the Wall Connector) and Cadillac XT5 in the 24×24 garage.',orbit:{t:[t[0],HM+2,t[1]],pos:[c[0]+10,HM+30,c[1]],fov:55},noRoof:true});}
 {VP.push({id:'network',n:'📶 Network + cameras',cap:'UniFi gateway + 3 indoor APs, 2 outdoor APs, bridges to both barns; Ring cameras.',orbit:{t:[-110,10,-10],pos:[-60,330,160],fov:55},showNet:true});}
 {const t=PB.P(18,0),c=PB.P(20,-40);VP.push({id:'barn_doors',n:'🚪 Modern glass barn doors',cap:'Full-view glass doors, brown frames, cream siding kept (concept).',orbit:{t:[t[0],PBy+7,t[1]],pos:[c[0],PBy+8,c[1]],fov:50}});}
+{const t=PB.P(6,38),c=PB.P(10,72);VP.push({id:'barn_rear',n:'🚪 Option B: new rear door (pole barn)',cap:'New 9×8 glass overhead door on the rear gable of the smaller section; gravel apron around the barn.',orbit:{t:[t[0],PBy+5,t[1]],pos:[c[0],PBy+12,c[1]],fov:50}});}
 function goVP(v,instant){{const set=(l,on)=>{const c=document.querySelector('#layers input[data-l="'+l+'"]');if(c&&c.checked!==on){c.checked=on;}};if(v.showNet){set('netcov',true);set('camcov',true);set('net',true);set('cams',true);}else{set('netcov',false);set('camcov',false);}refresh();}const rt=document.getElementById('roofT');if(v.noRoof&&rt.checked){rt.checked=false;refresh();}else if(!v.noRoof&&!rt.checked&&v.orbit){rt.checked=true;refresh();}if(instant){anim=null;if(v.walk){const w=walkPose(v.walk);enterWalk(Object.assign({},v.walk,{feet:w.feet}));}else{camera.position.set(...v.orbit.pos);enterOrbit(new THREE.Vector3(...v.orbit.t),v.orbit.fov);camera.lookAt(...v.orbit.t);}return;}
   if(v.walk)goWalk(v.walk,true);else{const T=new THREE.Vector3(...v.orbit.t);flyCam(new THREE.Vector3(...v.orbit.pos),T,null,()=>enterOrbit(T,v.orbit.fov));}caption(v);}
 function caption(v){const c=document.getElementById('caption');if(!c)return;c.innerHTML=`<b>${v.n}</b><span>${v.cap||''}</span>`;c.style.opacity=1;clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,tour?5200:4200);}
