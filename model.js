@@ -42,7 +42,7 @@ const TEX={
  plank:ctex(512,(g,n)=>{let r=7;const rnd=()=>{r=(r*16807)%2147483647;return r/2147483647;};const pw=n/8;for(let i=0;i<8;i++){let y=0;while(y<n){const L=n*(0.35+rnd()*0.5);const v=225+Math.floor(rnd()*30);g.fillStyle=`rgb(${v},${v},${v})`;g.fillRect(i*pw,y,pw,L);g.fillStyle='rgba(0,0,0,0.25)';g.fillRect(i*pw,y,pw,1.5);y+=L;}g.fillStyle='rgba(0,0,0,0.3)';g.fillRect(i*pw,0,1.5,n);}}),
  tile:ctex(256,(g,n)=>{g.fillStyle='#fafafa';g.fillRect(0,0,n,n);g.fillStyle='#cfcfcf';for(let i=0;i<2;i++){g.fillRect(0,i*n/2,n,2);g.fillRect(i*n/2,0,2,n);}}),
  deck:ctex(256,(g,n)=>{for(let i=0;i<10;i++){const v=200+(i*37%40);g.fillStyle=`rgb(${v},${v},${v})`;g.fillRect(i*n/10,0,n/10,n);g.fillStyle='#555';g.fillRect(i*n/10,0,2,n);}})};
-function texMat(m,key,ru,rv){const t=TEX[key].clone();t.needsUpdate=true;t.repeat.set(ru,rv);m.map=t;m.needsUpdate=true;}
+window.__TEX=TEX;function texMat(m,key,ru,rv){const t=TEX[key].clone();t.needsUpdate=true;t.repeat.set(ru,rv);m.map=t;m.needsUpdate=true;}
 const soft=t=>t==='inf'||t==='prop'||t==='pnew'||t==='future';
 function mat(color,tag,extra){
   const m=new THREE.MeshLambertMaterial(Object.assign({color},extra||{}));
@@ -807,10 +807,12 @@ const EXTRAS=[];
 
 // ---- furniture shape upgrade: replace placeholder boxes with simple modeled shapes (same footprint, same info/picking)
 // ================= v7 FURNITURE LIBRARY (procedural, inventory sizes) =================
+const V8HI=(()=>{let q=null;try{q=localStorage.getItem('samelsQ');}catch(e){}const Q=new URLSearchParams(location.search);if(Q.get('clean')==='1')q='high';if(Q.get('q'))q=Q.get('q');if(!q)q=(matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high';return q==='high'&&!!THREE.GLTFLoader;})();window.__V8HI=V8HI;window.__swaps=[];
+function SW(G,m,o){if(!V8HI||!G)return G;G.traverse(c=>{c.userData.noMerge=true;});window.__swaps.push(Object.assign({G,m},o||{}));return G;}
 const FX=(()=>{const tex=(w,h,fn,rep)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(rep)t.repeat.set(rep[0],rep[1]);t.anisotropy=4;return t;};
  const noise=(g,w,h,n,cols,a)=>{for(let i=0;i<n;i++){g.fillStyle=cols[i%cols.length];g.globalAlpha=a;g.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1+Math.random()*2);}g.globalAlpha=1;};
- const leatherT=c=>tex(128,128,(g,w,h)=>{g.fillStyle=c;g.fillRect(0,0,w,h);noise(g,w,h,1800,['#000','#fff'],0.06);});
- const fabricT=c=>tex(128,128,(g,w,h)=>{g.fillStyle=c;g.fillRect(0,0,w,h);g.globalAlpha=0.08;for(let i=0;i<w;i+=2){g.fillStyle=i%4?'#000':'#fff';g.fillRect(i,0,1,h);g.fillRect(0,i,w,1);}g.globalAlpha=1;noise(g,w,h,600,['#000','#fff'],0.05);});
+ const leatherT=c=>{const t=tex(128,128,(g,w,h)=>{g.fillStyle=c;g.fillRect(0,0,w,h);noise(g,w,h,1800,['#000','#fff'],0.06);});t.__pbr='leather';return t;};
+ const fabricT=c=>{const t=tex(128,128,(g,w,h)=>{g.fillStyle=c;g.fillRect(0,0,w,h);g.globalAlpha=0.08;for(let i=0;i<w;i+=2){g.fillStyle=i%4?'#000':'#fff';g.fillRect(i,0,1,h);g.fillRect(0,i,w,1);}g.globalAlpha=1;noise(g,w,h,600,['#000','#fff'],0.05);});t.__pbr='fabric';return t;};
  const mats={};const M=(k,f)=>mats[k]||(mats[k]=f());
  const leather=c=>M('lea'+c,()=>new THREE.MeshPhongMaterial({color:0xffffff,map:leatherT('#'+c.toString(16).padStart(6,'0')),shininess:38,specular:0x3a3a3a}));
  const fabric=c=>M('fab'+c,()=>new THREE.MeshLambertMaterial({color:0xffffff,map:fabricT('#'+c.toString(16).padStart(6,'0'))}));
@@ -868,12 +870,12 @@ function fxBed(k,hb,headCol,duvet,throwC){const [W,D]=FX.dims(k,hb),G=new THREE.
  FX.box(G,0,0,hd-0.2,W+0.25,4.2,0.35,HB);const tp=[];for(let i=1;i<Math.round(W/0.6);i++)for(let j=0;j<3;j++){if((i+j)%2)continue;tp.push([-hw+i*0.6,2.6+j*0.5,hd-0.4]);}FX.studs(G,tp,FX.ph(0x0d1530,10));
  const np=W>5.5?2:1;for(let i=0;i<np;i++){const x=np===1?0:(i?hw/2:-hw/2);FX.blob(G,x,1.95,hd-1.0,np===1?hw*0.55:hw*0.42,0.24,0.45,FX.fabric(0xffffff),14);FX.blob(G,x,2.1,hd-1.55,np===1?hw*0.4:hw*0.3,0.22,0.12,FX.fabric(headCol?0x9aa8c0:0xc9b8a0),12).rotation.x=-0.4;}
  return FX.place(G,k,hb);}
-function fxLamp(x,y,z,h,shadeC,layer){const G=new THREE.Group();FX.cyl(G,0,0.06,0,0.45,0.12,FX.black());FX.cyl(G,0,h/2,0,0.035,h,FX.ph(0x1d1d1d,80));const s=FX.cyl(G,0,h+0.15,0,0.6,0.9,new THREE.MeshLambertMaterial({color:shadeC||0xf3ead8,emissive:0x6a5a40,side:THREE.DoubleSide}),null,0.75,20);s.castShadow=false;G.position.set(x,y,z);groups[layer||'house'].add(G);return G;}
+function fxLamp(x,y,z,h,shadeC,layer){const G=new THREE.Group();FX.cyl(G,0,0.06,0,0.45,0.12,FX.black());FX.cyl(G,0,h/2,0,0.035,h,FX.ph(0x1d1d1d,80));const s=FX.cyl(G,0,h+0.15,0,0.6,0.9,new THREE.MeshLambertMaterial({color:shadeC||0xf3ead8,emissive:0x6a5a40,side:THREE.DoubleSide}),null,0.75,20);s.castShadow=false;G.position.set(x,y,z);groups[layer||'house'].add(G);return h<2.2?SW(G,'desk_lamp_arm_01',{fit:'h',ry:Math.PI,k:0.95}):G;}
 function fxPlant(x,y,z,s,kind,layer){const G=new THREE.Group(),pot=FX.ph(kind==='snake'?0xe9e6df:0x2b2b2b,30);FX.cyl(G,0,0.65*s,0,0.55*s,1.3*s,pot,null,0.42*s,18);FX.cyl(G,0,1.28*s,0,0.5*s,0.04,FX.lam(0x3a2a1c),null,undefined,14);
  const lf=FX.lam(kind==='snake'?0x3f6a35:0x2f5d2a),lf2=FX.lam(0x4f7f38);
  if(kind==='snake'){for(let i=0;i<9;i++){const a=i*2.3,r=0.12*s;const l=FX.box(G,Math.cos(a)*r,1.3*s,Math.sin(a)*r,0.16*s,(1.6+(i%3)*0.5)*s,0.04*s,i%2?lf:lf2);l.rotation.set(Math.sin(i)*0.15,a,Math.cos(i)*0.15);}}
  else{FX.cyl(G,0,(1.3+1.6)*s,0,0.05*s,3.2*s,FX.lam(0x5a4330));for(let i=0;i<22;i++){const a=i*2.4,hh=(2.2+(i%7)*0.4)*s,r=(0.35+(i%4)*0.15)*s;const l=FX.blob(G,Math.cos(a)*r,1.3*s+hh,Math.sin(a)*r,0.32*s,0.05*s,0.42*s,i%3?lf:lf2,8);l.rotation.set(0.5*Math.cos(a),a,0.4);}}
- G.position.set(x,y,z);groups[layer||'house'].add(G);return G;}
+ G.position.set(x,y,z);groups[layer||'house'].add(G);return SW(G,kind==='snake'?'potted_plant_04':'potted_plant_02',{fit:'h',ry:0});}
 function fxRugTex(base,border,pattern){return FX.tex(256,256,(g,w,h)=>{g.fillStyle=base;g.fillRect(0,0,w,h);FX.noise(g,w,h,3000,['#000','#fff'],0.05);g.strokeStyle=border;g.lineWidth=10;g.strokeRect(14,14,w-28,h-28);g.lineWidth=2;g.strokeRect(30,30,w-60,h-60);
  if(pattern==='geo'){g.globalAlpha=0.25;g.strokeStyle=border;for(let i=40;i<w-40;i+=24){g.beginPath();g.moveTo(i,40);g.lineTo(i+12,h-40);g.stroke();}g.globalAlpha=1;}});}
 {const byName=re=>window.__furn.filter(f=>re.test(f.name));
@@ -888,8 +890,8 @@ function fxRugTex(base,border,pattern){return FX.tex(256,256,(g,w,h)=>{g.fillSty
    const n=Math.max(1,Math.round(((back==='n'||back==='s')?(x1-x0):(z1-z0))/2.6));for(let i=1;i<n;i++){const t=i/n;if(back==='n'||back==='s')B(x0+(x1-x0)*t-0.02,x0+(x1-x0)*t+0.02,z0,z1,y+seatH,0.02,0x111111);else B(x0,x1,z0+(z1-z0)*t-0.02,z0+(z1-z0)*t+0.02,y+seatH,0.02,0x111111);}}
  window.__furn.forEach(f=>{f.mesh=f.mesh||null;});
  const want=[[/cigar chair \(1/,'e',0x15110e,1.5,3.2,1],[/cigar chair \(2/,'e',0x15110e,1.5,3.2,1],[/club sofa/,'e',0x6b5442,1.5,2.7,1],[/#3 Seabreeze gray sectional/,'w',0x9a9fa6,1.5,2.7,1]];
- for(const f of byName(/cigar chair/)){hideBox(f);fxClubChair(f.c,'e',0x17120e);}
- for(const f of byName(/club sofa/)){hideBox(f);fxSofa(f.c,'e',0x6b5442);}
+ for(const f of byName(/cigar chair/)){hideBox(f);SW(fxClubChair(f.c,'e',0x17120e),'modern_arm_chair_01',{ry:Math.PI});}
+ for(const f of byName(/club sofa/)){hideBox(f);SW(fxSofa(f.c,'e',0x6b5442),'sofa_02',{ry:Math.PI});}
  for(const f of byName(/#3 Seabreeze gray sectional/)){hideBox(f);fxSofa(f.c,'w',0x8f959c,{arms:[1],pillows:[0xe9e4da,0x3f4d5c,0xb88a5a,0xe9e4da],throwC:0xd8d0c2});}
  for(const f of byName(/#3 Sectional chaise \(left/)){hideBox(f);fxSofa(f.c,'n',0x8f959c,{arms:[-1],noBack:false,pillows:[0x3f4d5c,0xe9e4da]});}
  for(const f of byName(/#3 Sectional chaise \(right/)){hideBox(f);}
@@ -919,8 +921,8 @@ function fxRugTex(base,border,pattern){return FX.tex(256,256,(g,w,h)=>{g.fillSty
    G.scale.x=-1;G.rotation.y=-Math.PI/2;G.position.set(k.x1,y,k.z1);groups.house.add(G);}
  for(const f of byName(/Steinway lid/)){hideBox(f);}
  // stools
- for(const f of byName(/Counter stool/)){hideBox(f);const k=f.c,x=(k.x0+k.x1)/2,z=(k.z0+k.z1)/2;const s=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,0.25,18),new THREE.MeshLambertMaterial({color:0x6b4f3a}));s.position.set(x,k.y0+2.4,z);groups.house.add(s);
-   B(x-0.07,x+0.07,z-0.07,z+0.07,k.y0,2.3,0x111111);const r=new THREE.Mesh(new THREE.TorusGeometry(0.45,0.04,6,18),new THREE.MeshLambertMaterial({color:0x111111}));r.rotation.x=Math.PI/2;r.position.set(x,k.y0+0.9,z);groups.house.add(r);}
+ for(const f of byName(/Counter stool/)){hideBox(f);const k=f.c,x=(k.x0+k.x1)/2,z=(k.z0+k.z1)/2;const SG=new THREE.Group();SG.position.set(x,k.y0,z);groups.house.add(SG);const s=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,0.25,18),new THREE.MeshLambertMaterial({color:0x6b4f3a}));s.position.set(0,2.4,0);SG.add(s);
+   const pst=new THREE.Mesh(new THREE.BoxGeometry(0.14,2.3,0.14),new THREE.MeshLambertMaterial({color:0x111111}));pst.position.y=1.15;SG.add(pst);const r=new THREE.Mesh(new THREE.TorusGeometry(0.45,0.04,6,18),new THREE.MeshLambertMaterial({color:0x111111}));r.rotation.x=Math.PI/2;r.position.set(0,0.9,0);SG.add(r);SW(SG,'bar_chair_round_01',{fit:'h',ry:0});}
  // teak dining table + 8 chairs on the deck
  for(const f of byName(/Teak dining table/)){hideBox(f);const k=f.c,y=k.y0,cx=(k.x0+k.x1)/2;const teak=new THREE.MeshLambertMaterial({color:0xa8733f});
    const tx0=cx-1.7,tx1=cx+1.7,tz0=k.z0+0.6,tz1=k.z1-0.6;B(tx0,tx1,tz0,tz1,y+2.35,0.15,0,teak);for(const [x,z] of [[tx0+.2,tz0+.2],[tx1-.2,tz0+.2],[tx0+.2,tz1-.2],[tx1-.2,tz1-.2]])B(x-.15,x+.15,z-.15,z+.15,y,2.35,0,teak);
@@ -935,9 +937,10 @@ function fxRugTex(base,border,pattern){return FX.tex(256,256,(g,w,h)=>{g.fillSty
  // massage chair
  for(const f of byName(/Massage chair/)){hideBox(f);uph(f,'s',0x2e2e2e,1.8,4.2,1);}
  // coffee chairs + cafe table at walk-out
- for(const f of byName(/Morning coffee/)){hideBox(f);const k=f.c,y=k.y0,cx=(k.x0+k.x1)/2+0.6,cz=(k.z0+k.z1)/2;const t=new THREE.Mesh(new THREE.CylinderGeometry(0.95,0.95,0.08,24),new THREE.MeshLambertMaterial({color:0x2a2a2a}));t.position.set(cx,y+2.4,cz);groups.house.add(t);B(cx-.05,cx+.05,cz-.05,cz+.05,y,2.4,0x222222);
+ {const n0=groups.house.children.length; for(const f of byName(/Morning coffee/)){hideBox(f);const k=f.c,y=k.y0,cx=(k.x0+k.x1)/2+0.6,cz=(k.z0+k.z1)/2;const t=new THREE.Mesh(new THREE.CylinderGeometry(0.95,0.95,0.08,24),new THREE.MeshLambertMaterial({color:0x2a2a2a}));t.position.set(cx,y+2.4,cz);groups.house.add(t);B(cx-.05,cx+.05,cz-.05,cz+.05,y,2.4,0x222222);
    const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.12,0.3,12),new THREE.MeshLambertMaterial({color:0xf4f1ea}));cup.position.set(cx-0.3,y+2.6,cz+0.2);groups.house.add(cup);const cup2=cup.clone();cup2.position.set(cx+0.35,y+2.6,cz-0.25);groups.house.add(cup2);
    for(const s2 of [-1,1]){const z=cz+s2*1.7;B(cx-0.85,cx+0.85,z-0.85,z+0.85,y+1.5,0.12,0x2a2a2a);B(cx-0.85,cx+0.85,s2<0?z-0.85:z+0.73,s2<0?z-0.73:z+0.85,y+1.5,1.5,0x2a2a2a);for(const [dx,dz] of [[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]])B(cx+dx-.05,cx+dx+.05,z+dz-.05,z+dz+.05,y,1.5,0x2a2a2a);B(cx-0.8,cx+0.8,z-0.8,z+0.8,y+1.62,0.2,0xd9cfbf);}}
+ const nw=groups.house.children.slice(n0);if(nw.length){const MG=new THREE.Group();nw.forEach(o=>MG.add(o));groups.house.add(MG);SW(MG,'outdoor_table_chair_set_01',{ry:0});}}
  // back bar: cabinet + shelves + bottles
  for(const f of byName(/Back bar/)){const k=f.c,y=k.y0;for(let i=0;i<14;i++){const x=k.x0+0.4+i*(k.x1-k.x0-0.8)/13;const b=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.12,0.9,8),new THREE.MeshPhongMaterial({color:[0x7a3b12,0x2f5d2a,0xc9b27a,0x5a1a1a][i%4],shininess:90}));b.position.set(x,y+3.95,(k.z0+k.z1)/2);groups.house.add(b);}
    B(k.x0,k.x1,k.z1-0.4,k.z1,y+5,0.1,0x3a2a20);}}
@@ -1163,12 +1166,12 @@ vw('🛁 Lower primary bath','Freestanding tub, acrylic shower, double vanity (O
 vw('📺 Lower sitting / TV room','Large L sectional in the NW corner (size to verify) facing the 75″ TV on a new media wall ~12 ft away.',13.6,16.2,HL,2,30,-0.12);VP[VP.length-1].walk.fov=68;
 vw('🛌 Guest loft','Guest loft for guests or the kids; shower-only ¾ bath.',12.6,10,HM+9.4,6,24,-0.2);VP[VP.length-1].walk.fov=68;
 {const t=PB.P(20,18),c=PB.P(38,-7);vo('🚐 Big barn — van + pontoon','Airstream Interstate 24X camper van (Sprinter 3500 dually) and the pontoon on its trailer in the large section.',[t[0],PBy+1,t[1]],[c[0],PBy+31,c[1]]);VP[VP.length-1].orbit.fov=55;VP[VP.length-1].noRoof=true;}
-{const t=GY.P(11,18),c=GY.P(27.2,0.8);vo('🏋 Gym barn — CrossFit + recovery','Rig, barbells, rower/SkiErg, Peloton, treadmill, wall balls, mirrors, cold-plunge recovery corner.',[t[0],GYy+2,t[1]],[c[0],GYy+8.6,c[1]]);VP[VP.length-1].orbit.fov=70;}
+{const t=GY.P(11,18),c=GY.P(27.2,0.8);vo('🏋 Gym barn — CrossFit + recovery','4-station rig with lifting zones, turf sled lane, rower/SkiErg, Peloton, storage wall, wall balls, and the recovery corner (Plunge, sauna, massage chair).',[t[0],GYy+2,t[1]],[c[0],GYy+8.6,c[1]]);VP[VP.length-1].orbit.fov=70;}
 {const t=[SOLAR.x,rawElev(SOLAR.x,SOLAR.z)+4,SOLAR.z];vo('☀ Ground-mount solar (concept)','~20 kW in two racked rows at ~40°, facing south; trench to the house.',t,[t[0]+75,t[1]+48,t[2]+62]);}
 vo('🟪 Guest suite site (future, ~2 yrs)','Future guest suite footprint beside the chalet (purple layer).',[SU.x0+10,HM,SU.z0-14],[SU.x0-55,HM+48,SU.z0+45]);
 ['aerial','arrival','front','pond','deck','coffee','great_room','kitchen','office','office_guest','lower_master','lower_bath','tv_room','loft','big_barn','gym','solar','guest_suite'].forEach((id,i)=>{if(VP[i])VP[i].id=id;});
 {const a=VP.find(v=>v.id==='arrival');if(a&&a.orbit){const t=a.orbit.t,p=a.orbit.pos;p[0]+=(p[0]-t[0])*0.25;p[2]+=(p[2]-t[2])*0.25;p[1]+=16;}}
-{const t=GY.P(9,15.5),c=GY.P(25.6,4.2);VP.push({id:'gym_beauty',n:'🏋 Gym — rig + platform',cap:'Rubber floor, oak lifting platform, 10 × 6 ft rig with loaded bar, mirror wall, bumper and dumbbell racks, rower/SkiErg, LED high-bays.',orbit:{t:[t[0],GYy+3.2,t[1]],pos:[c[0],GYy+7.2,c[1]],fov:68}});}
+{const t=GY.P(9,15.5),c=GY.P(25.6,4.2);VP.push({id:'gym_beauty',n:'🏋 Gym — 4-station rig',cap:'Compact 2-sided rig with 4 barbell stations, each on its own 8 × 6 ft lifting zone; pull-up bars at 7.5–9 ft, high and low rings, turf sled lane alongside, storage wall with dumbbells, kettlebells, bumpers and bars.',orbit:{t:[t[0],GYy+3.2,t[1]],pos:[c[0],GYy+7.2,c[1]],fov:68}});}
 {const t=GY.P(6.5,27.8),c=GY.P(9.2,20.6);VP.push({id:'recovery',n:'🧊 Recovery — Plunge + Sauna',cap:'The Plunge tub (66⅝ × 31½ × 26 in) at 39°F, Plunge The Sauna Standard (cedar, glass front, HUUM heater), massage chair, cedar slat wall.',orbit:{t:[t[0],GYy+3.4,t[1]],pos:[c[0],GYy+6.2,c[1]],fov:72}});}
 {const PD=[W(345),rawElev(W(345),Zs(296)),Zs(296)],HC=H.P(17,16),d=new THREE.Vector2(PD[0]-HC[0],PD[2]-HC[1]).normalize(),pb=PB.P(16,19),gy=GY.P(14,15);
  const ctr=[(HC[0]+pb[0]+gy[0])/3,HM-6,(HC[1]+pb[1]+gy[1])/3];
@@ -1210,7 +1213,7 @@ const TOUR=[
  ['aerial_p09','The chalet from the air','Like the listing drone shot: the chalet on its rise, the stone-edged pond in front and the barns tucked behind.'],
 ['pond','The pond','A landscaped lily pond ringed with stacked stone and plantings, just below the deck.'],
  ['big_barn','The big pole barn','Room for the Airstream Interstate and the pontoon, with a proposed glass overhead door and a tandem bay for a future sports car.'],
- ['gym_beauty','The small barn: CrossFit gym','Rubber floor and an oak lifting platform in front of the pull-up rig, with the mirror wall, bumper plates, dumbbells, rower and SkiErg.'],
+ ['gym_beauty','The small barn: CrossFit gym','An open room built around a compact rig with four barbell stations, each on its own lifting zone. A turf sled lane runs alongside, with the rower, SkiErg and Peloton, a storage wall for dumbbells, kettlebells and bumper plates, and a wall-ball target.'],
  ['recovery','Recovery corner','The Plunge cold tub at thirty-nine degrees beside a cedar Plunge sauna, with the massage chair and a warm cedar slat wall.'],
  ['barns_solar','Barns and solar from above','The pole barn, the gym barn and the south-field array, all linked by the gravel drive.'],
 ['solar','The solar field','A ground-mount array in the south field, angled for winter sun and clear of snow sliding off the roofs.'],
@@ -1296,7 +1299,7 @@ const TF=(()=>{const V3=THREE.Vector3,B3=THREE.Box3;
   go(fit(lvl[k](),Math.PI*0.8,k==='loft'?1.05:0.95),k,false,()=>{cur='house';ui();});}
  // UI: places bar (collapses to a menu on phones), Enter hotspots, Go-outside button
  const css=document.createElement('style');css.textContent=`#tfBar{position:absolute;bottom:66px;left:50%;transform:translateX(-50%);z-index:40;display:flex;gap:4px;background:rgba(20,24,28,.82);padding:4px;border-radius:10px;font:13px system-ui,sans-serif}
-#tfBar button{background:#2b3138;color:#fff;border:0;border-radius:7px;padding:7px 10px;cursor:pointer;white-space:nowrap;touch-action:manipulation}#tfBar button:hover{background:#3d4752}#tfBar #tfTog{display:none}
+body.clean #tfBar,body.clean .tfHot,body.clean #tfOut{display:none!important}#tfBar button{background:#2b3138;color:#fff;border:0;border-radius:7px;padding:7px 10px;cursor:pointer;white-space:nowrap;touch-action:manipulation}#tfBar button:hover{background:#3d4752}#tfBar #tfTog{display:none}
 @media (max-width:700px){#tfBar{flex-direction:column;left:auto;right:8px;transform:none;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 128px)}#tfBar #tfTog{display:block}#tfBar:not(.open) .tfp{display:none}#tfBar button{padding:10px 12px;font-size:14px}}
 .tfHot{position:absolute;z-index:35;transform:translate(-50%,-100%);background:#ffcc33;color:#111;border:2px solid #fff;border-radius:16px;padding:6px 11px;font:bold 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.45);touch-action:manipulation;white-space:nowrap}
 .tfHot:after{content:'';position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
@@ -1414,7 +1417,7 @@ pickables.forEach(o=>{const it=o.userData.item;if(it&&/^Sauna 6|Bathroom \/ show
  // axis: 'y' vertical, 'u' east-west, 'v' north-south. (u,v,y)=center
  const Cy=(u,v,y,r,h,M,ax,r2,seg,it)=>{const [x,z]=F.P(u,v);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r2===undefined?r:r2,h,seg||20),M);m.position.set(x,Y+y,z);if(ax==='u')m.rotation.z=Math.PI/2;if(ax==='v')m.rotation.x=Math.PI/2;return add(m,it,true);};
  // ---- rubber floor (whole room) with speckle, + 8x4 lifting platform
- const rubT=cv(256,256,(c,w,h)=>{c.fillStyle='#1a1a1b';c.fillRect(0,0,w,h);for(let i=0;i<5000;i++){c.fillStyle=['#2a2a2c','#3a3a3d','#101010','#4a4a4a'][i%4];c.fillRect(Math.random()*w,Math.random()*h,1.4,1.4);}c.strokeStyle='#0a0a0a';c.lineWidth=2;c.strokeRect(0,0,w,h);});rubT.repeat.set(7,7.5);
+ const rubT=cv(256,256,(c,w,h)=>{c.fillStyle='#1a1a1b';c.fillRect(0,0,w,h);for(let i=0;i<5000;i++){c.fillStyle=['#2a2a2c','#3a3a3d','#101010','#4a4a4a'][i%4];c.fillRect(Math.random()*w,Math.random()*h,1.4,1.4);}c.strokeStyle='#0a0a0a';c.lineWidth=2;c.strokeRect(0,0,w,h);});rubT.repeat.set(7,7.5);rubT.__pbr='rubber';
  const fl=Bx(0.05,0.05,27.95,29.95,0.02,0.06,new THREE.MeshLambertMaterial({map:rubT}),itOf(/Rubber gym flooring/));fl.castShadow=false;
  const oakT=cv(256,64,(c,w,h)=>{c.fillStyle='#b98a55';c.fillRect(0,0,w,h);for(let i=0;i<60;i++){c.strokeStyle='rgba(90,55,25,'+(0.15+Math.random()*0.25)+')';c.beginPath();const y=Math.random()*h;c.moveTo(0,y);c.bezierCurveTo(w/3,y+Math.random()*6-3,2*w/3,y+Math.random()*6-3,w,y);c.stroke();}for(let x=0;x<w;x+=64){c.fillStyle='#7a5a35';c.fillRect(x,0,1,h);} });
  const pit=info('Lifting platform 8 × 4 ft (proposed new)','pnew','3/4 in rubber drop zones each side, oak center strip; in front of the rig so the barbell can be dropped. ~$400–900 DIY.',null,{gym:true,near:true});
@@ -1500,8 +1503,8 @@ pickables.forEach(o=>{const it=o.userData.item;if(it&&/^Sauna 6|Bathroom \/ show
  const si=itOf(/Sauna 6/);if(si){si.name='Plunge "The Sauna" — Standard (optional, proposed)';si.tag='pnew';si.text='Plunge The Sauna, Standard: H 7 ft 11 in × W 5 ft 8 in × D 5 ft 11 in, cedar, full-glass front, HUUM electric heater, flip-up benches. $12,990 list ($11,040 fall sale) per plunge.com/products/the-sauna. Needs a dedicated 240 V 30 A circuit (NEMA L14-30). Foundation rated for ~1,400 lb (4 in concrete slab is fine). Gym eave ~10 ft (estimated) clears the 7 ft 11 in height. XL (W 7 ft 8 in, 240 V 50 A, NEMA 14-50) also fits if the plunge shifts east. Option B: outdoors on a pad beside the north wall.';}
  {const u0=0.12,u1=0.12+5.92,v0=29.9-5.67,v1=29.9,SH2=95/12;
   const CED=new THREE.MeshLambertMaterial({map:cedT}),CD2=L(0x8a5a35);Bx(u0,v1-0.3,u1,v1,0,SH2,CED,si);Bx(u0,v0,u0+0.3,v1,0,SH2,CED,si);Bx(u0,v0,u1,v0+0.3,0,SH2,CED,si);Bx(u0-0.1,v0-0.1,u1+0.1,v1+0.05,SH2-0.35,0.35,CD2,si);
-  const gl=new THREE.MeshPhongMaterial({color:0x2a3438,transparent:true,opacity:0.32,shininess:200,specular:0xffffff,depthWrite:false});Bx(u1-0.12,v0+0.3,u1,v1-0.3,0.2,SH2-0.6,gl,si);
-  for(const v of [v0+0.3,v1-0.3])Bx(u1-0.2,v-0.12,u1,v+0.12,0,SH2-0.35,CD2,si);Bx(u1-0.2,v0+0.3,u1,v1-0.3,0,0.2,CD2,si);Bx(u1-0.04,v0+1.5,u1+0.08,v0+1.6,3,1.6,L(0x2a1a10),si);
+  const gl=new THREE.MeshPhongMaterial({color:0x31403f,transparent:true,opacity:0.2,shininess:220,specular:0xffffff,depthWrite:false,side:THREE.DoubleSide});gl.userData.keepSoft=true;const gm=Bx(u1-0.05,v0+0.36,u1-0.01,v1-0.36,0.12,SH2-0.35-0.22,gl,si);if(gm){gm.renderOrder=20;gm.castShadow=false;gm.userData.noMerge=true;gm.userData.sauna='glass';}const BLK=new THREE.MeshLambertMaterial({color:0x0c0c0c});
+  for(const v of [v0+0.3,v1-0.3])Bx(u1-0.12,v-0.06,u1+0.02,v+0.06,0,SH2-0.35,BLK,si);Bx(u1-0.12,v0+0.3,u1+0.02,v1-0.3,0,0.12,BLK,si);Bx(u1-0.12,v0+0.3,u1+0.02,v1-0.3,SH2-0.47,0.12,BLK,si);Bx(u1-0.12,v0+2.25,u1+0.02,v0+2.33,0.12,SH2-0.59,BLK,si);Bx(u1+0.01,v0+2.0,u1+0.09,v0+2.08,3,1.8,BLK,si);
   Bx(u0+0.3,v1-2.0,u1-1.0,v1-0.3,1.6,0.15,CED,si);Bx(u0+0.3,v0+0.3,u0+2.0,v1-2.0,3.0,0.15,CED,si);Bx(u0+0.3,v1-1.9,u1-1.0,v1-0.3,3.0,0.15,CED,si);
   Cy(u1-0.9,v0+0.9,1.3,0.55,2.4,Ph(0x1a1a1a,60),'y',0.6,24,si);for(let i=0;i<14;i++){const a=i*2.4,r=0.12+(i%4)*0.1;const [x,z]=F.P(u1-0.9+Math.cos(a)*r,v0+0.9+Math.sin(a)*r);const s=new THREE.Mesh(new THREE.DodecahedronGeometry(0.13),L(0x6b6b68));s.position.set(x,Y+2.5+(i%3)*0.08,z);add(s);}
   const lw=new THREE.MeshBasicMaterial({color:0xffb36b});Bx(u0+0.35,v1-0.34,u1-0.4,v1-0.31,1.45,0.05,lw);Bx(u0+0.35,v1-0.34,u1-0.4,v1-0.31,2.85,0.05,lw);
@@ -1650,7 +1653,7 @@ let FLY=null;window.flyover=function(){if(FLY){FLY=null;const b=document.getElem
    q.fillStyle='rgba(90,60,30,0.55)';q.fillRect(0,0,2,h);q.fillRect(w-2,0,2,h);q.fillStyle='#4a4a4a';for(const x of [8,w/2,w-8])for(let y=12;y<h;y+=42){q.beginPath();q.arc(x,y,2.2,0,7);q.fill();}},[len/4,1]);
  const foamT=tx(256,256,(q,w,h)=>{q.fillStyle='#e8e1c8';q.fillRect(0,0,w,h);for(let i=0;i<500;i++){const x=Math.random()*w,y=Math.random()*h,r=4+Math.random()*14;const gr=q.createRadialGradient(x-r*0.3,y-r*0.3,0,x,y,r);gr.addColorStop(0,'rgba(255,252,235,0.6)');gr.addColorStop(1,'rgba(170,160,120,0.25)');q.fillStyle=gr;q.beginPath();q.arc(x,y,r,0,7);q.fill();}},[4,1]);
  const wall=(u0,v0,u1,v1,y0,h,M)=>{const a=F.P(u0,v0),b=F.P(u1,v1);const o=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.06,Math.abs(b[0]-a[0])),h,Math.max(0.06,Math.abs(b[1]-a[1]))),M);o.position.set((a[0]+b[0])/2,Y+y0+h/2,(a[1]+b[1])/2);o.receiveShadow=true;g.add(o);return o;};
- const PLY=L=>new THREE.MeshLambertMaterial({map:plyT(L)}),FOAM=new THREE.MeshLambertMaterial({map:foamT});
+ const PLY=L=>{const t=plyT(L);t.__pbr='ply';return new THREE.MeshLambertMaterial({map:t});},FOAM=new THREE.MeshLambertMaterial({map:foamT});
  const it=info('Birch plywood walls to 8 ft over closed-cell spray foam (proposed)','prop','Closed-cell spray foam on the steel, 1×3 furring, then 3/4 in sanded birch/maple ply screwed in a visible pattern up to 8 ft (hang anything anywhere), foam left exposed above. ~29 sheets: ~$1.5–2.5K materials (ply ~$50–80/sheet) + furring/screws; spray foam is in the climate line.',null,{gym:true,near:true});
  // runs: [axis, fixed, from, to] with door gaps
  const runs=[['S',0.32,[[0.3,22],[25,27.7]]],['N',29.68,[[0.3,13],[16,27.7]]],['E',27.68,[[0.3,11],[19,29.7]]],['W',0.32,[[0.3,29.7]]]];
@@ -1658,7 +1661,7 @@ let FLY=null;window.flyover=function(){if(FLY){FLY=null;const b=document.getElem
  // 4 ft x 6 ft rubber mat seams (lighter lines) over the existing rubber floor
  {const pts=[];for(let u=4;u<28;u+=4)pts.push([[u,0.3],[u,29.7]]);for(let v=6;v<30;v+=6)pts.push([[0.3,v],[27.7,v]]);const geo=new THREE.BufferGeometry(),arr=[];for(const [[u0,v0],[u1,v1]] of pts){const a=F.P(u0,v0),b=F.P(u1,v1);arr.push(a[0],Y+0.15,a[1],b[0],Y+0.15,b[1]);}geo.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));g.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0x4a4a4a})));}
  // turf sled lane: 4.5 ft wide, alongside the rig (north side), u 3.5 → 27.7
- const turfT=tx(256,256,(q,w,h)=>{q.fillStyle='#2f6b2a';q.fillRect(0,0,w,h);for(let i=0;i<9000;i++){q.fillStyle=['#3a7d33','#285e24','#468a3c','#2b6427'][i%4];q.fillRect(Math.random()*w,Math.random()*h,1,2+Math.random()*3);}},[6,1]);
+ const turfT=tx(256,256,(q,w,h)=>{q.fillStyle='#2f6b2a';q.fillRect(0,0,w,h);for(let i=0;i<9000;i++){q.fillStyle=['#3a7d33','#285e24','#468a3c','#2b6427'][i%4];q.fillRect(Math.random()*w,Math.random()*h,1,2+Math.random()*3);}},[6,1]);turfT.__pbr='turf';
  const tit=info('Turf sled lane 4.5 × 24 ft (proposed new)','pnew','Gym turf strip (white lane lines) beside the rig for sled pushes/pulls and carries. ~108 sf: e.g. Yescom HybridLane 4.3 × 50 ft $699.99 ($3.26/sf, yescomusa.com); gym turf generally ~$3–6/sf.',null,{gym:true,near:true});
  {const a=F.P(3.5,18.7),b=F.P(27.6,23.2);const t=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(b[0]-a[0]),0.06,Math.abs(b[1]-a[1])),new THREE.MeshLambertMaterial({map:turfT}));t.position.set((a[0]+b[0])/2,Y+0.15,(a[1]+b[1])/2);t.receiveShadow=true;t.userData.item=tit;pickables.push(t);g.add(t);
   for(const v of [18.9,23.0]){const c=F.P(15.55,v);const l=new THREE.Mesh(new THREE.BoxGeometry(24,0.01,0.15),new THREE.MeshBasicMaterial({color:0xf2f2f2}));l.position.set(c[0],Y+0.185,c[1]);g.add(l);}
@@ -1671,6 +1674,64 @@ let FLY=null;window.flyover=function(){if(FLY){FLY=null;const b=document.getElem
   bx(-2.1,3.95,0,0.1,0.1,2.0,st);const hc=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,1.2,10),st);hc.position.set(0.3,1.0,0);S.add(hc);for(const y of [0.55,0.78]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.74,0.74,0.2,28),new THREE.MeshPhongMaterial({color:0x1f4fa8,shininess:15}));pl.position.set(0.3,y,0);pl.castShadow=true;S.add(pl);}
   const c=F.P(9,20.95);S.position.set(c[0],Y+0.18,c[1]);g.add(S);}
 }
+// ---- v8 gym downsize (Clark, Oct 27): 4 barbell stations on a compact 2-sided rig, sled lane alongside, storage wall; extra stations removed
+{const F=GY,Y=GYy,g=groups.gym;
+ const RM=/^(owned – Seabreeze rack|Flat weight bench|Hip-thrust bench|Barbell tree|Bumper plates \+ rolling|DB\/KB 3-tier|Xebex curved|30-in 3-in-1 plyo|Plyo box set|Med\/slam balls|Small gray fridge|Bike storage wall|eBike charging|Assault|GHD|Kettlebell set|Sled \(proposed|Gymnastics rings hung|Climbing rope|Free-standing pull-up rig|Center rig|Olympic barbell \+ bumper|Lifting platform 8|Turf sled lane|Push sled)/;
+ const gone=new Set(items.filter(i=>RM.test(i.name)));const boxes=[];const kill=[];
+ const inBike=o=>{const p=new THREE.Vector3();o.getWorldPosition(p);const u=p.x-F.x0,v=F.z0-p.z;return (u>8.8&&u<23.2&&v>-0.1&&v<3.8&&p.y<Y+4.6||u>15.8&&u<22.2&&v>26.2&&v<29.8&&p.y<Y+5)&&!(o.userData.item&&!gone.has(o.userData.item));};
+ for(const grp of [groups.gym,groups.elec])grp.traverse(o=>{if(!(o.isMesh||o.isLine||o.isLineSegments||o.isInstancedMesh))return;let a=o,it=null;while(a&&!it){it=a.userData&&a.userData.item;a=a.parent;}const tmSl=o.isInstancedMesh&&o.count===34&&o.geometry.parameters&&o.geometry.parameters.width===0.16&&o.geometry.parameters.depth===2.5;if((it&&gone.has(it))||(!it&&grp===groups.gym&&(inBike(o)||tmSl)))kill.push(o);});
+ // ancestors that are groups owned by a removed item (e.g. the push sled group) go whole
+ for(const o of kill){o.updateWorldMatrix(true,false);boxes.push(new THREE.Box3().setFromObject(o).expandByScalar(0.25));let t=o;while(t.parent&&t.parent!==groups.gym&&t.parent!==groups.elec)t=t.parent;{const r=(t!==o&&t.children.every(c=>kill.includes(c)||!c.isMesh)?t:o);if(r.parent)r.parent.remove(r);}}
+ for(let i=pickables.length-1;i>=0;i--)if(kill.includes(pickables[i]))pickables.splice(i,1);
+ const inside=(c,b)=>{const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2,cy=(c.y0+c.y1)/2;return cx>b.min.x&&cx<b.max.x&&cz>b.min.z&&cz<b.max.z&&cy>b.min.y-1&&cy<b.max.y+1;};
+ for(let i=colliders.length-1;i>=0;i--)if(boxes.some(b=>inside(colliders[i],b)))colliders.splice(i,1);
+ gone.forEach(it=>{it.removed=true;if(it.el){it.el.remove();it.el=null;}});document.querySelectorAll('#legend a[data-n]').forEach(a=>{const it=items[+a.dataset.n];if(it&&it.removed&&a.parentElement)a.parentElement.remove();});
+ // helpers
+ const add=(m,it)=>{m.castShadow=m.receiveShadow=true;g.add(m);if(it){m.userData.item=it;pickables.push(m);}return m;};
+ const Bx=(u0,v0,u1,v1,y0,h,M,it)=>{const a=F.P(u0,v0),b=F.P(u1,v1);const m=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.02,Math.abs(b[0]-a[0])),h,Math.max(.02,Math.abs(b[1]-a[1]))),M);m.position.set((a[0]+b[0])/2,Y+y0+h/2,(a[1]+b[1])/2);return add(m,it);};
+ const Cy=(u,v,y,r,h,M,ax,it,seg)=>{const [x,z]=F.P(u,v);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg||16),M);m.position.set(x,Y+y,z);if(ax==='u')m.rotation.z=Math.PI/2;if(ax==='v')m.rotation.x=Math.PI/2;return add(m,it);};
+ const P=(c,s,sp)=>new THREE.MeshPhongMaterial({color:c,shininess:s||40,specular:sp||0x333333});const STL=P(0x1d1f22,50),CHR=P(0xd8dde2,140,0xffffff),RED=P(0xb3261e,40),RUB=new THREE.MeshLambertMaterial({color:0x202022}),OAK=new THREE.MeshLambertMaterial({color:0xb98a55});
+ const col=(u0,v0,u1,v1,h)=>{const a=F.P(u0,v0),b=F.P(u1,v1);colliders.push({x0:Math.min(a[0],b[0]),x1:Math.max(a[0],b[0]),z0:Math.min(a[1],b[1]),z1:Math.max(a[1],b[1]),y0:Y,y1:Y+h});};
+ // rig: 12 × 4 × 9 ft, uprights u7/11/15/19 × v11.5/15.5; stations in bays 7–11 and 15–19 on both faces; open middle bay with rings
+ const rig=info('Center rig — 4 barbell stations, 12 × 4 × 9 ft (proposed new)','pnew','Freestanding 2-sided rig: two station bays per side (4 J-cup pairs + spotter arms), multi-height pull-up bars (7.5 / 8 / 8.5 / 9 ft) and a middle bay with high rings (6.6 ft) and low rings (3 ft). Each station faces its own 8 × 6 ft lifting zone. Rough $2–4K (not price-checked), inside the gym line.',null,{gym:true,near:true});
+ const US=[7,11,15,19],VS=[11.5,15.5];
+ for(const u of US)for(const v of VS){Bx(u-0.125,v-0.125,u+0.125,v+0.125,0,9,STL,rig);Bx(u-0.15,v-0.5,u+0.15,v+0.5,0,0.12,STL,rig);col(u-0.2,v-0.2,u+0.2,v+0.2,9);}
+ for(const v of VS)Bx(7,v-0.12,19,v+0.12,8.75,0.25,STL,rig);for(const u of US)Bx(u-0.12,11.5,u+0.12,15.5,8.75,0.25,STL,rig);
+ [[7,11,11.2,7.5],[7,11,15.8,8.0],[15,19,11.2,8.5],[15,19,15.8,9.0]].forEach(([a,b,v,h])=>{Cy((a+b)/2,v,h,0.06,4.2,CHR,'u',rig,12);for(const u of [a,b])Bx(u-0.08,Math.min(v,v<13?11.5:15.5),u+0.08,Math.max(v,v<13?11.5:15.5),h-0.15,0.3,STL,rig);});
+ const ring=(u,v,y)=>{const [x,z]=F.P(u,v);const r=new THREE.Mesh(new THREE.TorusGeometry(0.36,0.06,8,20),P(0xc8a060,30));r.position.set(x,Y+y,z);add(r,rig);Bx(u-0.03,v-0.03,u+0.03,v+0.03,y+0.36,8.75-(y+0.36),new THREE.MeshLambertMaterial({color:0xdddddd}),rig);};
+ for(const du of [-0.8,0.8]){ring(13+du,12.6,6.6);ring(13+du,14.4,3.0);}
+ // J-cups + spotters on both faces of each station bay
+ for(const u of [7,11,15,19])for(const [v,dv] of [[11.5,-1],[15.5,1]]){Bx(u-0.1,Math.min(v,v+dv*0.35),u+0.1,Math.max(v,v+dv*0.35),4.4,0.35,RED,rig);Bx(u-0.07,Math.min(v,v+dv*1.7),u+0.07,Math.max(v,v+dv*1.7),2.6,0.18,STL,rig);}
+ // 4 lifting zones 8 × 6 ft, each with a loaded barbell
+ const zone=info('Lifting zones 8 × 6 ft × 4 (proposed new)','pnew','One 8 × 6 ft zone per rig station: 3/4 in rubber with an oak center strip. Bars use the owned barbells (#27) and bumpers (#28).',null,{gym:true,near:true});
+ const PC=[0xb3261e,0x1f4fa8,0xd9b21c,0x2e7d32];
+ [[5,13,5.5,11.5],[13,21,5.5,11.5],[5,13,15.5,21.5],[13,21,15.5,21.5]].forEach(([u0,u1,v0,v1],i)=>{Bx(u0,v0,u1,v1,0.08,0.1,RUB,zone);const uc=(u0+u1)/2,vc=(v0+v1)/2;Bx(uc-1.5,v0+0.05,uc+1.5,v1-0.05,0.08,0.11,OAK,zone);
+  Cy(uc,vc,0.74,0.05,7.2,CHR,'u',zone,12);for(const s of [-1,1]){Cy(uc+s*2.75,vc,0.74,0.74,0.22,P(PC[i],25),'u',zone,28);Cy(uc+s*2.97,vc,0.74,0.62,0.18,P(PC[(i+2)%4],25),'u',zone,28);Cy(uc+s*3.2,vc,0.74,0.1,0.12,CHR,'u',zone,10);}});
+ // storage wall (west, near the rig, clear floor in front): 7 ft 3-tier DB rack + KB top shelf, bumper toast rack, barbell holder
+ const st=info('Storage wall: 3-tier dumbbell rack + kettlebell shelf (owned #25, #31, #32 + proposed)','pnew','7 ft long, 3 sloped tiers of paired hex dumbbells (5–50 lb, 10 pairs) and a flat top shelf with 7 competition kettlebells (8 / 12 / 16 / 20 / 24 / 28 / 32 kg). West wall v8–15, ~2.6 ft of clear floor in front, next to the rig.',null,{gym:true,near:true});
+ for(const v of [8.1,11.5,14.9])for(const u of [0.45,2.25]){Bx(u-0.08,v-0.08,u+0.08,v+0.08,0,u<1?3.9:3.2,STL,st);}col(0.3,8,2.4,15,3.5);
+ const tiers=[[2.0,0.9,0.3],[1.5,1.7,0.24],[1.0,2.5,0.2]];
+ tiers.forEach(([uc,y,r],t)=>{const sh=Bx(uc-0.45,8.1,uc+0.45,14.9,y,0.08,STL,st);sh.rotation.z=0;});
+ const DBM=P(0x161616,30),HND=CHR;let n=0;
+ const sizes=[0.3,0.285,0.27,0.255,0.24,0.225,0.21,0.195,0.18,0.165];
+ for(let t=0;t<3;t++){const [uc,y]=tiers[t];const cnt=t===0?4:3;for(let k=0;k<cnt;k++){const r=sizes[n++];const v0=8.4+k*(6.4/cnt);for(const dv of [0,0.55+r]){const v=v0+dv;
+  for(const s of [-1,1]){const [x,z]=F.P(uc+s*0.3,v);const hx=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.2+r*0.4,6),DBM);hx.rotation.z=Math.PI/2;hx.position.set(x,Y+y+0.08+r,z);add(hx,st);}Cy(uc,v,y+0.08+r,0.05,0.55,HND,'u',st,8);}}}
+ Bx(0.35,8.1,2.25,14.9,3.25,0.1,P(0x2a2c30,30),st);
+ const KC=[0xe58fb1,0x1f4fa8,0xd9b21c,0x6a3fa0,0x2e7d32,0xe07020,0xb3261e];KC.forEach((c,i)=>{const [x,z]=F.P(1.3,8.6+i*0.93);const b=new THREE.Mesh(new THREE.SphereGeometry(0.4,16,12),P(c,30));b.scale.y=0.92;b.position.set(x,Y+3.35+0.38,z);add(b,st);
+  const h=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.05,6,14,Math.PI),P(c,30));h.position.set(x,Y+3.35+0.78,z);add(h,st);});
+ const bp=info('Bumper-plate toast rack + barbell holder (owned #27, #28)','own','Toast rack for the bumper set and a wall barbell holder for the 3 owned bars (bars in use sit on the 4 zones). West wall v16–20.5.',null,{gym:true,near:true});
+ Bx(0.4,16,3,18.4,0,0.15,STL,bp);for(const v of [16.1,18.3])Bx(0.5,v-0.05,2.9,v+0.05,0,1.1,STL,bp);col(0.3,16,3.1,18.5,1.5);
+ [[0.8,0xb3261e,0.74],[1.0,0xb3261e,0.74],[1.35,0x1f4fa8,0.74],[1.55,0x1f4fa8,0.74],[1.9,0xd9b21c,0.74],[2.1,0xd9b21c,0.74],[2.45,0x2e7d32,0.74],[2.65,0x2e7d32,0.74]].forEach(([u,c,r])=>Cy(u,17.2,0.15+r,r,0.2,P(c,25),'u',bp,28));
+ Bx(0.3,19,0.6,20.6,1,0.2,STL,bp);Bx(0.3,19,0.6,20.6,5.5,0.2,STL,bp);[19.3,19.8,20.3].forEach((v,i)=>Cy(0.8,v,3.9,0.05,7.2,i===1?P(0x111111,40):CHR,'y',bp,10));
+ // turf sled lane moved south, alongside the rig: 4.5 × 23 ft (u2–25, v0.8–5.3), one push sled
+ const tit=info('Turf sled lane 4.5 × 23 ft (proposed new)','pnew','Gym turf with white lane lines along the south wall, parallel to the rig; one push sled. ~$350–700 (Yescom HybridLane 4.3 × 50 ft $699.99, $3.26/sf).',null,{gym:true,near:true});
+ const TM=new THREE.MeshLambertMaterial({color:0x2f6b2a});{const tc=document.createElement('canvas');tc.width=tc.height=256;const q=tc.getContext('2d');q.fillStyle='#2f6b2a';q.fillRect(0,0,256,256);for(let i=0;i<9000;i++){q.fillStyle=['#3a7d33','#285e24','#468a3c','#2b6427'][i%4];q.fillRect(Math.random()*256,Math.random()*256,1,2+Math.random()*3);}const tt=new THREE.CanvasTexture(tc);tt.wrapS=tt.wrapT=THREE.RepeatWrapping;tt.repeat.set(6,1);tt.__pbr='turf';TM.map=tt;}
+ Bx(2,0.8,25,5.3,0.12,0.06,TM,tit).castShadow=false;const LW=new THREE.MeshBasicMaterial({color:0xf2f2f2});for(const v of [1.0,5.1])Bx(2,v-0.07,25,v+0.07,0.185,0.01,LW);for(const u of [6,12,18,24])Bx(u-0.07,1.0,u+0.07,5.1,0.185,0.01,LW);
+ const sit=info('Push sled (proposed new)','pnew','Prowler-style push sled with high/low handles; runs down the turf lane and out the man door. ~$250–500.',null,{gym:true,near:true});
+ {const c=F.P(5,3.05);const S=new THREE.Group();const bx=(x,y,z,w,h,d,M)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M);o.position.set(x,y,z);o.castShadow=true;o.userData.item=sit;pickables.push(o);S.add(o);};
+  for(const z of [-1.1,1.1])bx(0,0.12,z,3.6,0.12,0.25,STL);bx(0,0.32,0,2.2,0.12,2.4,RED);for(const z of [-0.9,0.9]){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,4.2,10),STL);p.position.set(-1.5,2.2,z);p.rotation.z=-0.32;S.add(p);}bx(-2.1,3.95,0,0.1,0.1,2.0,STL);
+  for(const y of [0.55,0.78]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.74,0.74,0.2,28),P(0x1f4fa8,25));pl.position.set(0.3,y,0);S.add(pl);}S.position.set(c[0],Y+0.18,c[1]);S.rotation.y=Math.PI;g.add(S);}
+ window.__gym8={removed:kill.length,items:gone.size};}
 // ================= QUALITY =================
 let QUALITY='high';
 window.setQuality=function(q){if(q!=='high'&&q!=='medium')q='low';if(window.__matTier&&((q==='low')!==(window.__matTier==='lambert'))&&window.__ready){try{localStorage.setItem('samelsQ',q);}catch(e){}location.reload();return;}QUALITY=q;const hi=q!=='low',full=q==='high';renderer.setPixelRatio(full?Math.min(2,devicePixelRatio):q==='medium'?Math.min(1.25,devicePixelRatio):1);
@@ -1742,6 +1803,34 @@ window.__mergeStatic=function(){const t0=performance.now();
  // partially merged multi-material originals: rendering both is harmless (identical depth)
  refresh();window.__mergeInfo={meshes:all.length,dynamic:dyn.size,dynMats:dynMat.size,merged:merged.size,newMeshes:made,ms:Math.round(performance.now()-t0)};return window.__mergeInfo;};
 {let q0=null;try{q0=localStorage.getItem('samelsQ');}catch(e){}const Q0=new URLSearchParams(location.search);if(Q0.get('clean')==='1')q0='high';if(Q0.get('q'))q0=Q0.get('q');if(!q0)q0=(matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high';window.__matTier=q0==='low'?'lambert':'standard';if(q0!=='low'){try{window.__toStandard();}catch(e){console.warn('std failed',e);}}}
+// ===== v8 photo-real (High only): CC0 Poly Haven PBR textures, HDRI environment, glTF furniture (lazy per room) =====
+if(window.__V8HI&&window.__matTier==='standard'){try{
+ const TL=new THREE.TextureLoader(),tc={};const T=(n,c)=>tc[n]||(tc[n]=new Promise(r=>TL.load('assets/tex/'+n+'.jpg',t=>{t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;r(t);},undefined,()=>r(null))));
+ const TEXr=window.__TEX||{};const sets={plank:'oak_wood_planks_gray',siding:'weathered_plank_siding_gray',rib:'box_profile_metal_sheet_gray',deck:'brown_planks_05_gray',rubber:'rubber_tiles_diff',ply:'plywood_diff',turf:'leafy_grass_diff'};
+ const nr={leather:'fabric_leather_01',fabric:'fabric_pattern_07',plank:'oak_wood_planks',siding:'weathered_plank_siding',rib:'box_profile_metal_sheet',seam:'box_profile_metal_sheet',deck:'brown_planks_05',rubber:'rubber_tiles',ply:'plywood',turf:'leafy_grass'};
+ const keyOf=m=>{const t=m.map;if(!t)return null;if(t.__pbr)return t.__pbr;for(const k of ['plank','siding','rib','seam','deck'])if(TEXr[k]&&t.image===TEXr[k].image)return k;return null;};
+ const todo=[];const seen=new Set();scene.traverse(o=>{if(!o.isMesh)return;for(const m of (Array.isArray(o.material)?o.material:[o.material])){if(!m||seen.has(m)||!m.isMeshStandardMaterial)continue;seen.add(m);const k=keyOf(m);if(k)todo.push([m,k]);}});
+ const cl=(t,ref)=>{if(!t)return null;const c=t.clone();c.repeat.copy(ref.repeat);c.offset.copy(ref.offset);c.rotation=ref.rotation;c.center.copy(ref.center);c.needsUpdate=true;return c;};
+ Promise.all(todo.map(async([m,k])=>{const ref=m.map;const [d,n,r]=await Promise.all([sets[k]?T(sets[k]):null,T(nr[k]+'_nor'),T(nr[k]+'_rough')]);if(d)m.map=cl(d,ref);if(n){m.normalMap=cl(n,ref);m.normalScale=new THREE.Vector2(k==='plank'?0.5:0.8,k==='plank'?0.5:0.8);}if(r)m.roughnessMap=cl(r,ref);m.roughness=k==='plank'?0.55:k==='leather'?0.7:1;if(k==='leather'||k==='fabric')m.normalMap&&m.normalMap.repeat.set(3,3),m.roughnessMap&&m.roughnessMap.repeat.set(3,3);m.needsUpdate=true;})).then(()=>{window.__v8tex=todo.length;});
+ // HDRI environment (Poly Haven kloofendal_48d_partly_cloudy_puresky, 1k) with a black-PMREM guard (some software GL stacks return black)
+ if(THREE.RGBELoader&&!/[?&]hdri=0/.test(location.search))new THREE.RGBELoader().setDataType(THREE.UnsignedByteType).load('assets/hdri/sky_1k.hdr',t=>{try{const pm=new THREE.PMREMGenerator(renderer);const rt=pm.fromEquirectangular(t);t.dispose();pm.dispose();
+   const ts=new THREE.Scene(),tcam=new THREE.PerspectiveCamera(40,1,0.1,10),sp=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),new THREE.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:0.6,envMap:rt.texture}));ts.add(sp);tcam.position.z=3;
+   const R=new THREE.WebGLRenderTarget(8,8);renderer.setRenderTarget(R);renderer.render(ts,tcam);const px=new Uint8Array(256);renderer.readRenderTargetPixels(R,0,0,8,8,px);renderer.setRenderTarget(null);R.dispose();let s=0;for(let i=0;i<256;i+=4)s+=px[i]+px[i+1]+px[i+2];
+   window.__hdriOK=s>300;if(window.__hdriOK){scene.environment=rt.texture;const seen2=new Set();scene.traverse(o=>{if(!o.isMesh)return;for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m&&m.isMeshStandardMaterial&&!seen2.has(m)){seen2.add(m);m.envMapIntensity=m.userData.glb?0.9:0.45;}});}}catch(e){console.warn('hdri',e);}},undefined,()=>{});
+ // glTF furniture swaps: fit each CC0 model into the existing piece's footprint (or height), same spot and facing; FX mesh kept as the Low/fallback
+ if(THREE.GLTFLoader&&window.__swaps.length){const ld=new THREE.GLTFLoader(),mc={};const get=m=>mc[m]||(mc[m]=new Promise((res,rej)=>ld.load('assets/models/'+m+'/'+m+'.gltf',g=>res(g.scene),undefined,rej)));
+  const doSwap=s=>{if(s.st)return;s.st=1;get(s.m).then(src=>{const G=s.G;const p0=G.position.clone(),r0=G.rotation.clone(),s0=G.scale.clone(),par=G.parent;if(!par)return;
+    par.remove(G);G.position.set(0,0,0);G.rotation.set(0,0,0);G.scale.set(1,1,1);G.updateMatrixWorld(true);const gb=new THREE.Box3().setFromObject(G);G.position.copy(p0);G.rotation.copy(r0);G.scale.copy(s0);par.add(G);
+    const o=src.clone(true);o.rotation.y=s.ry||0;o.updateMatrixWorld(true);let mb=new THREE.Box3().setFromObject(o);const gs=gb.getSize(new THREE.Vector3()),ms=mb.getSize(new THREE.Vector3());
+    const sc=(s.fit==='h'?gs.y/ms.y:Math.min(gs.x/ms.x,gs.z/ms.z))*(s.k||1);o.scale.setScalar(sc);o.updateMatrixWorld(true);mb=new THREE.Box3().setFromObject(o);const gc=gb.getCenter(new THREE.Vector3()),mcn=mb.getCenter(new THREE.Vector3());
+    o.position.set(gc.x-mcn.x,gb.min.y-mb.min.y,gc.z-mcn.z);const Hd=new THREE.Group();Hd.position.copy(p0);Hd.rotation.copy(r0);Hd.scale.copy(s0);Hd.add(o);Hd.userData.noMerge=true;
+    o.traverse(c=>{c.userData.noMerge=true;if(c.isMesh){c.castShadow=c.receiveShadow=true;const ms2=Array.isArray(c.material)?c.material:[c.material];ms2.forEach(m=>{m.userData.glb=true;if(m.isMeshStandardMaterial)m.envMapIntensity=scene.environment?0.9:1;});}});
+    par.add(Hd);G.visible=false;s.H=Hd;s.st=2;window.__swapDone=(window.__swapDone||0)+1;}).catch(e=>{s.st=3;console.warn('glb',s.m,e&&e.message);});};
+  window.__swaps.forEach(s=>{s.G.updateWorldMatrix(true,false);s.wp=new THREE.Vector3().setFromMatrixPosition(s.G.matrixWorld);});
+  window.__swapAll=()=>window.__swaps.forEach(doSwap);
+  if(/[?&]glb=all/.test(location.search)||new URLSearchParams(location.search).get('clean')==='1')window.__swapAll();
+  setInterval(()=>{const c=camera.position;for(const s of window.__swaps)if(!s.st&&c.distanceTo(s.wp)<75)doSwap(s);},500);}
+}catch(e){console.warn('v8',e);}}
 try{window.__mergeStatic();}catch(e){console.warn('merge failed',e);}
 {const Q=new URLSearchParams(location.search);const clean=Q.get('clean')==='1';let q=null;try{q=localStorage.getItem('samelsQ');}catch(e){}
  if(clean)q='high';else if(!q)q=(matchMedia('(pointer:coarse)').matches||innerWidth<900)?'low':'high';if(Q.get('q'))q=Q.get('q');setQuality(q);
