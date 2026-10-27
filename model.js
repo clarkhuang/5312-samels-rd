@@ -1125,8 +1125,16 @@ const TOUR=[
  ['guest_suite','Phase 2: the guest suite','A future guest suite with its own entry, planned for a couple of years out.']];
 const NARR={on:false,voice:null};
 function pickVoice(){try{const vs=speechSynthesis.getVoices()||[];const pref=[/Samantha/,/Google US English/,/Microsoft (Aria|Jenny|Guy).*Online/,/Daniel/,/Karen/,/en-US/];for(const re of pref){const v=vs.find(v=>re.test(v.name)||re.test(v.lang));if(v)return v;}return vs.find(v=>/^en/.test(v.lang))||null;}catch(e){return null;}}
-if(window.speechSynthesis){speechSynthesis.onvoiceschanged=()=>{NARR.voice=pickVoice();};}
-function speak(t,done){if(!NARR.on||!window.speechSynthesis){done&&done();return;}try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=0.98;u.pitch=1;if(!NARR.voice)NARR.voice=pickVoice();if(NARR.voice)u.voice=NARR.voice;u.onend=()=>done&&done();u.onerror=()=>done&&done();speechSynthesis.speak(u);}catch(e){done&&done();}}
+if(window.speechSynthesis){try{speechSynthesis.addEventListener('voiceschanged',()=>{NARR.voice=pickVoice();});}catch(e){}}
+const SS=window.speechSynthesis||null;window.__utt=[];let ssKA=null,ssGen=0;
+function ssMsg(t){const c=document.getElementById('caption');if(!c)return;c.innerHTML='<b>🔇 '+t+'</b>';c.style.opacity=1;clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,4500);}
+function sayNow(t,onend){ // synchronous speak (safe inside a tap handler)
+ if(!SS){ssMsg('Voice not supported on this browser');onend&&onend();return null;}
+ try{const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=1.0;u.pitch=1;u.volume=1;if(!NARR.voice)NARR.voice=pickVoice();if(NARR.voice)u.voice=NARR.voice;u.onend=()=>onend&&onend();u.onerror=()=>onend&&onend();window.__utt.push(u);if(window.__utt.length>30)window.__utt.shift();SS.speak(u);return u;}catch(e){onend&&onend();return null;}}
+function speak(t,done){if(!NARR.on||!SS){done&&done();return;}const gen=++ssGen;try{SS.cancel();}catch(e){}
+ const parts=(t.match(/[^.!?]+[.!?]*/g)||[t]).map(s=>s.trim()).filter(Boolean);let i=0;
+ const nx=()=>{if(gen!==ssGen)return;if(i>=parts.length){clearInterval(ssKA);ssKA=null;done&&done();return;}sayNow(parts[i++],nx);};
+ clearInterval(ssKA);ssKA=setInterval(()=>{try{if(SS.speaking&&!SS.paused){SS.pause();SS.resume();}}catch(e){}},10000);nx();}
 function tcap(title,txt){const c=document.getElementById('caption');if(!c)return;c.classList.add('tourcap');c.innerHTML=`<b>${title}</b><span>${txt}</span>`;c.style.opacity=0;requestAnimationFrame(()=>{c.style.opacity=1;});clearTimeout(caption.t);caption.t=setTimeout(()=>c.style.opacity=0,Math.max(5200,txt.length*60));}
 function stopTour(){if(!tour)return;clearTimeout(tour.t);tour.gen++;try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}document.getElementById('lblT').checked=tour.lbl;tour=null;const b=document.getElementById('bTour');if(b){b.classList.remove('on');b.textContent='▶ Tour';}const tb=document.getElementById('tourBar');if(tb)tb.style.display='none';const c=document.getElementById('caption');if(c)c.classList.remove('tourcap');}
 function stops(){return TOUR.map(([id,t,x])=>({v:VP.find(v=>v.id===id),t,x})).filter(s=>s.v);}
@@ -1134,11 +1142,11 @@ function tourStep(){if(!tour)return;const S=stops(),s=S[tour.i];const gen=++tour
   setTimeout(()=>{if(!tour||tour.gen!==gen)return;tcap(s.t,s.x);let spoke=!NARR.on,dwell=false;const next=()=>{if(!tour||tour.gen!==gen||tour.paused)return;if(spoke&&dwell){tour.i++;if(tour.i>=S.length){stopTour();return;}tourStep();}};tour.next=next;
    speak(s.t+'. '+s.x,()=>{spoke=true;setTimeout(next,700);});tour.t=setTimeout(()=>{dwell=true;next();},Math.max(5500,s.x.length*55));},1600);}
 window.toggleTour=function(){if(tour){stopTour();return;}const lt=document.getElementById('lblT');tour={i:0,lbl:lt.checked,gen:0,paused:false};lt.checked=false;const b=document.getElementById('bTour');b.classList.add('on');b.textContent='■ Stop tour';
-  if(NARR.on&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}} // unlock audio on the tap (iOS)
+  if(NARR.on){ssGen++;try{SS&&SS.cancel();}catch(e){}sayNow('Starting the tour.');} // synchronous speak inside the tap unlocks iOS audio
   tourStep();};
 window.tourNav=function(d){if(!tour)return;clearTimeout(tour.t);try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}const n=stops().length;tour.i=(tour.i+d+n)%n;tour.paused=false;tourStep();};
 window.tourPause=function(){if(!tour)return;tour.paused=!tour.paused;const b=document.getElementById('bPause');if(b)b.textContent=tour.paused?'▶ Resume':'⏸ Pause';try{if(window.speechSynthesis){tour.paused?speechSynthesis.pause():speechSynthesis.resume();}}catch(e){}if(!tour.paused&&tour.next){setTimeout(()=>{tour&&tour.next&&tour.next();},300);}};
-window.setNarrate=function(on){NARR.on=!!on;const b=document.getElementById('bNarr');if(b){b.classList.toggle('on',NARR.on);b.textContent=NARR.on?'🔊 Narrate: on':'🔈 Narrate: off';}const b2=document.getElementById('bNarr2');if(b2){b2.classList.toggle('on',NARR.on);b2.textContent=NARR.on?'🔊 Narrate':'🔈 Narrate';}if(!NARR.on){try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}}};
+window.setNarrate=function(on){NARR.on=!!on;const b=document.getElementById('bNarr');if(b){b.classList.toggle('on',NARR.on);b.textContent=NARR.on?'🔊 Narrate: on':'🔈 Narrate: off';}const b2=document.getElementById('bNarr2');if(b2){b2.classList.toggle('on',NARR.on);b2.textContent=NARR.on?'🔊 Narrate':'🔈 Narrate';}if(NARR.on){ssGen++;try{SS&&SS.cancel();}catch(e){}sayNow('Narration on.');}else{ssGen++;clearInterval(ssKA);try{SS&&SS.cancel();}catch(e){}}};
 window.__tour={TOUR,NARR,stops};
 {const vd=document.getElementById('views');VP.forEach(v=>{const b=document.createElement('button');b.textContent=v.n;b.title=v.cap;b.onclick=()=>{stopTour();goVP(v);document.body.classList.remove('menu');};vd.appendChild(b);});}
 const jd=document.getElementById('jumps');J.forEach(([n,f])=>{const b=document.createElement('button');b.textContent=n;if(n.includes('Future'))b.title=FUTNAME;b.onclick=()=>{stopTour();f();};jd.appendChild(b);});
